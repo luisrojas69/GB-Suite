@@ -1,0 +1,66 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use App\Models\Produccion\Agro\Zafra;
+use App\Models\Produccion\Agro\Variedad;
+use App\Models\Produccion\Agro\Contratista; // Ajusta el namespace si es diferente
+use App\Models\Produccion\Agro\Destino;     // Ajusta el namespace si es diferente
+
+class ProduccionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        // --- 1. Contratistas (Ejemplo: Maestros)
+       // Contratista::truncate(); // Limpiar la tabla antes de sembrar (solo para desarrollo/testing)
+        Contratista::create(['nombre' => 'Cosecha La Palma C.A.', 'rif' => 'J-12345678-0']);
+        Contratista::create(['nombre' => 'Transportes El Flete R.L.', 'rif' => 'J-87654321-0']);
+        
+        $this->command->info('Contratistas creados.');
+
+        // --- 2. Destinos (Ejemplo: Maestros)
+        //Destino::truncate();
+        Destino::create(['nombre' => 'Central Azucarero La Pastora', 'codigo' => 'CLP']);
+        Destino::create(['nombre' => 'Astillero y Depósito Principal', 'codigo' => 'CEP']);
+        
+        $this->command->info('Destinos creados.');
+
+        // --- 3. Variedades (Ejemplo: Produccion/Agro)
+        //Variedad::truncate();
+        Variedad::create(['nombre' => 'CP 72-2086', 'codigo' => '0103', 'descripcion' => 'Caña de alto rendimiento y resistencia.']);
+        Variedad::create(['nombre' => 'PR 69-2503', 'codigo' => '0104', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        
+        $this->command->info('Variedades creadas.');
+
+        // --- 4. Zafras (Ejemplo: Produccion/Agro)
+       // Zafra::truncate();
+        Zafra::create([
+            'nombre' => 'Zafra 2024-2025',
+            'anio_inicio' => 2024,
+            'anio_fin' => 2025,
+            'fecha_inicio' => '2024-11-01',
+            'fecha_fin' => '2025-05-31',
+            'estado' => 'Cerrada',
+        ]);
+        Zafra::create([
+            'nombre' => 'Zafra 2025-2026',
+            'anio_inicio' => 2025,
+            'anio_fin' => 2026,
+            'fecha_inicio' => '2025-11-01',
+            'fecha_fin' => '2026-05-31',
+            'estado' => 'Activa',
+        ]);
+        
+        $this->command->info('Zafras creadas.');
+
+        // Reactivar la verificación de claves foráneas
+       // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+    }
+}
