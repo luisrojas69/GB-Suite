@@ -39,6 +39,7 @@ class CreateMedPacientesTable extends Migration
             $table->float('estatura')->nullable();
             $table->boolean('es_zurdo')->default(false);
             $table->text('alergias')->nullable();
+            $table->date('fecha_retorno_vacaciones')->nullable();
             $table->text('enfermedades_base')->nullable();
             $table->string('foto_path')->nullable();
 

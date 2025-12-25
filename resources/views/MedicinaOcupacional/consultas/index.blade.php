@@ -92,4 +92,25 @@
         });
     });
 </script>
+
+@if(session('print_id'))
+<script>
+    Swal.fire({
+        title: '¡Consulta Guardada!',
+        text: "¿Desea imprimir el récipe y la constancia médica ahora?",
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#4e73df',
+        cancelButtonColor: '#858796',
+        confirmButtonText: '<i class="fas fa-print"></i> Imprimir Reporte',
+        cancelButtonText: 'Cerrar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Abrimos el PDF en una nueva pestaña
+            window.open("{{ route('medicina.consultas.imprimir', session('print_id')) }}", '_blank');
+        }
+    });
+</script>
+@endif
+
 @endsection

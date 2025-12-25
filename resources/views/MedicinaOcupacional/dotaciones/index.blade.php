@@ -58,9 +58,9 @@ $(document).ready(function() {
                 data: null,
                 render: function(data) {
                     let items = [];
-                    if(data.calzado_entregado) items.push('<i class="fas fa-boot"></i> Calzado');
-                    if(data.pantalon_entregado) items.push('<i class="fas fa-user-tag"></i> Pantalón');
-                    if(data.camisa_entregado) items.push('<i class="fas fa-tshirt"></i> Camisa');
+                    if(data.calzado_entregado > 0) items.push('<i class="fas fa-shoe-prints"></i> Calzado');
+                    if(data.pantalon_entregado > 0) items.push('<i class="fas fa-user-tag"></i> Pantalón');
+                    if(data.camisa_entregado > 0) items.push('<i class="fas fa-tshirt"></i> Camisa');
                     return items.join(' | ');
                 }
             },

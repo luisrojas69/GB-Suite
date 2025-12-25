@@ -10,6 +10,12 @@ class Consulta extends Model
     protected $table = 'med_consultas';
     protected $guarded = ['id'];
 
+    public function accidente()
+    {
+        // El segundo parámetro es la llave foránea en la tabla med_accidentes
+        return $this->hasOne(Accidente::class, 'consulta_id');
+    }
+
     // Relación con el Paciente
     public function paciente()
     {

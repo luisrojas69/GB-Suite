@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('med_accidentes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('paciente_id')->constrained('med_pacientes');
-            $table->foreignId('consulta_id')->nullable()->constrained('med_consultas'); // Vinculo opcional con la atención médica
+           
             
             // Datos del Evento
             $table->dateTime('fecha_hora_accidente');
@@ -31,6 +31,10 @@ return new class extends Migration
             $table->string('testigos')->nullable();
             $table->text('acciones_correctivas'); // ¿Qué se hará para que no pase de nuevo?
             $table->date('fecha_cierre_investigacion')->nullable();
+
+            $table->unsignedBigInteger('consulta_id')->nullable(); // Relación opcional
+            // $table->foreignId('consulta_id')->nullable()->constrained('med_consultas'); // Vinculo opcional con la atención médica
+            $table->foreign('consulta_id')->references('id')->on('med_consultas');
             
             $table->foreignId('user_id')->constrained('users'); // Investigador/Médico
             $table->timestamps();

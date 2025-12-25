@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+        {{-- Mostrar mensajes de sesión --}}
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detalle de Investigación de Accidente</h1>
@@ -12,8 +20,18 @@
                 Volver al Paciente
             </a>
         </div>
-    </div>
+    </div> 
+            @if($accidente->consulta_id)
+                <div class="alert alert-info border-left-info">
+                    <i class="fas fa- stethoscope"></i> <strong>Este accidente tiene una evaluación médica asociada.</strong> 
+                    <a href="{{ route('medicina.consultas.show', $accidente->consulta_id) }}" class="font-weight-bold">Ver Diagnóstico Médico</a><br>
+                    <i class="fas fa- stethoscope"></i> 
+                        <br><small>Atendido por: <strong>{{ $accidente->consulta->medico->name." ".$accidente->consulta->medico->last_name }}</strong></small>
 
+                    <i class="fas fa- stethoscope"></i> 
+                        <br><small>Diagn&oacute;stico: <strong>{{ $accidente->consulta->diagnostico_cie10 }}</strong></small>
+                </div>
+            @endif
     <div class="row">
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-danger shadow h-100 py-2">

@@ -73,8 +73,16 @@ class ConsultaController extends Controller
             $consulta = new Consulta($request->all());
             $consulta->user_id = Auth::id(); // Médico autenticado
             $consulta->save();
-
+            // Si la consulta fue pre-vacacional, actualizamos la ficha del paciente
+            if ($request->motivo_consulta === 'Pre-vacacional' && $request->fecha_retorno_vacaciones) {
+                $paciente = Paciente::find($request->paciente_id);
+                $paciente->update([
+                    'fecha_retorno_vacaciones' => $request->fecha_retorno_vacaciones
+                ]);
+            }
             DB::commit();
+
+            
 
           // Enviamos el ID de la consulta para que la vista sepa cuál imprimir
             return redirect()->route('medicina.consultas.index')
@@ -136,61 +144,78 @@ class ConsultaController extends Controller
     }
 
 
-    //Imprimir Recipe / COnstancias
-    public function imprimir($id)
-    {
-        $consulta = Consulta::with(['paciente', 'medico'])->findOrFail($id);
-        
-        $pdf = Pdf::loadView('MedicinaOcupacional.consultas.pdf', compact('consulta'));
-        
-        // Si quieres que se descargue: download(). Si quieres ver en navegador: stream()
-        return $pdf->stream("Consulta_{$consulta->paciente->cedula}.pdf");
-    }
+        //Imprimir Recipe / COnstancias
+        public function imprimir($id)
+        {
+            $consulta = Consulta::with(['paciente', 'medico'])->findOrFail($id);
+            
+            $pdf = Pdf::loadView('MedicinaOcupacional.consultas.pdf', compact('consulta'));
+            
+            // Si quieres que se descargue: download(). Si quieres ver en navegador: stream()
+            return $pdf->stream("Consulta_{$consulta->paciente->cedula}.pdf");
+        }
 
 
-    public function historial($paciente_id)
-    {
-        $paciente = Paciente::with([
-            'consultas' => function($q) {
-                $q->orderBy('created_at', 'desc');
-            },
-            'dotaciones' => function($q) {
-                $q->orderBy('created_at', 'desc');
-            },
-            'accidentes' => function($q) {
-                $q->orderBy('fecha_hora_accidente', 'desc');
-            }
-        ])->findOrFail($paciente_id);
+        public function historial($paciente_id)
+        {
+            $paciente = Paciente::with([
+                'consultas' => function($q) {
+                    $q->orderBy('created_at', 'desc');
+                },
+                'dotaciones' => function($q) {
+                    $q->orderBy('created_at', 'desc');
+                },
+                'accidentes' => function($q) {
+                    $q->orderBy('fecha_hora_accidente', 'desc');
+                }
+            ])->findOrFail($paciente_id);
 
-        return view('MedicinaOcupacional.consultas.historial', compact('paciente'));
-    }
+            return view('MedicinaOcupacional.consultas.historial', compact('paciente'));
+        }
 
-    public function subirArchivo(Request $request)
-    {
-        $request->validate([
-            'paciente_id' => 'required',
-            'nombre_archivo' => 'required|string|max:100',
-            'archivo' => 'required|mimes:pdf,jpg,jpeg,png|max:5120', // Máx 5MB
-        ]);
-
-        if ($request->hasFile('archivo')) {
-            $file = $request->file('archivo');
-            $nombreFinal = time() . '_' . $file->getClientOriginalName();
-            // Guardamos en una carpeta privada: storage/app/public/examenes_medicos
-            $ruta = $file->storeAs('examenes_medicos/' . $request->paciente_id, $nombreFinal, 'public');
-
-            DB::table('med_paciente_archivos')->insert([
-                'paciente_id' => $request->paciente_id,
-                'nombre_archivo' => $request->nombre_archivo,
-                'ruta_archivo' => $ruta,
-                'tipo_archivo' => $file->getClientOriginalExtension(),
-                'user_id' => Auth::id(),
-                'created_at' => now(),
+        public function subirArchivo(Request $request)
+        {
+            $request->validate([
+                'paciente_id' => 'required',
+                'nombre_archivo' => 'required|string|max:100',
+                'archivo' => 'required|mimes:pdf,jpg,jpeg,png|max:5120', // Máx 5MB
             ]);
 
-            return back()->with('success', 'Archivo adjuntado correctamente.');
-        }
-    }
+            if ($request->hasFile('archivo')) {
+                $file = $request->file('archivo');
+                $nombreFinal = time() . '_' . $file->getClientOriginalName();
+                // Guardamos en una carpeta privada: storage/app/public/examenes_medicos
+                $ruta = $file->storeAs('examenes_medicos/' . $request->paciente_id, $nombreFinal, 'public');
 
+                DB::table('med_paciente_archivos')->insert([
+                    'paciente_id' => $request->paciente_id,
+                    'nombre_archivo' => $request->nombre_archivo,
+                    'ruta_archivo' => $ruta,
+                    'tipo_archivo' => $file->getClientOriginalExtension(),
+                    'user_id' => Auth::id(),
+                    'created_at' => now(),
+                ]);
+
+                return back()->with('success', 'Archivo adjuntado correctamente.');
+            }
+        }
+
+        public function buscarCie10(Request $request) {
+            $term = $request->get('q');
+            
+            $resultados = DB::table('med_cie10')
+                ->where('codigo', 'LIKE', "%$term%")
+                ->orWhere('descripcion', 'LIKE', "%$term%")
+                ->limit(15)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'id' => $item->codigo, // Guardamos el código (Z00.0) en la tabla consultas
+                        'text' => $item->codigo . " - " . $item->descripcion
+                    ];
+                });
+
+            return response()->json($resultados);
+        }
 
 }

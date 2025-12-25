@@ -21,26 +21,64 @@
                                 <i class="fas fa-map-marker-alt"></i> {{ $paciente->des_depart }}
                             </p>
                         </div>
-                        <div class="col-auto">
-                            <div class="dropdown">
-                                <button class="btn btn-dark dropdown-toggle shadow-sm" type="button" data-toggle="dropdown">
-                                    <i class="fas fa-plus"></i> Acción Rápida
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="{{ route('medicina.consultas.create', ['paciente_id' => $paciente->id]) }}"><i class="fas fa-notes-medical text-primary mr-2"></i> Nueva Consulta</a>
-                                    <a class="dropdown-item" href="{{ route('medicina.accidentes.create', $paciente->id) }}"><i class="fas fa-ambulance text-danger mr-2"></i> Registrar Accidente</a>
-                                    <a class="dropdown-item" href="{{ route('medicina.dotaciones.create', $paciente->id) }}"><i class="fas fa-tshirt text-success mr-2"></i> Nueva Dotación</a>
+                        <div class="d-flex justify-content-between"> 
+                            <div class="col-auto">
+                                <div class="dropdown">
+                                    <button class="btn btn-dark dropdown-toggle shadow-sm" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-plus"></i> Acción Rápida
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{{ route('medicina.consultas.create', ['paciente_id' => $paciente->id]) }}"><i class="fas fa-notes-medical text-primary mr-2"></i> Nueva Consulta</a>
+                                        <a class="dropdown-item" href="{{ route('medicina.accidentes.create', $paciente->id) }}"><i class="fas fa-ambulance text-danger mr-2"></i> Registrar Accidente</a>
+                                        <a class="dropdown-item" href="{{ route('medicina.dotaciones.create', $paciente->id) }}"><i class="fas fa-tshirt text-success mr-2"></i> Nueva Dotación</a>
 
-                                     <a class="dropdown-item" href="{{ route('medicina.consultas.historial', $paciente->id) }}"><i class="fas fa-notes-medical text-info mr-2"></i> Ver Historial M&eacute;dico</a>
+                                         <a class="dropdown-item" href="{{ route('medicina.consultas.historial', $paciente->id) }}"><i class="fas fa-notes-medical text-info mr-2"></i> Ver Historial M&eacute;dico</a>
 
+                                        </a>
+                                        <button class="dropdown-item btnEdit" data-id="{{ $paciente->id }}" title="Editar Datos Médicos"><i class="fas fa-user-edit text-warning mr-2"></i>Editar datos médicos</button>
+                                        <a class="dropdown-item" href="{{ route('medicina.pacientes.index', $paciente->id) }}"><i class="fas fa-list text-secondary mr-2"></i> Ir a Lista de Pacientes</a>
+
+
+
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="{{ route('medicina.consultas.historial', $paciente->id) }}"><i class="fas fa-history mr-2"></i> Ver Historial Completo</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-auto">
+                                {{-- Dropdown para constancias--}}
+
+                                <div class="dropdown no-arrow">
+                                    <a class="btn btn-dark dropdown-toggle shadow-sm" href="#" role="button" data-toggle="dropdown">
+                                        <i class="fas fa-file-pdf text-danger"></i>
                                     </a>
-                                    <button class="dropdown-item btnEdit" data-id="{{ $paciente->id }}" title="Editar Datos Médicos"><i class="fas fa-user-edit text-warning mr-2"></i>Editar datos médicos</button>
-                                    <a class="dropdown-item" href="{{ route('medicina.pacientes.index', $paciente->id) }}"><i class="fas fa-list text-secondary mr-2"></i> Ir a Lista de Pacientes</a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                        <div class="dropdown-header ">Certificados M&eacute;dicos:</div>
 
+                                        <a class="dropdown-item" href="{{ route('medicina.pdf.aptitud', $paciente->id) }}" target="_blank">
+                                            <i class="fas fa-person-circle-check fa-sm fa-fw mr-2 text-warning"></i> Certificado de Aptitud
+                                        </a>
 
+                                        <a class="dropdown-item" href="{{ route('medicina.pdf.constancia', $paciente->id) }}" target="_blank">
+                                            <i class="fas fa-person-walking-arrow-right fa-sm fa-fw mr-2 text-info"></i> Constancia de Asistencia
+                                        </a>
 
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ route('medicina.consultas.historial', $paciente->id) }}"><i class="fas fa-history mr-2"></i> Ver Historial Completo</a>
+                                         <a class="dropdown-item" href="{{ route('medicina.pdf.historial', $paciente->id) }}" target="_blank">
+                                            <i class="fas fa-virus fa-sm fa-fw mr-2 text-danger"></i> Historial Epidemiol&oacute;gico
+                                        </a>
+                                        
+         
+                                        <div class="dropdown-divider"></div>
+                                        <div class="dropdown-header">Certificados SSL:</div>
+                                        <a class="dropdown-item" target="_blank" href="{{ route('medicina.pdf.epp', $paciente->id) }}">
+                                            <i class="fas fa-user-tag fa-sm fa-fw mr-2 text-info"></i> Generador de Entrega de EPP
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="{{ route('medicina.pacientes.index') }}"><i class="fas fa-hospital-user mr-2"></i> Lista de Pacientes</a>
+                                       
+                                    </div>
                                 </div>
                             </div>
                         </div>

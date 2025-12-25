@@ -5,11 +5,25 @@
     <style>
         body { font-family: Arial, sans-serif; font-size: 11px; }
         .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
-        .section-title { background: #eee; padding: 5px; font-weight: bold; border: 1px solid #000; margin-top: 10px; }
+    
         .field { padding: 4px; border: 0.5px solid #ccc; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .table td { border: 1px solid #000; padding: 5px; }
+
         @media print { .no-print { display: none; } }
+
+
+         @page { margin: 1cm; }
+        body { font-family: 'Helvetica', sans-serif; font-size: 11px; color: #333; line-height: 1.5; }
+        .header-table { width: 100%; border-bottom: 2px solid #1a592e; margin-bottom: 20px; }
+        .logo { width: 70px; }
+        .company-info { text-align: right; }
+        .company-name { font-size: 16px; font-weight: bold; color: #1a592e; }
+        .section-title { background: #f2f2f2; padding: 8px; font-weight: bold; margin-top: 20px; border-left: 5px solid #1a592e; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background-color: #f8f9fc; border: 1px solid #ddd; padding: 8px; text-align: left; }
+        td { border: 1px solid #ddd; padding: 8px; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 9px; color: #777; border-top: 1px solid #ddd; padding-top: 5px; }
+        .chart-sim { width: 15px; height: 15px; display: inline-block; margin-right: 5px; }
+
     </style>
 </head>
 <body onload="window.print()">
@@ -17,9 +31,18 @@
         Pulse Ctrl+P para imprimir el reporte oficial.
     </div>
 
-    <div class="header">
-        <h2>GRANJA BORAURE</h2>
-        <h3>NOTIFICACIÓN DE ACCIDENTE DE TRABAJO (INPSASEL)</h3>
+    <div class="header-table">
+        <tr>
+            <td style="border:none;">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('img/logoB.png'))) }}" class="logo">
+            </td>
+            <td style="border:none;" class="company-info">
+                <div class="company-name">GRANJA BORAURE, C.A.</div>
+                <div>RIF: J-08500570-6</div>
+                <div>Departamento de Medicina Ocupacional</div>
+                <strong>NOTIFICACIÓN DE ACCIDENTE DE TRABAJO (INPSASEL)</strong>
+            </td>
+        </tr>
     </div>
 
     <div class="section-title">1. DATOS DEL TRABAJADOR</div>

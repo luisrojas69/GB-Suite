@@ -46,7 +46,8 @@ class RolesAndPermissionsSeeder extends Seeder
       'gestionar_seguridad',
       'gestionar_areas',
       'gestionar_agro',
-      'acceder_menu_liquidacion'
+      'acceder_menu_liquidacion',
+      'acceder_modulo_medicina',
     ];
 
 
@@ -71,6 +72,15 @@ class RolesAndPermissionsSeeder extends Seeder
       'gestionar_aforos',
       'cambiar_status_pozos',
       'ver_dashboard_pozos',
+    ];
+
+
+    $permisos_base_medicina= [
+      'gestionar_pacientes',
+      'gestionar_consultas',
+      'gestionar_accidentes',
+      'gestionar_dotaciones',
+      'descargar_reporte_profit'
     ];
 
 
@@ -182,6 +192,7 @@ class RolesAndPermissionsSeeder extends Seeder
       $permisos_total_logistica,
       $permisos_lecturas,
       $permisos_base_produccion,
+      $permisos_base_medicina,
       $permisos_produccion_pozos,
       $permisos_produccion_mtto_pozos,
       $permisos_produccion_aforos,

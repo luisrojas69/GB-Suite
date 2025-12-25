@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
- {{-- Mostrar mensajes de sesión --}}
+
+        {{-- Mostrar mensajes de sesión --}}
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -41,6 +42,11 @@
                             <strong class="text-xs">ALERGIAS:</strong><br>
                             <span class="text-danger font-weight-bold">{{ $paciente->alergias ?? 'NINGUNA CONOCIDA' }}</span>
                         </div>
+                        <div class="mt-2 text-center p-2 bg-light rounded">
+                               <button class="btn btn-primary btn-sm btnEdit" data-id="{{ $paciente->id }}" title="Editar Datos Médicos">
+                                <i class="fas fa-user-edit"></i> Editar Datos Medicos
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -57,7 +63,8 @@
                                 <span class="text-primary font-weight-bold">{{ $h->created_at->format('d/m/Y') }}</span>
                                 <span class="badge badge-secondary">{{ $h->motivo_consulta }}</span>
                             </div>
-                            <div class="text-muted mt-1">{{ Str::limit($h->diagnostico_cie10, 50) }}</div>
+                            <div class="text-muted mt-1">{{ Str::limit($h->diagnostico_cie10, 50) }} <a href="{{ route('medicina.consultas.show', $h->id) }}">Ver detalles</a></div>
+
                         </li>
                         @empty
                         <li class="list-group-item text-center text-muted italic">Sin consultas previas en el sistema</li>
@@ -80,19 +87,34 @@
                     
                     <div class="card-body">
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="font-weight-bold small text-uppercase">Motivo de Atención</label>
-                                <select class="form-control" name="motivo_consulta" required>
+                                <select class="form-control border-left-primary" name="motivo_consulta" id="motivo_consulta" required>
                                     <option value="">Seleccione...</option>
                                     <option>Enfermedad Común</option>
                                     <option>Accidente Laboral</option>
                                     <option>Control Médico Interno</option>
-                                    <option>Evaluación Ocupacional</option>
+                                    <option value="Evaluación Ocupacional">Evaluación Ocupacional (Pre-empleo/Egreso)</option>
+                                    <option value="Pre-vacacional">Evaluación Pre-vacacional</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="font-weight-bold small text-uppercase">Diagnóstico (CIE-10)</label>
-                                <input type="text" class="form-control" name="diagnostico_cie10" placeholder="Ej: J00 - Rinofaringitis" required>
+
+                            <div class="col-md-4" id="div_retorno_vacaciones" style="display:none;">
+                                <label class="font-weight-bold small text-uppercase text-primary">
+                                    <i class="fas fa-calendar-alt"></i> Fecha Estimada de Retorno
+                                </label>
+                                <input type="date" class="form-control border-left-primary" name="fecha_retorno_vacaciones">
+                                <small class="text-muted">Se usará para la alerta post-vacacional.</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Diagnóstico (CIE-10)</label>
+                                    <select name="diagnostico_cie10" id="diagnostico_cie10" class="form-control" required>
+                                        <option value="">Escriba para buscar diagnóstico...</option>
+                                    </select>
+                                    <small class="text-muted">Use códigos Z00-Z10 para chequeos de rutina o vacaciones.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -130,7 +152,7 @@
                             <textarea class="form-control border-left-success" name="plan_tratamiento" rows="3" required placeholder="Medicamentos, dosis, recomendaciones..."></textarea>
                         </div>
 
-                        <div class="row border-top pt-3">
+                        <div class="row border-top pt-3" id="div_aptitud">
                             <div class="col-md-6">
                                 <label class="font-weight-bold small">Aptitud Laboral Post-Consulta</label>
                                 <select class="form-control border-left-warning" name="aptitud">
@@ -164,9 +186,102 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalPaciente" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle">Ficha Médica: <span id="nombrePacienteTitle"></span></h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formPaciente">
+                @csrf
+                <input type="hidden" id="paciente_id" name="id">
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab-bio-tab" data-toggle="pill" href="#tab-bio"><i class="fas fa-heartbeat"></i> Biometría</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-med-tab" data-toggle="pill" href="#tab-med"><i class="fas fa-pills"></i> Médicos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-talla-tab" data-toggle="pill" href="#tab-talla"><i class="fas fa-cut"></i> Tallas y EPP</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-bio">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Tipo de Sangre</label>
+                                    <select class="form-control" name="tipo_sangre" id="tipo_sangre">
+                                        <option value="">Seleccione...</option>
+                                        <option value="O+">O+</option><option value="O-">O-</option>
+                                        <option value="A+">A+</option><option value="A-">A-</option>
+                                        <option value="B+">B+</option><option value="B-">B-</option>
+                                        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Peso (Kg)</label>
+                                    <input type="number" step="0.1" class="form-control" name="peso_inicial" id="peso_inicial">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Estatura (Cm)</label>
+                                    <input type="number" class="form-control" name="estatura" id="estatura">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-med">
+                            <div class="form-group">
+                                <label>Alergias Conocidas</label>
+                                <textarea class="form-control" name="alergias" id="alergias" rows="2" placeholder="Ej: Penicilina, polen..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Enfermedades de Base / Patologías</label>
+                                <textarea class="form-control" name="enfermedades_base" id="enfermedades_base" rows="2"></textarea>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="es_zurdo" name="es_zurdo">
+                                <label class="custom-control-label" for="es_zurdo">¿Es Zurdo?</label>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-talla">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Talla Camisa</label>
+                                    <input type="text" class="form-control" name="talla_camisa" id="talla_camisa">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Talla Pantalón</label>
+                                    <input type="text" class="form-control" name="talla_pantalon" id="talla_pantalon">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Calzado</label>
+                                    <input type="text" class="form-control" name="talla_calzado" id="talla_calzado">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
     // Mostrar/Ocultar campo de días de reposo
@@ -197,6 +312,82 @@ $(document).ready(function() {
             }
         });
     });
+
+    //Si el motivo es PreVacacional se habilita el campo de retorno
+    $('#motivo_consulta').change(function() {
+        if($(this).val() === 'Pre-vacacional') {
+            $('#div_retorno_vacaciones').fadeIn();
+            $('input[name="fecha_retorno_vacaciones"]').attr('required', true);
+            $('#div_aptitud').fadeOut();
+        } else {
+            $('#div_retorno_vacaciones').fadeOut();
+            $('input[name="fecha_retorno_vacaciones"]').attr('required', false).val('');
+            $('#div_aptitud').fadeIn();
+            
+        }
+    });
+
+
+
+    // Abrir Modal y Cargar Datos
+    $(document).on('click', '.btnEdit', function() {
+        let id = $(this).data('id');
+        $.get('/medicina/pacientes/'+id+'/edit', function(data) {
+            $('#paciente_id').val(data.id);
+            $('#nombrePacienteTitle').text(data.nombre_completo);
+            $('#tipo_sangre').val(data.tipo_sangre);
+            $('#peso_inicial').val(data.peso_inicial);
+            $('#estatura').val(data.estatura);
+            $('#alergias').val(data.alergias);
+            $('#enfermedades_base').val(data.enfermedades_base);
+            $('#talla_camisa').val(data.talla_camisa);
+            $('#talla_pantalon').val(data.talla_pantalon);
+            $('#talla_calzado').val(data.talla_calzado);
+            $('#es_zurdo').prop('checked', data.es_zurdo == 1);
+            
+            $('#modalPaciente').modal('show');
+        });
+    });
+
+        // Guardar por AJAX
+    $('#formPaciente').on('submit', function(e) {
+        e.preventDefault();
+        let id = $('#paciente_id').val();
+        let formData = $(this).serialize();
+
+        $.ajax({
+            url: `/medicina/pacientes/${id}`,
+            method: 'PUT',
+            data: formData,
+            success: function(response) {
+                $('#modalPaciente').modal('hide');
+                Swal.fire('¡Guardado!', 'La ficha médica ha sido actualizada.', 'success');
+                location.reload()
+            }
+        });
+    });
+
+
+    $(document).ready(function() {
+        $('#diagnostico_cie10').select2({
+            theme: 'bootstrap4',
+            ajax: {
+                url: "{{ route('medicina.buscarCie10') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term };
+                },
+                processResults: function (data) {
+                    return { results: data };
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        });
+    });
+
+
 });
 </script>
 @endsection

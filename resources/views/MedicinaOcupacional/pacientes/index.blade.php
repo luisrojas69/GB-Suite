@@ -172,27 +172,87 @@ $(document).ready(function() {
                 data: 'id',
                 render: function(data) {
                     return `
-
-                        <div class="text-center">
-                            <a href="/medicina/paciente/${data}" class="btn btn-secondary btn-circle btn-sm" title="Ver Dettales">
-                                <i class="fas fa-eye"></i>
+                <div class="d-flex justify-content-around"> 
+                    <div class="col-auto">
+                        <div class="dropdown no-arrow">
+                            <a class="btn btn-primary dropdown-toggle shadow-sm" href="#" role="button" data-toggle="dropdown">
+                                <i class="fa-solid fa-user"></i>
+                                <i class="fa-solid fa-angle-down"></i>
                             </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                <div class="dropdown-header ">Accesos M&eacute;dicos:</div>
 
-                            <a href="/medicina/consultas/crear/${data}" class="btn btn-success btn-circle btn-sm" title="Nueva Consulta">
-                                <i class="fas fa-file-medical"></i>
-                            </a>
+                                <a class="dropdown-item" href="/medicina/paciente/${data}">
+                                    <i class="fas fa-person-circle-check fa-sm fa-fw mr-2 text-body"></i> Ver Detalles
+                                </a>
 
-                            <a href="dotaciones/entregar/${data}" class="btn btn-warning btn-circle btn-sm" title="Nueva Consulta">
-                                <i class="fa-solid fa-helmet-safety"></i>
-                            </a>
+                                <a class="dropdown-item" href="/medicina/consultas/crear/${data}">
+                                    <i class="fas fa-file-medical fa-sm fa-fw mr-2 text-success"></i> Nueva Consulta
+                                </a>
 
-                            <a href="/medicina/consultas/historial/${data}" class="btn btn-info btn-circle btn-sm" title="Ver Historia">
-                                <i class="fas fa-notes-medical"></i>
+                                 <a class="dropdown-item" href="/medicina/consultas/historial/${data}">
+                                    <i class="fas fa-notes-medical fa-sm fa-fw mr-2 text-info"></i> Ver Historia M&eacute;dica
+                                </a> 
+
+                                <button class="dropdown-item btnEdit" data-id="${data}" title="Editar Datos Médicos">
+                                    <i class="fas fa-user-edit fa-sm fa-fw mr-2 text-primary"></i> Editar datos M&eacute;dicos
+                                </button>
+                                
+
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-header">Accessos SSL:</div>
+                                <a class="dropdown-item" href="dotaciones/entregar/${data}">
+                                    <i class="fas fa-tshirt fa-sm fa-fw mr-2 text-warning"></i> Nueva Dotaci&oacute;n
+                                </a>
+
+                                <a class="dropdown-item" href="accidentes/registrar/${data}">
+                                    <i class="fas fa-ambulance fa-sm fa-fw mr-2 text-danger"></i> Registrar Accidente
+                                </a>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/home"><i class="fas fa-home mr-2"></i> Ir al Home</a>
+                               
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-auto">
+                        <div class="dropdown no-arrow">
+                            <a class="btn btn-info dropdown-toggle shadow-sm" href="#" role="button" data-toggle="dropdown">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <i class="fa-solid fa-angle-down"></i>
                             </a>
-                            <button class="btn btn-primary btn-circle btn-sm btnEdit" data-id="${data}" title="Editar Datos Médicos">
-                                <i class="fas fa-user-edit"></i>
-                            </button>
-                        </div>`;
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                <div class="dropdown-header ">Certificados M&eacute;dicos:</div>
+
+                                <a class="dropdown-item" href="/medicina/aptitud/${data}" target="_blank">
+                                    <i class="fas fa-person-circle-check fa-sm fa-fw mr-2 text-warning"></i> Certificado de Aptitud
+                                </a>
+
+                                <a class="dropdown-item" href="/medicina/constancia/${data}" target="_blank">
+                                    <i class="fas fa-person-walking-arrow-right fa-sm fa-fw mr-2 text-info"></i> Constancia de Asistencia
+                                </a>
+
+                                 <a class="dropdown-item" href="/medicina/historial/${data}" target="_blank">
+                                    <i class="fas fa-virus fa-sm fa-fw mr-2 text-danger"></i> Historial Epidemiol&oacute;gico
+                                </a>
+                                
+
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-header">Certificados SSL:</div>
+                                <a class="dropdown-item" target="_blank" href="/medicina/epp/${data}">
+                                    <i class="fas fa-user-tag fa-sm fa-fw mr-2 text-info"></i> Generador de Entrega de EPP
+                                </a>
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/home"><i class="fas fa-home mr-2"></i> Ir al Home</a>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+`;
                 }
             }
         ],

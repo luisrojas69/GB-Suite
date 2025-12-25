@@ -8,7 +8,7 @@ use App\Http\Controllers\HomeController;
 Auth::routes();
 
 // Home/Dashboard route
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index']);
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // Rutas protegidas por autenticación

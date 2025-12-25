@@ -14,7 +14,7 @@ class DeviceControlController extends Controller
    
     public function index()
     {
-       Gate::authorize('controlar_dispositivo_comedor');
+      // Gate::authorize('controlar_dispositivo_comedor');
         
         // Intentamos obtener información básica para el estado inicial
         $zk = new ZKTeco(env('DEVICE_IP'), env('DEVICE_PORT') );
@@ -36,7 +36,7 @@ class DeviceControlController extends Controller
 
     public function execute(Request $request)
     {
-       Gate::authorize('controlar_dispositivo_comedor');
+    //   Gate::authorize('controlar_dispositivo_comedor');
         
         $command = $request->command;
         $zk = new ZKTeco(env('DEVICE_IP'), env('DEVICE_PORT') );
@@ -68,7 +68,7 @@ class DeviceControlController extends Controller
     //Metodos de Gestion activa
     public function forceSync(Request $request)
     {
-        Gate::authorize('controlar_dispositivo_comedor');
+       // Gate::authorize('controlar_dispositivo_comedor');
         
         $type = $request->type; // 'attendance' o 'users'
 
@@ -90,7 +90,7 @@ class DeviceControlController extends Controller
 
     public function pushToDevice2(Request $request)
     {
-       Gate::authorize('controlar_dispositivo_comedor');
+    //   Gate::authorize('controlar_dispositivo_comedor');
         
         $employee = DiningEmployee::findOrFail($request->employee_id);
         $zk = new ZKTeco(env('DEVICE_IP'), env('DEVICE_PORT') );

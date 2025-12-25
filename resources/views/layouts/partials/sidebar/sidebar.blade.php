@@ -2,9 +2,9 @@
 
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/home') }}">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-desktop"></i>
+            <i class="fas fa-atom"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">BORAURE<sup> APP</sup></div>
+        <div class="sidebar-brand-text mx-3">GB<sup> Suite</sup></div>
     </a>
 
     <hr class="sidebar-divider my-0">
@@ -18,6 +18,9 @@
     <hr class="sidebar-divider">
 
     {{-- MÓDULO LOGÍSTICA (TALLER) --}}
+    @include('layouts.partials.sidebar.menu_medicina')
+    @include('layouts.partials.sidebar.menu_rrhh')
+    @include('layouts.partials.sidebar.menu_administrador')
 
      {{-- @include('layouts.partials.sidebar.menu_animales') --}}
 
