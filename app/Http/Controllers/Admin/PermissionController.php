@@ -4,39 +4,64 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission; // Importamos el modelo de Permisos de Spatie
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Gate; // Importamos el Gate
 
 class PermissionController extends Controller
 {
-    /**
-     * Muestra la lista de todos los permisos del sistema.
-     */
     public function index()
     {
-        // === PROTECCIÓN: Solo si tiene permiso para gestionar la seguridad ===
-        Gate::authorize('gestionar_seguridad'); 
-        // ===================================================================
+         Gate::authorize('gestionar_seguridad'); 
+        // Agrupamos para la vista principal
+        $permissions = Permission::all();
+        $groupedPermissions = $permissions->groupBy(fn($p) => $p->module ?: 'GLOBAL');
         
-        // Obtenemos todos los permisos (ordenados por módulo si es posible)
-        $permissions = Permission::orderBy('name')->get(); 
-        
-        return view('admin.permissions.index', compact('permissions'));
+        return view('admin.permissions.index', compact('groupedPermissions'));
     }
 
-    // Nota: Generalmente, los permisos se gestionan desde el RoleController, 
-    // y solo se listan aquí, ya que se crean vía Seeders o Artisan.
-
-    // Los métodos create, store, edit, update, destroy se pueden dejar vacíos 
-    // o eliminarse si la gestión de permisos se hace solo desde código/base de datos.
-    
-    // Si decide dejarlos, DEBE PROTEGERLOS:
-    /*
-    public function create()
+    public function store(Request $request)
     {
-        Gate::authorize('gestionar_seguridad'); 
-        // ...
+         Gate::authorize('gestionar_seguridad'); 
+        $request->validate([
+            'name' => 'required|unique:permissions,name',
+            'module' => 'required|string'
+        ]);
+
+        Permission::create([
+            'name' => strtolower(str_replace(' ', '_', $request->name)),
+            'module' => strtoupper($request->module),
+            'guard_name' => 'web'
+        ]);
+
+        return redirect()->back()->with('success', 'Permiso creado correctamente.');
     }
-    // ...
-    */
+
+    public function edit(Permission $permission)
+    {
+         Gate::authorize('gestionar_seguridad'); 
+        return response()->json($permission);
+    }
+
+    public function update(Request $request, Permission $permission)
+    {
+         Gate::authorize('gestionar_seguridad'); 
+        $request->validate([
+            'name' => 'required|unique:permissions,name,' . $permission->id,
+            'module' => 'required|string'
+        ]);
+
+        $permission->update([
+            'name' => strtolower(str_replace(' ', '_', $request->name)),
+            $permission->module = strtoupper($request->module)
+        ]);
+
+        return redirect()->back()->with('success', 'Permiso actualizado.');
+    }
+
+    public function destroy(Permission $permission)
+    {
+         Gate::authorize('gestionar_seguridad'); 
+        $permission->delete();
+        return redirect()->back()->with('success', 'Permiso eliminado.');
+    }
 }

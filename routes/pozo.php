@@ -17,6 +17,9 @@ Route::prefix('produccion/pozos')->name('produccion.pozos.')->group(function () 
     // =================================================================
     Route::resource('activos', ActivoController::class);
 
+    // Ruta para exportar pozos
+    Route::get('activos-export', [ActivoController::class, 'export'])->name('activos.export');
+
     // Lógica Específica para el cambio rápido de estatus vía AJAX
     Route::post('activos/{activo}/cambiar-estatus', [ActivoController::class, 'cambiarEstatus'])->name('activos.cambiarEstatus');
 

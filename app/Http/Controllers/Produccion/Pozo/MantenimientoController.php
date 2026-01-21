@@ -75,12 +75,6 @@ class MantenimientoController extends Controller
     // Actualiza los datos y realiza el cierre si es necesario (UPDATE)
     public function update(Request $request, MantenimientoCorrectivo $mantenimiento)
     {   
-        $request->validate([
-            'sintoma_falla' => 'required|string|max:500',
-            'trabajo_realizado' => 'nullable|string',
-            'costo_asociado' => 'nullable|numeric|min:0',
-            'fecha_reinicio_operacion' => 'nullable|after_or_equal:fecha_falla_reportada',
-        ]);
 
         $activo = $mantenimiento->activo;
 
@@ -115,7 +109,7 @@ class MantenimientoController extends Controller
 
             $mantenimiento->update($data);
 
-            return redirect()->route('produccion.pozos.mantenimientos.show', $mantenimiento)
+            return redirect()->route('produccion.pozos.mantenimientos.index')
                          ->with('success', $mensaje);
         });
         

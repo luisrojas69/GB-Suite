@@ -4,22 +4,25 @@ namespace App\Models\Produccion\Pozo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+// IMPORTANTE: Agregar estas líneas
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Activo extends Model
 {
     use HasFactory;
 
     protected $table = 'pozos_y_estaciones';
+    
     protected $fillable = [
         'nombre',
         'ubicacion',
-        'tipo_activo', // POZO o ESTACION_REBOMBEO
-        'subtipo_pozo', // TURBINA o SUMERGIBLE (nullable)
-        'id_pozo_asociado', // FK para estaciones
-        'estatus_actual', // OPERATIVO, PARADO, EN_MANTENIMIENTO
+        'tipo_activo', 
+        'subtipo_pozo', 
+        'id_pozo_asociado',
+        'estatus_actual', 
         'fecha_ultimo_cambio',
         'coordenadas',
-        // Otros campos para caracteristicas del pozo/estacion
     ];
 
     protected $casts = [
@@ -27,17 +30,34 @@ class Activo extends Model
     ];
 
     // Relaciones
-    public function mantenimientos()
+    public function mantenimientos(): HasMany
     {
         return $this->hasMany(MantenimientoCorrectivo::class, 'id_activo');
     }
 
-    public function aforos()
+    /**
+     * El aforo suele aplicar a los Pozos. 
+     * Nota: En Eloquent se recomienda devolver la relación siempre 
+     * y filtrar la lógica en el controlador o vista.
+     */
+    public function aforos(): HasMany
     {
-        // El aforo solo aplica a los Pozos
-        if ($this->tipo_activo === 'POZO') {
-            return $this->hasMany(Aforo::class, 'id_pozo');
-        }
-        return null;
+        return $this->hasMany(Aforo::class, 'id_pozo');
+    }
+
+    /**
+     * Obtiene el Pozo al que pertenece esta Estación de Rebombeo.
+     */
+    public function pozoAsociado(): BelongsTo
+    {
+        return $this->belongsTo(Activo::class, 'id_pozo_asociado');
+    }
+
+    /**
+     * Obtiene todas las Estaciones asociadas a este Pozo.
+     */
+    public function estacionesAsociadas(): HasMany
+    {
+        return $this->hasMany(Activo::class, 'id_pozo_asociado');
     }
 }

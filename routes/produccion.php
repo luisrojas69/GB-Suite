@@ -21,8 +21,12 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
         
-
+         //Ruta para exportar todos los animales
+        Route::get('animals/export', [AnimalController::class, 'export'])->name('animals.export');
         Route::resource('animals', AnimalController::class); // No implementamos show por ahora
+       
+        
+
         Route::get('weighings/create', [WeighingController::class, 'create'])->name('weighings.create');
         Route::post('weighings', [WeighingController::class, 'store'])->name('weighings.store');
         Route::get('weighings', [WeighingController::class, 'index'])->name('weighings.index');

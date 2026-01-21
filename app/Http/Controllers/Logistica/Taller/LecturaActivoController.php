@@ -171,11 +171,13 @@ class LecturaActivoController extends Controller
      * @param  \App\Models\Logistica\Taller\Activo  $activo
      * @return \Illuminate\View\View
      */
-    public function show(Activo $activo)
+    public function show(Activo $maq, $id)
     {
         // 1. Autorización: Se mantiene el permiso general para gestionar (CRUD) o se define uno específico
         Gate::authorize('ver_lecturas');
-        
+
+        $activo = Activo::findOrFail($id);
+
         // 2. Cargar el historial de lecturas (asumiendo que Activo tiene una relación 'lecturas')
         // Usamos la relación para obtener el historial, ordenado por fecha de lectura o ID descendente
         $lecturas = $activo->lecturas()

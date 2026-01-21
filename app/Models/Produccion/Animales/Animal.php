@@ -55,6 +55,12 @@ class Animal extends Model
         return $this->hasMany(Weighing::class);
     }
 
+    public function latestWeighing()
+    {
+        // Esto obtiene el último pesaje registrado para el animal
+        return $this->hasOne(Weighing::class)->latestOfMany();
+    }
+
     public function events()
     {
         return $this->hasMany(AnimalEvent::class);

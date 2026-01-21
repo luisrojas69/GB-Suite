@@ -11,18 +11,19 @@ return new class extends Migration
      */
 // ...
 
-    public function up(): void
-    {
+    public function up() {
         Schema::create('lotes', function (Blueprint $table) {
             $table->id();
-            
-            // Clave Foránea
             $table->foreignId('sector_id')->constrained('sectores')->onDelete('cascade');
-            
-            $table->string('codigo_lote_interno', 5); // Ej: 02, 03
-            $table->string('codigo_completo', 10)->unique(); // Ej: 0102
+            $table->string('codigo_lote_interno', 10); // Ej: 01, 02
+            $table->string('codigo_completo', 25)->unique(); // Ej: A-01 (Autogenerado)
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();
+            
+            // El lote no suele dibujarse, se calcula de sus tablones, 
+            // pero dejamos el campo por si quieres definir un perímetro general.
+            $table->geometry('geometria')->nullable(); 
+
             $table->timestamps();
 
             // Aseguramos que no haya dos lotes con el mismo código interno DENTRO de un mismo sector

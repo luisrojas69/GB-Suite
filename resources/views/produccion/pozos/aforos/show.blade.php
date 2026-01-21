@@ -1,7 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-
+{{-- Mostrar mensajes de sesión --}}
+@if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Análisis de Aforo ({{ $aforo->fecha_medicion->format('d/m/Y') }})</h1>
     <div class="d-flex">

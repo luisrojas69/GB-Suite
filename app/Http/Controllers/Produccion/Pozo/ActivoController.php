@@ -7,6 +7,8 @@ use App\Models\Produccion\Pozo\Activo;
 use App\Models\Produccion\Pozo\MantenimientoCorrectivo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\Produccion\Pozo\ActivoExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ActivoController extends Controller
 {
@@ -153,6 +155,12 @@ class ActivoController extends Controller
             'mttr',
             'aforosRecientes'
         ));
+    }
+
+
+    public function export() 
+    {
+        return Excel::download(new ActivoExport, 'lista_pozos_y_estaciones_' . now()->format('Y-m-d') . '.xlsx');
     }
     
 }

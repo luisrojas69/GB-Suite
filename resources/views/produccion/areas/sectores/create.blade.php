@@ -1,69 +1,82 @@
 @extends('layouts.app')
-@section('title', 'Crear Sector Productivo')
+@section('title', 'Crear Sector')
+
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+<style>
+    #map { height: 500px; width: 100%; border-radius: 8px; }
+    .form-group label { font-weight: bold; color: #4e73df; }
+</style>
+@endpush
 
 @section('content')
 <div class="container-fluid">
-    
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">➕ Crear Nuevo Sector</h1>
-        <a href="{{ route('produccion.areas.sectores.index') }}" class="btn btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Regresar al Listado
-        </a>
-    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Nuevo Sector</h6></div>
+                <div class="card-body">
 
-    {{-- Aunque la ruta ya lo protege, es buena práctica hacer una doble verificación visual --}}
-    @can('crear_sectores')
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Información del Sector</h6>
-            </div>
-            <div class="card-body">
-                
-                <form action="{{ route('produccion.areas.sectores.store') }}" method="POST">
-                    @csrf
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     
-                    <div class="form-group row">
-                        <label for="codigo_sector" class="col-sm-3 col-form-label">Código del Sector (Máx. 5 dígitos/letras): <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control @error('codigo_sector') is-invalid @enderror" id="codigo_sector" name="codigo_sector" value="{{ old('codigo_sector') }}" required maxlength="5" placeholder="Ej: 01, S1, A">
-                            @error('codigo_sector')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                    <form action="{{ route('produccion.areas.sectores.store') }}" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label>Código del Sector *</label>
+                            <input type="text" name="codigo_sector" class="form-control @error('codigo_sector') is-invalid @enderror" value="{{ old('codigo_sector') }}">
                         </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="nombre" class="col-sm-3 col-form-label">Nombre del Sector: <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control @error('nombre') is-invalid @enderror" id="nombre" name="nombre" value="{{ old('nombre') }}" required maxlength="100" placeholder="Ej: Sector Charco">
-                            @error('nombre')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="form-group">
+                            <label>Nombre del Sector *</label>
+                            <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre') }}">
                         </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="descripcion" class="col-sm-3 col-form-label">Descripción / Notas:</label>
-                        <div class="col-sm-9">
-                            <textarea class="form-control @error('descripcion') is-invalid @enderror" id="descripcion" name="descripcion" rows="3">{{ old('descripcion') }}</textarea>
-                            @error('descripcion')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="3">{{ old('descripcion') }}</textarea>
                         </div>
-                    </div>
-
-                    <div class="form-group row mt-4">
-                        <div class="col-sm-12 text-right">
-                            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save"></i> Guardar Sector</button>
-                        </div>
-                    </div>
-                </form>
-
+                        <input type="hidden" name="geometria" id="geometria_input">
+                        
+                        <button type="submit" class="btn btn-success btn-block shadow mt-4">
+                            <i class="fas fa-save"></i> Guardar Sector
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-    @else
-        <p class="alert alert-danger">Usted no tiene permisos para crear Sectores.</p>
-    @endcan
-
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-dark">Dibujar Límite Geográfico</h6>
+                    <small class="text-danger">@error('geometria') El mapa es obligatorio @enderror</small>
+                </div>
+                <div class="card-body p-1"><div id="map"></div></div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+<script>
+    $(document).ready(function() {
+        const map = L.map('map').setView([9.960669, -70.234770], 13);
+        L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { subdomains:['mt0','mt1','mt2','mt3'] }).addTo(map);
+
+        map.pm.addControls({ position: 'topleft', drawCircle: false, drawMarker: false, drawPolyline: false });
+
+        map.on('pm:create', (e) => {
+            $('#geometria_input').val(JSON.stringify(e.layer.toGeoJSON().geometry));
+        });
+    });
+</script>
+@endpush

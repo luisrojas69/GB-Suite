@@ -1,81 +1,67 @@
-@extends('layouts.app') 
+@extends('layouts.app')
 
 @section('content')
+    {{-- Mensajes de Notificación --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
-    <h1 class="h3 mb-4 text-gray-800">{{ __('Gestión de Roles del Sistema') }}</h1>
-
-    <div class="mb-4">
-        <a href="{{ route('admin.roles.create') }}" class="btn btn-success btn-icon-split shadow-sm">
-            <span class="icon text-white-50">
-                <i class="fas fa-plus"></i>
-            </span>
-            <span class="text">{{ __('Crear Nuevo Rol') }}</span>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ __('Administración de Roles') }}</h1>
+        <a href="{{ route('admin.roles.create') }}" class="btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Nuevo Rol
         </a>
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">{{ __('Roles Definidos') }}</h6>
-        </div>
         <div class="card-body">
-            
-            @if (session('success'))
-                {{-- Alerta de éxito al guardar o eliminar --}}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
-
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
+                <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="bg-light text-primary">
                         <tr>
-                            <th>{{ __('ID') }}</th>
-                            <th>{{ __('Nombre del Rol') }}</th>
-                            <th>{{ __('Permisos Asignados') }}</th>
-                            <th>{{ __('Acciones') }}</th>
+                            <th>ID</th>
+                            <th>Nombre del Rol</th>
+                            <th>Permisos</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($roles as $role)
                         <tr>
-                            <td>{{ $role->id }}</td>
-                            <td>{{ $role->name }}</td>
-                            <td>
-                                {{-- Contamos y listamos solo los primeros 3 permisos para no saturar --}}
-                                @forelse ($role->permissions->take(3) as $permission)
-                                    <span class="badge badge-primary text-white me-1">{{ $permission->name }}</span>
+                            <td class="align-middle font-weight-bold">#{{ $role->id }}</td>
+                            <td class="align-middle">
+                                <span class="badge badge-dark p-2">{{ $role->name }}</span>
+                            </td>
+                            <td class="align-middle">
+                                @forelse ($role->permissions->take(4) as $permission)
+                                    <span class="badge badge-light border text-primary">{{ str_replace('_', ' ', $permission->name) }}</span>
                                 @empty
-                                    <span class="badge badge-secondary">Ninguno</span>
+                                    <span class="text-muted small italic">Sin permisos asignados</span>
                                 @endforelse
                                 
-                                @if ($role->permissions->count() > 3)
-                                    <span class="badge badge-light text-dark">
-                                        + {{ $role->permissions->count() - 3 }} más
-                                    </span>
+                                @if ($role->permissions->count() > 4)
+                                    <span class="badge badge-info">+ {{ $role->permissions->count() - 4 }} más</span>
                                 @endif
                             </td>
-                            <td>
-                                {{-- Botón de Edición (Asignar permisos) --}}
-                                <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-info shadow-sm me-2" title="Editar Permisos">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-
-                                {{-- Botón de Eliminación (Acción Crítica) --}}
-                                @if ($role->name !== 'super_administrador') 
-                                {{-- Evitar que el rol principal sea eliminado --}}
-                                    <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline"
-                                          onsubmit="return confirm('¿Está seguro de eliminar el rol \'{{ $role->name }}\'? Esta acción no se puede deshacer.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger shadow-sm" title="Eliminar Rol">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                @endif
+                            <td class="text-center align-middle">
+                                <div class="btn-group shadow-sm" role="group">
+                                    <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @if ($role->name !== 'super_administrador')
+                                        <form action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="d-inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('¿Eliminar el rol {{ $role->name }}?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -84,4 +70,5 @@
             </div>
         </div>
     </div>
+</div>
 @endsection

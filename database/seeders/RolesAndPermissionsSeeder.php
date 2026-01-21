@@ -48,6 +48,9 @@ class RolesAndPermissionsSeeder extends Seeder
       'gestionar_agro',
       'acceder_menu_liquidacion',
       'acceder_modulo_medicina',
+      'ver_inventario_it',
+      'ver_inventario_admin',
+      'ver_inventario_general',
     ];
 
 

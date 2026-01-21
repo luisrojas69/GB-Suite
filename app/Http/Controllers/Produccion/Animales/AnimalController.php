@@ -11,6 +11,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use App\Exports\Produccion\Animals\AnimalsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AnimalController extends Controller
 {
@@ -146,5 +148,8 @@ class AnimalController extends Controller
         }
     }
     
-    // Los métodos show() y create() (vista del formulario) se implementarían aparte
+    public function export() 
+    {
+        return Excel::download(new AnimalsExport, 'inventario_animales_' . now()->format('d-m-Y') . '.xlsx');
+    }
 }

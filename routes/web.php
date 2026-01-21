@@ -57,6 +57,14 @@ Route::middleware(['auth'])->group(function () {
      // CARGA DEL MÓDULO DE pozo
     require __DIR__.'/medicina.php';
 
+         // CARGA DEL MÓDULO DE pozo
+    require __DIR__.'/sistemas.php';
+    
+    // CARGA DEL MÓDULO DE PLUVIOMETRIA
+    require __DIR__.'/pluviometria.php';
+
+    // CARGA DEL MÓDULO DE PLUVIOMETRIA
+    require __DIR__.'/labores.php';
 
 
 

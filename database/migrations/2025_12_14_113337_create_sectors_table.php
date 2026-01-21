@@ -9,13 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    
+    public function up() {
         Schema::create('sectores', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo_sector', 5)->unique();
+            $table->string('codigo_sector', 10)->unique(); // Ej: A, B, C
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();
+            
+            // Campo espacial para el límite del Sector
+            $table->geometry('geometria')->nullable(); 
+            
             $table->timestamps();
         });
     }

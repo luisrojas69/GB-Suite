@@ -5,7 +5,13 @@
         <li class="nav-item">
             <a class="nav-link" href="{{ route('admin.roles.index') }}">
                 <i class="fas fa-user-lock"></i>
-                <span>{{ __('Roles y Permisos') }}</span>
+                <span>{{ __('Roles') }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.permissions.index') }}">
+                <i class="fas fa-user-shield"></i>
+                <span>{{ __('Permisos') }}</span>
             </a>
         </li>
         <li class="nav-item">

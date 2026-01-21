@@ -5,86 +5,121 @@
 <div class="container-fluid">
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">📋 Lotes Productivos</h1>
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-layer-group text-primary"></i> Lotes Productivos</h1>
         
-        @can('crear_sectores') {{-- Usamos el permiso general de creación para Lotes --}}
-        <a href="{{ route('produccion.areas.lotes.create') }}" class="d-none d-sm-inline-block btn btn-success shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Crear Nuevo Lote
+        @can('crear_sectores')
+        <a href="{{ route('produccion.areas.lotes.create') }}" class="btn btn-success btn-icon-split shadow-sm">
+            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+            <span class="text">Crear Nuevo Lote</span>
         </a>
         @endcan
-        
     </div>
 
     @if ($message = Session::get('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ $message }}
+    <div class="alert alert-success border-left-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ $message }}
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     @endif
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Listado de Lotes Registrados</h6>
+    <div class="card shadow mb-4 border-bottom-info">
+        <div class="card-header py-3 bg-light d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Listado de Lotes por Sector</h6>
+            <span class="badge badge-info">{{ $lotes->count() }} Lotes en total</span>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                @can('ver_sectores') {{-- Usamos el permiso general de visualización --}}
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
+                @can('ver_sectores')
+                <table class="table table-hover align-middle" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="thead-light">
                         <tr>
-                            <th>Código Completo</th>
-                            <th>Sector</th>
-                            <th>Código Interno</th>
-                            <th>Nombre</th>
-                            <th>Tablones</th>
-                            {{-- Solo mostrar la columna de acciones si hay permisos de editar o eliminar --}}
-                            @if(Auth::user()->can('editar_sectores') || Auth::user()->can('eliminar_sectores'))
-                                <th>Acciones</th>
-                            @endif
+                            <th width="15%">Código Completo</th>
+                            <th width="25%">Sector de Origen</th>
+                            <th width="25%">Nombre del Lote</th>
+                            <th width="15%" class="text-center">Estructura</th>
+                            <th width="20%" class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($lotes as $lote)
                         <tr>
-                            <td>**{{ $lote->codigo_completo }}**</td>
-                            <td>{{ $lote->sector->codigo_sector }} - {{ $lote->sector->nombre }}</td>
-                            <td>{{ $lote->codigo_lote_interno }}</td>
-                            <td>{{ $lote->nombre }}</td>
-                            <td>{{ $lote->tablones->count() }}</td>
-                            
+                            <td class="align-middle text-center">
+                                <span class="badge badge-dark p-2" style="font-size: 0.9rem;">
+                                    {{ $lote->codigo_completo }}
+                                </span>
+                            </td>
+
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle bg-primary text-white mr-3" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                        <i class="fas fa-map"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-weight-bold text-dark">{{ $lote->sector->nombre }}</span><br>
+                                        <small class="text-muted">Cod: {{ $lote->sector->codigo_sector }}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="align-middle">
+                                <span class="font-weight-bold text-primary">{{ $lote->nombre }}</span><br>
+                                <small class="text-muted">ID Interno: {{ $lote->codigo_lote_interno }}</small>
+                            </td>
+
+                            <td class="align-middle text-center">
+                                <div class="badge badge-pill badge-light border border-info px-3 py-2">
+                                    <i class="fas fa-th-large text-info mr-1"></i> 
+                                    <strong>{{ $lote->tablones->count() }}</strong> 
+                                    <small class="text-muted text-uppercase">Tablones</small>
+                                </div>
+                                @if($lote->tablones->count() > 0)
+                                    <br>
+                                    <small class="text-success font-weight-bold">
+                                        {{ number_format($lote->tablones->sum('hectareas_documento'), 2) }} Has
+                                    </small>
+                                @endif
+                            </td>
+
+                            <td class="align-middle text-center">
                                 @if(Auth::user()->can('ver_sectores') || Auth::user()->can('editar_sectores') || Auth::user()->can('eliminar_sectores'))
-                                <td>
+                                <div class="btn-group shadow-sm" role="group">
                                     @can('ver_sectores')
-                                    <a href="{{ route('produccion.areas.lotes.show', $lote->id) }}" class="btn btn-info btn-sm" title="Ver Detalle"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('produccion.areas.lotes.show', $lote->id) }}" class="btn btn-white btn-sm border" title="Ver Detalle">
+                                        <i class="fas fa-eye text-info"></i>
+                                    </a>
                                     @endcan
                                     
                                     @can('editar_sectores')
-                                    <a href="{{ route('produccion.areas.lotes.edit', $lote->id) }}" class="btn btn-primary btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ route('produccion.areas.lotes.edit', $lote->id) }}" class="btn btn-white btn-sm border" title="Editar">
+                                        <i class="fas fa-edit text-primary"></i>
+                                    </a>
                                     @endcan
 
                                     @can('eliminar_sectores')
-                                    <form action="{{ route('produccion.areas.lotes.destroy', $lote->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar el lote {{ $lote->nombre }}? Esto eliminará todos sus tablones asociados.')">
-                                            <i class="fas fa-trash"></i>
+                                    <form action="{{ route('produccion.areas.lotes.destroy', $lote->id) }}" method="POST" class="d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-white btn-sm border" title="Eliminar" onclick="return confirm('¿Eliminar lote {{ $lote->nombre }}?')">
+                                            <i class="fas fa-trash text-danger"></i>
                                         </button>
                                     </form>
                                     @endcan
-                                </td>
+                                </div>
                                 @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
                 @else
-                    <p class="alert alert-warning">No tiene permiso para ver este listado de lotes.</p>
+                    <div class="text-center py-5">
+                        <i class="fas fa-lock fa-3x text-gray-200 mb-3"></i>
+                        <p class="text-muted">No tiene permisos para ver esta sección.</p>
+                    </div>
                 @endcan
             </div>
         </div>
     </div>
-
 </div>
 @endsection

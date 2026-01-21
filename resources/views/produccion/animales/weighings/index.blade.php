@@ -44,7 +44,7 @@
                             </td>
                             <td>
                                 <span class="badge badge-success" style="font-size: 1.1em;">
-                                    {{ number_format($weighing->weight, 2, ',', '.') }} kg
+                                    {{ number_format($weighing->weight_kg, 2, ',', '.') }} kg
                                 </span>
                             </td>
                             <td>{{ $weighing->notes ?? 'N/A' }}</td>

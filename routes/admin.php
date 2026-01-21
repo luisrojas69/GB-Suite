@@ -18,10 +18,15 @@ Route::middleware(['auth'])->group(function () {
         // El middleware se aplicará en el constructor del controlador.
         Route::resource('roles', RoleController::class);
 
-        // Rutas para la gestión de Permisos (Generalmente solo lectura y asignación)
-        Route::resource('permissions', PermissionController::class)->only(['index', 'show']);
-
-        // Rutas para asignar Roles a Usuarios (CRUD)
+        // Administración de Permisos
+    Route::prefix('permisos')->group(function () {
+        Route::get('/', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::post('/', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('permissions.edit');
+        Route::put('/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+        Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    });
+            // Rutas para asignar Roles a Usuarios (CRUD)
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/{user}/edit-roles', [UserController::class, 'editRoles'])->name('users.edit-roles');
         Route::put('users/{user}/update-roles', [UserController::class, 'updateRoles'])->name('users.update-roles');

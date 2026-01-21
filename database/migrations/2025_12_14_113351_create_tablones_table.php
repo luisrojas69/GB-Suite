@@ -24,21 +24,27 @@ return new class extends Migration
             $table->string('codigo_tablon_interno', 5); // Ej: 01, AB
             $table->string('codigo_completo', 15)->unique(); // Ej: 010201, 0802AB
             $table->string('nombre', 100);
-            
-            // Campo de Área
-            $table->decimal('area_ha', 8, 2)->comment('Área en Hectáreas del tablón.');
-            
-            // Campos de Control de Siembra y Metas
-            $table->date('fecha_siembra')->nullable()->comment('Fecha de la última siembra o resoca (para control de edad).');
+
+            // Estado del Ciclo (La Inteligencia)
+            $table->enum('tipo_ciclo', ['Plantilla', 'Soca'])->default('Plantilla');
+            $table->integer('numero_soca')->default(0); 
+            $table->date('fecha_inicio_ciclo')->nullable()->comment('Fecha de Siembra o Cosecha anterior');
+
+            // El "Presupuesto" de Rendimiento (Central Pastora vs Granja)
             $table->decimal('meta_ton_ha', 8, 2)->nullable()->comment('Meta de Toneladas por Hectárea esperada.');
 
-            // Campos existentes
+             // Datos Físicos y Operativos
+            $table->decimal('hectareas_documento', 10, 2);
             $table->string('tipo_suelo', 50)->nullable();
-            $table->enum('estado', ['Activo', 'Inactivo', 'Preparacion'])->default('Activo');
+            $table->enum('estado', ['Preparacion', 'Crecimiento', 'Maduro', 'Cosecha', 'Inactivo'])->default('Preparacion');
+
+            // Campo espacial crítico
+            $table->geometry('geometria')->nullable(); 
+
             $table->text('descripcion')->nullable();
             $table->timestamps();
             
-            // Restricción de unicidad
+            // Restricción de unicidad.
             $table->unique(['lote_id', 'codigo_tablon_interno']);
         });
     }

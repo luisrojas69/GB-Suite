@@ -18,11 +18,13 @@
     <hr class="sidebar-divider">
 
     {{-- MÓDULO LOGÍSTICA (TALLER) --}}
-    @include('layouts.partials.sidebar.menu_medicina')
-    @include('layouts.partials.sidebar.menu_rrhh')
-    @include('layouts.partials.sidebar.menu_administrador')
+    {{-- @include('layouts.partials.sidebar.menu_medicina') --}}
+    {{-- @include('layouts.partials.sidebar.menu_rrhh') --}}
 
-     {{-- @include('layouts.partials.sidebar.menu_animales') --}}
+     @include('layouts.partials.sidebar.menu_taller')
+
+
+    @include('layouts.partials.sidebar.menu_administrador')
 
     
 
@@ -45,7 +47,6 @@
 
 
 
-    <hr class="sidebar-divider d-none d-md-block">
 
     <li class="nav-item {{ Nav::isRoute('profile') }}">
         <a class="nav-link" href="{{ route('profile') }}">

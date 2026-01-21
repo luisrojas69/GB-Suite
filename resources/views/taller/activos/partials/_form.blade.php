@@ -1,216 +1,158 @@
-{{-- 
-    Este partial requiere las siguientes variables:
-    $activo: Objeto Activo (para bindear datos)
-    $action: 'create' o 'edit' (para lógica condicional)
---}}
-
 @php
-    // Definiciones de ENUMs basadas en tu migración
     $tipos_activo = ['Tractor', 'Camión', 'Camioneta', 'Moto', 'Cosechadora', 'Zorra', 'Otro'];
     $estados_operativos = ['Operativo', 'En Mantenimiento', 'Fuera de Servicio', 'Desincorporado'];
     $unidades_medida = ['KM', 'HRS'];
-
-    // Lógica para el campo Lectura Actual (min)
     $lectura_min = ($action == 'edit') ? $activo->lectura_actual : 0;
 @endphp
 
+<style>
+    .form-section-title { border-left: 4px solid #4e73df; padding-left: 15px; margin-bottom: 25px; }
+    .input-group-text { background-color: #f8f9fc; border-right: none; color: #4e73df; }
+    .form-control { border-left: none; }
+    .form-control:focus { border-left: none; box-shadow: none; border-color: #d1d3e2; }
+    .custom-file-label::after { content: "Buscar"; }
+</style>
+
 <div class="row">
-    
-    {{-- Columna 1: Identificación Básica --}}
-    <div class="col-md-6">
-        <h5 class="mb-3 text-info">Identificación del Vehículo/Equipo</h5>
-
-        {{-- Campo Código --}}
-        <div class="form-group">
-            <label for="codigo">Código del Activo <span class="text-danger">*</span></label>
-            <input type="text" 
-                   name="codigo" 
-                   id="codigo" 
-                   class="form-control @error('codigo') is-invalid @enderror" 
-                   value="{{ old('codigo', $activo->codigo ?? '') }}" 
-                   placeholder="Ej: GBT01"
-                   required>
-            @error('codigo')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+    {{-- Sección 1: Datos Técnicos --}}
+    <div class="col-lg-6 pr-lg-4 border-right">
+        <div class="form-section-title">
+            <h6 class="text-primary font-weight-bold text-uppercase small mb-1">Paso 1</h6>
+            <h5 class="text-dark font-weight-bold">Identificación Técnica</h5>
         </div>
 
-        {{-- Campo Nombre --}}
-        <div class="form-group">
-            <label for="nombre">Nombre (Descripción corta) <span class="text-danger">*</span></label>
-            <input type="text" 
-                   name="nombre" 
-                   id="nombre" 
-                   class="form-control @error('nombre') is-invalid @enderror" 
-                   value="{{ old('nombre', $activo->nombre ?? '') }}" 
-                   required>
-            @error('nombre')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-        
-        {{-- Campo Placa --}}
-        <div class="form-group">
-            <label for="placa">Placa</label>
-            <input type="text" 
-                   name="placa" 
-                   id="placa" 
-                   class="form-control @error('placa') is-invalid @enderror" 
-                   value="{{ old('placa', $activo->placa ?? '') }}" 
-                   placeholder="Solo para vehículos registrados">
-            @error('placa')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="form-group mb-4">
+            <label class="font-weight-bold small">Código Interno <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-hashtag"></i></span></div>
+                <input type="text" name="codigo" class="form-control @error('codigo') is-invalid @enderror" 
+                       value="{{ old('codigo', $activo->codigo) }}" placeholder="Ej: GBT-01" required>
+            </div>
+            @error('codigo') <div class="small text-danger mt-1">{{ $message }}</div> @enderror
         </div>
 
-        {{-- Campo Tipo (ENUM) --}}
-        <div class="form-group">
-            <label for="tipo">Tipo de Activo <span class="text-danger">*</span></label>
-            <select name="tipo" 
-                    id="tipo" 
-                    class="form-control @error('tipo') is-invalid @enderror" 
-                    required>
-                <option value="">Seleccione el Tipo</option>
-                @foreach ($tipos_activo as $tipo)
-                    <option value="{{ $tipo }}" 
-                            {{ old('tipo', $activo->tipo ?? '') == $tipo ? 'selected' : '' }}>
-                        {{ $tipo }}
-                    </option>
-                @endforeach
-            </select>
-            @error('tipo')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="form-group mb-4">
+            <label class="font-weight-bold small">Nombre del Equipo <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-signature"></i></span></div>
+                <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" 
+                       value="{{ old('nombre', $activo->nombre) }}" placeholder="Ej: Tractor Massey Ferguson" required>
+            </div>
         </div>
-        
-        {{-- Campo Marca --}}
-        <div class="form-group">
-            <label for="marca">Marca</label>
-            <input type="text" 
-                   name="marca" 
-                   id="marca" 
-                   class="form-control @error('marca') is-invalid @enderror" 
-                   value="{{ old('marca', $activo->marca ?? '') }}">
-            @error('marca')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small">Placa / Matrícula</label>
+                    <input type="text" name="placa" class="form-control" value="{{ old('placa', $activo->placa) }}" placeholder="A12BC3D">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small">Tipo <span class="text-danger">*</span></label>
+                    <select name="tipo" class="form-control select2" required>
+                        <option value="">Seleccione...</option>
+                        @foreach ($tipos_activo as $t)
+                            <option value="{{ $t }}" {{ old('tipo', $activo->tipo) == $t ? 'selected' : '' }}>{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
         </div>
-        
-        {{-- Campo Modelo --}}
-        <div class="form-group">
-            <label for="modelo">Modelo</label>
-            <input type="text" 
-                   name="modelo" 
-                   id="modelo" 
-                   class="form-control @error('modelo') is-invalid @enderror" 
-                   value="{{ old('modelo', $activo->modelo ?? '') }}">
-            @error('modelo')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small text-muted">Marca</label>
+                    <input type="text" name="marca" class="form-control bg-light" value="{{ old('marca', $activo->marca) }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small text-muted">Modelo</label>
+                    <input type="text" name="modelo" class="form-control bg-light" value="{{ old('modelo', $activo->modelo) }}">
+                </div>
+            </div>
         </div>
-        
     </div>
 
-    {{-- Columna 2: Uso, Estado y Adquisición --}}
-    <div class="col-md-6">
-        <h5 class="mb-3 text-info">Uso y Metadatos</h5>
-        
-        {{-- Campo Departamento Asignado --}}
-        <div class="form-group">
-            <label for="departamento_asignado">Departamento Asignado <span class="text-danger">*</span></label>
-            <input type="text" 
-                   name="departamento_asignado" 
-                   id="departamento_asignado" 
-                   class="form-control @error('departamento_asignado') is-invalid @enderror" 
-                   value="{{ old('departamento_asignado', $activo->departamento_asignado ?? '') }}" 
-                   placeholder="Ej: Cosecha, Administración"
-                   required>
-            @error('departamento_asignado')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+    {{-- Sección 2: Operación e Imagen --}}
+    <div class="col-lg-6 pl-lg-4">
+        <div class="form-section-title">
+            <h6 class="text-primary font-weight-bold text-uppercase small mb-1">Paso 2</h6>
+            <h5 class="text-dark font-weight-bold">Uso y Asignación</h5>
         </div>
 
-        {{-- Campo Unidad de Medida (ENUM) --}}
-        <div class="form-group">
-            <label for="unidad_medida">Unidad de Medida <span class="text-danger">*</span></label>
-            <select name="unidad_medida" 
-                    id="unidad_medida" 
-                    class="form-control @error('unidad_medida') is-invalid @enderror" 
-                    required>
-                <option value="">Seleccione</option>
-                @foreach ($unidades_medida as $unidad)
-                    <option value="{{ $unidad }}" 
-                            {{ old('unidad_medida', $activo->unidad_medida ?? '') == $unidad ? 'selected' : '' }}>
-                        {{ $unidad }}
-                    </option>
-                @endforeach
-            </select>
-            @error('unidad_medida')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="form-group mb-4">
+            <label class="font-weight-bold small">Departamento / Frente <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-users-cog"></i></span></div>
+                <input type="text" name="departamento_asignado" class="form-control" 
+                       value="{{ old('departamento_asignado', $activo->departamento_asignado) }}" placeholder="Ej: Cosecha III">
+            </div>
         </div>
 
-        {{-- Campo Lectura Actual --}}
-        <div class="form-group">
-            <label for="lectura_actual">Lectura Inicial/Actual (<span id="unidad_label">{{ old('unidad_medida', $activo->unidad_medida ?? 'KM/HRS') }}</span>) <span class="text-danger">*</span></label>
-            <input type="number" 
-                   name="lectura_actual" 
-                   id="lectura_actual" 
-                   class="form-control @error('lectura_actual') is-invalid @enderror" 
-                   value="{{ old('lectura_actual', $activo->lectura_actual ?? 0) }}" 
-                   min="{{ $lectura_min }}"
-                   required>
-            @if ($action == 'edit')
-                <small class="form-text text-muted">En edición, el valor no puede ser menor a la lectura actual ({{ number_format($lectura_min) }}) para proteger la secuencia de lecturas.</small>
-            @else
-                <small class="form-text text-muted">Ingrese la lectura inicial (kilometraje u horas).</small>
-            @endif
-            @error('lectura_actual')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-        
-        <script>
-            // Script básico para actualizar la etiqueta de la unidad de medida
-            document.getElementById('unidad_medida').addEventListener('change', function() {
-                document.getElementById('unidad_label').innerText = this.value || 'KM/HRS';
-            });
-        </script>
-        
-        {{-- Campo Fecha Adquisición --}}
-        <div class="form-group">
-            <label for="fecha_adquisicion">Fecha de Adquisición</label>
-            <input type="date" 
-                   name="fecha_adquisicion" 
-                   id="fecha_adquisicion" 
-                   class="form-control @error('fecha_adquisicion') is-invalid @enderror" 
-                   value="{{ old('fecha_adquisicion', ($activo->fecha_adquisicion ?? null) ? \Carbon\Carbon::parse($activo->fecha_adquisicion)->format('Y-m-d') : '') }}">
-            @error('fecha_adquisicion')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-        
-        {{-- Campo Estado Operativo (ENUM) --}}
-        <div class="form-group">
-            <label for="estado_operativo">Estado Operativo <span class="text-danger">*</span></label>
-            <select name="estado_operativo" 
-                    id="estado_operativo" 
-                    class="form-control @error('estado_operativo') is-invalid @enderror" 
-                    required>
-                <option value="">Seleccione el Estado</option>
-                @foreach ($estados_operativos as $estado)
-                    <option value="{{ $estado }}" 
-                            {{ old('estado_operativo', $activo->estado_operativo ?? 'Operativo') == $estado ? 'selected' : '' }}
-                            {{-- Lógica: Solo en la creación (create), el usuario solo puede registrar como 'Operativo'. --}}
-                            @if ($action == 'create' && $estado != 'Operativo') disabled @endif>
-                        {{ $estado }}
-                    </option>
-                @endforeach
-            </select>
-            @error('estado_operativo')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="card bg-light border-0 mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label class="font-weight-bold small">Unidad Medida</label>
+                        <select name="unidad_medida" id="u_medida" class="form-control font-weight-bold text-primary">
+                            @foreach ($unidades_medida as $u)
+                                <option value="{{ $u }}" {{ old('unidad_medida', $activo->unidad_medida) == $u ? 'selected' : '' }}>{{ $u }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="font-weight-bold small">Lectura <span id="u_label">{{ old('unidad_medida', $activo->unidad_medida ?? 'HRS') }}</span> <span class="text-danger">*</span></label>
+                        <input type="number" name="lectura_actual" class="form-control form-control-lg font-weight-bold" 
+                               value="{{ old('lectura_actual', $activo->lectura_actual ?? 0) }}" min="{{ $lectura_min }}">
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small">Fecha Adquisición</label>
+                    <input type="date" name="fecha_adquisicion" class="form-control" value="{{ old('fecha_adquisicion', $activo->fecha_adquisicion ? $activo->fecha_adquisicion->format('Y-m-d') : '') }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="font-weight-bold small">Estado Inicial</label>
+                    <select name="estado_operativo" class="form-control border-left-success">
+                        @foreach ($estados_operativos as $e)
+                            <option value="{{ $e }}" {{ old('estado_operativo', $activo->estado_operativo) == $e ? 'selected' : '' }}
+                                @if ($action == 'create' && $e != 'Operativo') disabled @endif>
+                                {{ $e }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label class="font-weight-bold small">Fotografía del Activo</label>
+            <div class="custom-file">
+                <input type="file" name="imagen" class="custom-file-input" id="customFile" accept="image/*">
+                <label class="custom-file-label" for="customFile">Elegir archivo...</label>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('u_medida').addEventListener('change', function() {
+        document.getElementById('u_label').innerText = this.value;
+    });
+
+    // Mostrar nombre del archivo en el input
+    document.querySelector('.custom-file-input').addEventListener('change', function(e){
+        var fileName = document.getElementById("customFile").files[0].name;
+        var nextSibling = e.target.nextElementSibling
+        nextSibling.innerText = fileName
+    })
+</script>

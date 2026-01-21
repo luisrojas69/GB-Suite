@@ -61,7 +61,7 @@ class AreasProduccionSeeder extends Seeder
             'codigo_tablon_interno' => '01',
             'codigo_completo' => $lote0102->id,
             'nombre' => 'Tablón 01',
-            'area_ha' => 2.75,
+            'hectareas_documento' => 2.75,
             'variedad_id' => '1',
             'tipo_suelo' => 'Arcilloso',
         ]);
@@ -72,7 +72,7 @@ class AreasProduccionSeeder extends Seeder
             'codigo_tablon_interno' => 'AB',
             'codigo_completo' => $lote0102->id,
             'nombre' => 'Tablón Alto AB',
-            'area_ha' => 1.50,
+            'hectareas_documento' => 1.50,
             'variedad_id' => '2',
             'tipo_suelo' => 'Franco-Arenoso',
         ]);
@@ -82,7 +82,7 @@ class AreasProduccionSeeder extends Seeder
             'codigo_tablon_interno' => '03',
             'codigo_completo' => $lote0102->id,
             'nombre' => 'Tablón de Prueba 03',
-            'area_ha' => 0.50,
+            'hectareas_documento' => 0.50,
             'variedad_id' => '1',
             'tipo_suelo' => 'Pedregoso',
             'estado' => 'Preparacion',

@@ -89,9 +89,9 @@
                     {{-- Peso en Kilogramos --}}
                     <div class="form-group col-md-4">
                         {{-- ADVERTENCIA: Se ajusta a 'weight' para coincidir con el modelo Weighing proporcionado anteriormente --}}
-                        <label for="weight">Peso (kg) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" class="form-control @error('weight') is-invalid @enderror" id="weight" name="weight" value="{{ old('weight') }}" required min="0.01">
-                        @error('weight') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        <label for="weight_kg">Peso (kg) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control @error('weight_kg') is-invalid @enderror" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" required min="0.01">
+                        @error('weight_kg') <span class="invalid-feedback">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Notas --}}

@@ -18,11 +18,13 @@
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "^3.1",
+        "matanyadaev/laravel-eloquent-spatial": "^4.5",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^6.23",
         "symfony/http-client": "^6.1",
         "symfony/mailgun-mailer": "^6.1",
-        "symfony/postmark-mailer": "^6.1"
+        "symfony/postmark-mailer": "^6.1",
+        "yajra/laravel-datatables": "^12.0"
     },
     "require-dev": {
         "spatie/laravel-ignition": "^2.0",

@@ -25,7 +25,11 @@
 
     <!-- Favicon -->
     <link href="{{ asset('img/favicon.png') }}" rel="icon" type="image/png">
-
+    <style>
+        #map { height: 450px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+    </style>
+    @stack('styles')
+    @yield('styles')
 </head>
 <body id="page-top">
 

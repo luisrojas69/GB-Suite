@@ -66,15 +66,16 @@
                 aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Configuración Pecuaria:</h6>
+                    @can('gestionar_especies')
+                        <a class="collapse-item {{ Nav::isRoute('species.index') }}" href="{{ route('species.index') }}">Especies</a>
+                    @endcan
                     @can('gestionar_categorias')
                         <a class="collapse-item {{ Nav::isRoute('categories.index') }}" href="{{ route('categories.index') }}">Categorías (CeCo)</a>
                     @endcan
                     @can('gestionar_ubicaciones')
                         <a class="collapse-item {{ Nav::isRoute('locations.index') }}" href="{{ route('locations.index') }}">Ubicaciones</a>
                     @endcan
-                    @can('gestionar_especies')
-                        <a class="collapse-item {{ Nav::isRoute('species.index') }}" href="{{ route('species.index') }}">Especies</a>
-                    @endcan
+                    
                     @can('gestionar_dueños')
                         <a class="collapse-item {{ Nav::isRoute('owners.index') }}" href="{{ route('owners.index') }}">Propietarios</a>
                     @endcan

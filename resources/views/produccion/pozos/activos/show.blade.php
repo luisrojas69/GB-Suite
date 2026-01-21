@@ -1,7 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-
+{{-- Mostrar mensajes de sesión --}}
+@if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
 @php
     $color = '';
     switch ($activo->estatus_actual) {

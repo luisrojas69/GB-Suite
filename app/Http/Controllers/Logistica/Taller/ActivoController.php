@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Logistica\Taller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Logistica\Taller\Activo;
+use App\Models\Produccion\Labores\LaborMaquinariaDetalle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -11,14 +12,26 @@ use Illuminate\Support\Facades\DB; // Para transacciones o consultas complejas
 
 class ActivoController extends Controller
 {
+    
     public function index()
     {
-        // Requerimiento: Poder listar los activos
         Gate::authorize('gestionar_activos');
         
-        $activos = Activo::orderBy('codigo')->paginate(15);
+        // Cargamos conteos de relaciones para mostrar indicadores en la tabla
+        $activos = Activo::withCount(['laboresDetalle', 'servicios', 'programacionesMP' => function($q) {
+            $q->where('status', '!=', 'Completado');
+        }])
+        ->orderBy('codigo')
+        ->get(); // Si prefieres Datatables JS, quitamos paginate. Si no, mantenlo.
+
+        // Estadísticas para las Mini-Cards superiores
+        $stats = [
+            'total' => $activos->count(),
+            'operativos' => $activos->where('estado_operativo', 'Operativo')->count(),
+            'taller' => $activos->whereIn('estado_operativo', ['En Mantenimiento', 'Fuera de Servicio'])->count(),
+        ];
         
-        return view('taller.activos.index', compact('activos'));
+        return view('taller.activos.index', compact('activos', 'stats'));
     }
 
     public function create()
@@ -46,14 +59,16 @@ class ActivoController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Autorización: Se mantiene el permiso general para gestionar (CRUD)
+
+       // 1. Autorización: Se mantiene el permiso general para gestionar (CRUD)
         Gate::authorize('gestionar_activos');
 
         // 2. Validación de datos: Adaptada a los campos de la tabla 'activos'
-        $request->validate([
+        $data = $request->validate([
             // Identificación
             'codigo' => ['required', 'string', 'max:50', 'unique:activos,codigo'],
             'nombre' => ['required', 'string', 'max:255'],
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validación Imagen
             'placa' => ['nullable', 'string', 'max:50'],
             'tipo' => ['required', Rule::in(['Tractor', 'Camión', 'Camioneta', 'Moto', 'Cosechadora', 'Zorra', 'Otro'])], // Corresponde al ENUM 'tipo'
             'marca' => ['nullable', 'string', 'max:100'],
@@ -69,9 +84,16 @@ class ActivoController extends Controller
             'fecha_adquisicion' => ['nullable', 'date'],
         ]);
 
+        // 3. Si tiene imagen la guardamos
+        if ($request->hasFile('imagen')) {
+            // Guarda la imagen en storage/app/public/activos
+            $ruta = $request->file('imagen')->store('activos', 'public');
+            $data['imagen'] = $ruta;
+        }
+
         // 3. Creación del Activo
         // Nota: El método create() funciona si todos los campos están en $fillable del modelo.
-        Activo::create($request->all());
+       Activo::create($data);
 
         return redirect()->route('activos.index')
             ->with('success', 'El Activo se ha creado exitosamente.');
@@ -105,8 +127,14 @@ class ActivoController extends Controller
             'ultimaLectura', 
         ]);
 
+        $labores = $activo->laboresDetalle()
+        ->with(['registro.labor', 'operador']) // Eager loading para no saturar la DB
+        ->latest()
+        ->take(10)
+        ->get();
+
         // 3. Pasar el activo cargado a la vista.
-        return view('taller.activos.show', compact('activo'));
+        return view('taller.activos.show', compact('activo', 'labores'));
     }
 
     /**

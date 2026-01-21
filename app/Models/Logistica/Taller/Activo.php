@@ -25,6 +25,7 @@ class Activo extends Model
         'estado_operativo',
         'lectura_actual',
         'unidad_medida',
+        'imagen',
         'fecha_adquisicion',
     ];
 
@@ -74,6 +75,11 @@ class Activo extends Model
     {
         // Se asume que 'fecha_lectura' o 'created_at' determina la última
         return $this->hasOne(LecturaActivo::class, 'activo_id')->latest('fecha_lectura');
+    }
+
+    public function laboresDetalle()
+    {
+        return $this->hasMany(\App\Models\Produccion\Labores\LaborMaquinariaDetalle::class, 'activo_id');
     }
 
     // ------------------------------------------

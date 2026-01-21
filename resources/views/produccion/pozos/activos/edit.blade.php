@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Mostrar mensajes de sesión --}}
+@if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
 <div class="row">
     <div class="col-xl-8 col-lg-10 mx-auto">
         <div class="card shadow mb-4">

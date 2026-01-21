@@ -2,6 +2,13 @@
 @extends('layouts.app') 
 
 @section('content')
+    {{-- Mensajes de Notificación --}}
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <h1 class="h3 mb-4 text-gray-800">{{ __('Gestión de Usuarios y Asignación de Roles') }}</h1>
 
