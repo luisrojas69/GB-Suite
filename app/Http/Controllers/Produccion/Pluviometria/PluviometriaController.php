@@ -12,12 +12,14 @@ use Illuminate\Support\Facades\Auth;
 use App\Exports\Produccion\Pluviometria\PluviometriaMatrizExport;
 use App\Exports\Produccion\Pluviometria\PluviometriaPlanoExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Gate;
 
 class PluviometriaController extends Controller
 {
    
     public function matrizIndex(Request $request)
     {
+        Gate::authorize('gestionar_pluviometria');
         \Carbon\Carbon::setLocale('es');
         $mes = $request->get('mes', now()->month);
         $anio = $request->get('anio', now()->year);
@@ -72,6 +74,7 @@ class PluviometriaController extends Controller
 
     public function guardarMasivo(Request $request)
     {
+         Gate::authorize('gestionar_pluviometria');
         // 1. Validar que vengan datos
         $request->validate([
             'registros' => 'required|array',
@@ -133,6 +136,7 @@ class PluviometriaController extends Controller
 
     public function exportar(Request $request) 
     {
+        Gate::authorize('exportar_pluviometria');
         $request->validate([
             'desde' => 'required|date',
             'hasta' => 'required|date',
@@ -154,6 +158,7 @@ class PluviometriaController extends Controller
     //Dashboard
     public function dashboard()
     {
+        Gate::authorize('gestionar_pluviometria');
         \Carbon\Carbon::setLocale('es');
         $hoy = now();
         $mesActual = $hoy->month;

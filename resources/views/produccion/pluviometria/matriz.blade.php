@@ -157,9 +157,12 @@
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
-
-            <button class="btn btn-sm btn-success mr-2" onclick="exportarExcel()"><i class="fas fa-file-excel"></i></button>
-            <button class="btn btn-sm btn-primary" id="btnGuardarMatriz"><i class="fas fa-save"></i> Guardar</button>
+            @can('exportar_pluviometria')
+                <button class="btn btn-sm btn-success mr-2" onclick="exportarExcel()"><i class="fas fa-file-excel"></i></button>
+            @endcan
+            @can('registrar_pluviometria')
+                <button class="btn btn-sm btn-primary" id="btnGuardarMatriz"><i class="fas fa-save"></i> Guardar</button>
+            @endcan
         </div>
     </div>
 

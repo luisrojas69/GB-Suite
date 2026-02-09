@@ -17,33 +17,15 @@
 
     <hr class="sidebar-divider">
 
-    {{-- MÓDULO LOGÍSTICA (TALLER) --}}
-    {{-- @include('layouts.partials.sidebar.menu_medicina') --}}
-    {{-- @include('layouts.partials.sidebar.menu_rrhh') --}}
-
-     @include('layouts.partials.sidebar.menu_taller')
+    {{-- PLUVIOMETRIAS   --}}
+    @include('layouts.partials.sidebar.menu_pluviometria')
 
 
-    @include('layouts.partials.sidebar.menu_administrador')
-
-    
-
-     {{-- @include('layouts.partials.sidebar.menu_administrador') --}}
-
-     {{-- @include('layouts.partials.sidebar.menu_costos') --}}
-
-    {{-- MÓDULO PECUARIO --}}
-
-
-    {{-- MÓDULO AGROINDUSTRIAL (CAÑA) --}}
-
-    {{-- ÁREAS DE PRODUCCIÓN --}}
-
-    {{-- INVENTARIO Y MAESTRAS PECUARIAS --}}
-
+    {{-- POZOS   --}}
+    @include('layouts.partials.sidebar.menu_pozos')
 
     {{-- CONFIGURACIONES Y PERFIL --}}
-
+    @include('layouts.partials.sidebar.menu_administrador')
 
 
 
@@ -68,3 +50,5 @@
     </div>
 
 </ul>
+
+

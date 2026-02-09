@@ -4,9 +4,11 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard Pluviométrico - {{ now()->translatedFormat('F Y') }}</h1>
-        <a href="{{ route('produccion.pluviometria.index') }}" class="btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-table fa-sm text-white-50"></i> Volver a Matriz
-        </a>
+        @can('gestionar_pluviometria')
+            <a href="{{ route('produccion.pluviometria.index') }}" class="btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-table fa-sm text-white-50"></i> Volver a Matriz
+            </a>
+        @endcan
     </div>
 
     <div class="row">
