@@ -3,6 +3,15 @@
             {{ __('Seguridad y Salud Laboral') }}
         </div>
 
+        @can('acceder_modulo_medicina')
+            <li class="nav-item {{ Nav::isRoute('medicina.dashboard') }}">
+                <a class="nav-link" href="{{ route('medicina.dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>{{ __('Dashboard Medicina') }}</span>
+                </a>
+            </li>
+        @endcan
+
         @can('gestionar_pacientes')
             <li class="nav-item {{ Nav::isRoute('medicina.pacientes.*') }}">
                 <a class="nav-link" href="{{ route('medicina.pacientes.index') }}">
@@ -13,7 +22,7 @@
         @endcan
 
         @can('gestionar_consultas')
-            <li class="nav-item {{ Nav::isRoute('medicina.consultas.index') || Nav::isRoute('medicina.consultas.create') }}">
+            <li class="nav-item {{ Nav::isRoute('medicina.consultas.*') }}">
                 <a class="nav-link" href="{{ route('medicina.consultas.index') }}">
                     <i class="fas fa-notes-medical"></i>
                     <span>{{ __('Consultas y Atención') }}</span>
@@ -56,7 +65,7 @@
         @endcan
 
         @can('gestionar_dotaciones')
-            <li class="nav-item {{ Nav::isRoute('medicina.dotaciones.create') || Nav::isRoute('medicina.dotaciones.index') }}">
+            <li class="nav-item {{ Nav::isRoute('medicina.dotaciones.*') }}">
                 <a class="nav-link" href="{{ route('medicina.dotaciones.index') }}">
                     <i class="fas fa-tshirt"></i>
                     <span>{{ __('Dotación de Uniformes') }}</span>

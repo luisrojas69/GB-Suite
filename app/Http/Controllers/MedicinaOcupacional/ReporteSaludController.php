@@ -24,7 +24,7 @@ class ReporteSaludController extends Controller
             ->groupBy('diagnostico_cie10')
             ->orderByDesc('total')
             ->get();
-
+            
         $pdf = Pdf::loadView('MedicinaOcupacional.reportes.pdf_morbilidad', [
             'data' => $data,
             'mes' => $mes,

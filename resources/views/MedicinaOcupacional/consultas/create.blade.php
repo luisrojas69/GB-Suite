@@ -1,4 +1,7 @@
 @extends('layouts.app')
+@section('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endsection
 
 @section('content')
 
@@ -113,8 +116,9 @@
                                     <select name="diagnostico_cie10" id="diagnostico_cie10" class="form-control" required>
                                         <option value="">Escriba para buscar diagnóstico...</option>
                                     </select>
-                                    <small class="text-muted">Use códigos Z00-Z10 para chequeos de rutina o vacaciones.</small>
+                                   <small class="text-muted">Use Z00-Z10 para chequeos de rutina o vacaciones.</small>
                                 </div>
+
                             </div>
                         </div>
 
@@ -144,7 +148,7 @@
 
                         <div class="form-group mb-4">
                             <label class="font-weight-bold small text-uppercase">Examen Físico / Hallazgos</label>
-                            <textarea class="form-control" name="examen_fisico" rows="2"></textarea>
+                            <textarea class="form-control" name="examen_fisico" rows="2" required></textarea>
                         </div>
 
                         <div class="form-group mb-4">
@@ -280,7 +284,6 @@
 @endsection
 
 @section('scripts')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
@@ -370,7 +373,7 @@ $(document).ready(function() {
 
     $(document).ready(function() {
         $('#diagnostico_cie10').select2({
-            theme: 'bootstrap4',
+            theme: 'default',
             ajax: {
                 url: "{{ route('medicina.buscarCie10') }}",
                 dataType: 'json',

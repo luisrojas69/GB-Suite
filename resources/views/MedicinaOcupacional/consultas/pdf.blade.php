@@ -1,77 +1,544 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Constancia de Aptitud Médica</title>
     <style>
-        body { font-family: 'Helvetica', sans-serif; font-size: 12px; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #4e73df; }
-        .section-title { background: #f2f2f2; padding: 5px; font-weight: bold; margin-top: 10px; }
-        .row { margin-bottom: 10px; }
-        .label { font-weight: bold; color: #555; }
-        .cut-line { border-top: 1px dashed #000; margin: 30px 0; text-align: center; }
-        .footer { position: fixed; bottom: 0; text-align: center; font-size: 10px; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11px;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        /* HEADER */
+        .header-container {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1a592e;
+            padding-bottom: 12px;
+        }
+        
+        .header-left {
+            display: table-cell;
+            width: 50%;
+            vertical-align: middle;
+        }
+        
+        .header-right {
+            display: table-cell;
+            width: 50%;
+            text-align: right;
+            vertical-align: middle;
+        }
+        
+        .logo {
+            max-width: 140px;
+            height: auto;
+        }
+        
+        .company-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a592e;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+        }
+        
+        .company-details {
+            font-size: 9px;
+            color: #555;
+            line-height: 1.3;
+        }
+        
+        /* TITLE */
+        .document-title {
+            background: linear-gradient(135deg, #1a592e 0%, #2d7a4a 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(26, 89, 46, 0.15);
+        }
+        
+        /* INFO BOX */
+        .info-box {
+            background: #f8f9fc;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            margin-bottom: 8px;
+            display: table;
+            width: 100%;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            display: table-cell;
+            font-weight: 700;
+            color: #1a592e;
+            width: 120px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .info-value {
+            display: table-cell;
+            color: #1f2937;
+            font-size: 11px;
+        }
+        
+        /* SECTION HEADER */
+        .section-header {
+            background: linear-gradient(to right, #f8f9fc, #ffffff);
+            border-left: 4px solid #1a592e;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 11px;
+            margin: 15px 0 10px 0;
+            color: #1a592e;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        /* APTITUD BADGE */
+        .aptitud-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            margin: 5px 0;
+            letter-spacing: 0.3px;
+        }
+        
+        .aptitud-apto {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        
+        .aptitud-no-apto {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #dc2626;
+        }
+        
+        .aptitud-condicional {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #f59e0b;
+        }
+        
+        /* REPOSO BOX */
+        .reposo-box {
+            background: linear-gradient(to bottom, #fef3c7, #ffffff);
+            border: 2px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin: 10px 0;
+        }
+        
+        .reposo-title {
+            font-weight: 700;
+            color: #92400e;
+            font-size: 11px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .reposo-content {
+            color: #78350f;
+            font-size: 11px;
+        }
+        
+        /* SIGNATURE SECTION */
+        .signature-section {
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .signature-container {
+            display: table;
+            width: 100%;
+            border-spacing: 20px 0;
+        }
+        
+        .signature-box {
+            display: table-cell;
+            width: 48%;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 2px solid #1a592e;
+            margin-top: 50px;
+            padding-top: 8px;
+        }
+        
+        .signature-label {
+            font-weight: 700;
+            color: #1a592e;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        
+        .signature-name {
+            color: #6b7280;
+            font-size: 9px;
+        }
+        
+        /* CUT LINE */
+        .cut-line {
+            border-top: 2px dashed #d1d5db;
+            margin: 35px 0 25px 0;
+            padding-top: 10px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* RECIPE SECTION */
+        .recipe-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+        }
+        
+        .treatment-box {
+            border: 2px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 180px;
+            background: #ffffff;
+            line-height: 1.8;
+            font-size: 11px;
+        }
+        
+        /* FOOTER */
+        .footer-info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 8px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+        
+        /* METADATA SMALL */
+        .metadata-small {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .metadata-col {
+            display: table-cell;
+            width: 50%;
+        }
+
+        @page {
+          size: Letter;
+          margin: 0.45in 0.5in 0.45in 0.5in;  /* tighter but still safe for printers */
+        }
+
+
+        - {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          font-size: 10px;      /* was 11px */
+          line-height: 1.25;    /* was 1.6 */
+          color: #2c3e50;
+        }
+
+        /* ---- Two-halves Letter layout (wkhtmltopdf-friendly) ---- */
+        /* Letter height is 11in. Subtract top+bottom margins: 11 - 0.45 - 0.45 = 10.10in */
+        .sheet {
+          height: 10.10in;
+        }
+
+        .half {
+          height: 5.05in;       /* exactly half of 10.10in */
+          overflow: hidden;     /* forces 1 page; content beyond gets clipped */
+          position: relative;
+        }
+
+        /* Cut line between halves */
+        .cut-line {
+          border-top: 2px dashed #d1d5db;
+          margin: 0.10in 0 0.10in 0;
+          padding-top: 0.06in;
+          text-align: center;
+          color: #9ca3af;
+          font-size: 8px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* Avoid wkhtmltopdf splitting key blocks */
+        .header-container, .document-title, .info-box, .reposo-box, .signature-section,
+        .recipe-header, .treatment-box, .footer-info {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        /* ---- Gentle compaction (keeps same style) ---- */
+        .header-container { margin-bottom: 10px; padding-bottom: 8px; }
+        .logo { max-width: 120px; } /* was 140px */
+        .company-name { font-size: 15px; }
+        .company-details { font-size: 8.5px; }
+
+        .document-title { padding: 8px 12px; margin-bottom: 10px; font-size: 13px; }
+        .section-header { padding: 6px 10px; margin: 10px 0 6px 0; font-size: 10px; }
+        .info-box { padding: 10px 12px; margin-bottom: 10px; }
+
+        .info-row { margin-bottom: 6px; }
+        .info-label { width: 105px; font-size: 9px; }
+        .info-value { font-size: 10px; }
+
+        .signature-section { margin-top: 14px; margin-bottom: 10px; }
+        .signature-line { margin-top: 30px; padding-top: 6px; }
+
+        .treatment-box {
+          padding: 12px;
+          min-height: 1.6in;   /* was 180px; use inches for wkhtmltopdf consistency */
+          line-height: 1.5;
+          font-size: 10px;
+        }
+
+        .legal-note {
+          margin-top: 8px !important;
+          padding: 8px !important;
+          font-size: 8px !important;
+          line-height: 1.15 !important;
+        }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h2 style="margin:0">GRANJA BORAURE</h2>
-        <p style="margin:0">SERVICIO DE MEDICINA OCUPACIONAL</p>
+    <!-- PRIMERA PARTE: CONSTANCIA DE APTITUD -->
+    <div class="header-container">
+        <div class="header-left">
+            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('img/logo.png'))) }}" class="logo" alt="Logo Granja Boraure">
+        </div>
+        <div class="header-right">
+            <div class="company-name">GRANJA BORAURE, C.A.</div>
+            <div class="company-details">
+                RIF: J-08500570-6<br>
+                Servicio de Medicina Ocupacional<br>
+                Departamento de Seguridad y Salud en el Trabajo
+            </div>
+        </div>
     </div>
 
-    <h3 style="text-align: center;">CONSTANCIA DE APTITUD MÉDICA</h3>
-
-    <div class="row">
-        <span class="label">Paciente:</span> {{ $consulta->paciente->nombre_completo }} <br>
-        <span class="label">Cédula:</span> {{ $consulta->paciente->ci }} | <span class="label">Ficha:</span> {{ $consulta->paciente->cod_emp }}
+    <div class="document-title">
+        CONSTANCIA DE APTITUD MÉDICA OCUPACIONAL
     </div>
 
-    <div class="section-title">DETALLES DE LA ATENCIÓN</div>
-    <div class="row">
-        <span class="label">Fecha:</span> {{ $consulta->fecha_formateada }} <br>
-        <span class="label">Motivo:</span> {{ $consulta->motivo_consulta }} <br>
-        <span class="label">Diagnóstico:</span> {{ $consulta->diagnostico_cie10 }}
+    <!-- DATOS DEL TRABAJADOR -->
+    <div class="section-header">Datos del Trabajador</div>
+    <div class="info-box">
+        <div class="info-row">
+            <div class="info-label">Nombre Completo:</div>
+            <div class="info-value">{{ $consulta->paciente->nombre_completo }}</div>
+        </div>
+        <div class="metadata-small">
+            <div class="metadata-col">
+                <div class="info-row">
+                    <div class="info-label">Cédula:</div>
+                    <div class="info-value">{{ $consulta->paciente->ci }}</div>
+                </div>
+            </div>
+            <div class="metadata-col">
+                <div class="info-row">
+                    <div class="info-label">Código Empleado:</div>
+                    <div class="info-value">{{ $consulta->paciente->cod_emp }}</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="section-title">RESULTADO DE EVALUACIÓN</div>
-    <div class="row">
-        <span class="label">Aptitud:</span> {{ $consulta->aptitud }} <br>
-        @if($consulta->genera_reposo)
-            <span class="label">REPOSO MÉDICO:</span> CONCEDIDO POR {{ $consulta->dias_reposo }} DÍA(S).
+    <!-- DETALLES DE LA ATENCIÓN -->
+    <div class="section-header">Detalles de la Atención Médica</div>
+    <div class="info-box">
+        <div class="info-row">
+            <div class="info-label">Fecha de Evaluación:</div>
+            <div class="info-value">{{ $consulta->fecha_formateada }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Motivo de Consulta:</div>
+            <div class="info-value">{{ $consulta->motivo_consulta }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Diagnóstico CIE-10:</div>
+            <div class="info-value">{{ $consulta->diagnostico_cie10 }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Médico Evaluador:</div>
+            <div class="info-value">Dr(a). {{ $consulta->medico->name }} {{ $consulta->medico->last_name }}</div>
+        </div>
+    </div>
+
+    <!-- RESULTADO DE EVALUACIÓN -->
+    <div class="section-header">Resultado de Evaluación Médica</div>
+    
+        @php
+            $aptitudLower = strtolower($consulta->aptitud);
+            if (str_contains($aptitudLower, 'apto') && !str_contains($aptitudLower, 'no')) {
+                $badgeClass = 'aptitud-apto';
+            } elseif (str_contains($aptitudLower, 'no apto')) {
+                $badgeClass = 'aptitud-no-apto';
+            } else {
+                $badgeClass = 'aptitud-condicional';
+            }
+        @endphp
+        <div class="aptitud-badge {{ $badgeClass }}">
+            {{ strtoupper($consulta->aptitud) }}
+        </div>
+    </div>
+
+    @if($consulta->genera_reposo)
+    <div class="reposo-box">
+        <div class="reposo-title">Reposo Médico Concedido</div>
+        <div class="reposo-content">
+            Se otorga reposo médico por un período de <strong>{{ $consulta->dias_reposo }} día(s)</strong> a partir de la fecha de evaluación.
+            El trabajador deberá permanecer en reposo y evitar actividades laborales durante este período.
+        </div>
+    </div>
+    @endif
+
+    <!-- FIRMAS -->
+    <div class="signature-section">
+        <div class="signature-container">
+            <div class="signature-box">
+                <div class="signature-line">
+                    <div class="signature-label">Firma del Médico Ocupacional</div>
+                    <div class="signature-name">Dr(a). {{ $consulta->medico->name }} {{ $consulta->medico->last_name }}</div>
+                </div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line">
+                    <div class="signature-label">Firma del Trabajador</div>
+                    <div class="signature-name">C.I.: {{ $consulta->paciente->ci }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 9px; color: #6b7280; text-align: justify;">
+        <strong>Nota Legal:</strong> Esta constancia certifica el estado de aptitud médica del trabajador evaluado en la fecha indicada. 
+        Es válida únicamente para fines ocupacionales y no constituye un certificado médico general. 
+        Cualquier cambio en las condiciones de salud del trabajador debe ser reportado inmediatamente al Servicio de Medicina Ocupacional.
+    </div>
+
+    <!-- LÍNEA DE CORTE -->
+    <div class="cut-line">
+        ✂ Corte aquí - Récipe Médico para el Trabajador ✂
+    </div>
+
+    <!-- SEGUNDA PARTE: RÉCIPE MÉDICO -->
+    <div class="header-container">
+        <div class="header-left">
+            <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('img/logo.png'))) }}" class="logo" alt="Logo Granja Boraure">
+        </div>
+        <div class="header-right">
+            <div class="company-name">GRANJA BORAURE, C.A.</div>
+            <div class="company-details">
+                RIF: J-08500570-6<br>
+                Servicio de Medicina Ocupacional
+            </div>
+        </div>
+    </div>
+
+    <div class="recipe-header">
+        RÉCIPE MÉDICO E INDICACIONES
+    </div>
+
+    <!-- DATOS DEL PACIENTE (RÉCIPE) -->
+    <div class="info-box">
+        <div class="metadata-small">
+            <div class="metadata-col">
+                <div class="info-row">
+                    <div class="info-label">Paciente:</div>
+                    <div class="info-value">{{ $consulta->paciente->nombre_completo }}</div>
+                </div>
+            </div>
+            <div class="metadata-col">
+                <div class="info-row">
+                    <div class="info-label">Fecha:</div>
+                    <div class="info-value">{{ $consulta->fecha_formateada }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">C.I.:</div>
+            <div class="info-value">{{ $consulta->paciente->ci }}</div>
+        </div>
+    </div>
+
+    <!-- TRATAMIENTO -->
+    <div class="section-header">Tratamiento y Recomendaciones Médicas</div>
+    <div class="treatment-box">
+        @if($consulta->plan_tratamiento)
+            {!! nl2br(e($consulta->plan_tratamiento)) !!}
+        @else
+            <div style="color: #9ca3af; text-align: center; padding: 40px 0;">
+                No se especificaron indicaciones médicas para este caso.
+            </div>
         @endif
     </div>
 
-    <div style="margin-top: 50px;">
-        <div style="float: left; width: 45%; border-top: 1px solid #000; text-align: center;">
-            Firma del Médico <br> <small>Dr. {{ $consulta->medico->name." ".$consulta->medico->last_name  }}</small>
+    <div style="margin-top: 20px;">
+        <div class="signature-box" style="display: block; margin: 0 auto; max-width: 300px;">
+            <div class="signature-line">
+                <div class="signature-label">Firma y Sello del Médico</div>
+                <div class="signature-name">Dr(a). {{ $consulta->medico->name }} {{ $consulta->medico->last_name }}</div>
+            </div>
         </div>
-        <div style="float: right; width: 45%; border-top: 1px solid #000; text-align: center;">
-            Firma del Trabajador <br> <small>{{ $consulta->paciente->ci }}</small>
-        </div>
     </div>
 
-    <div style="clear: both;"></div>
-
-    <div class="cut-line"> - - - - - - - - - - - - - - - Corte aquí (Récipe Médico) - - - - - - - - - - - - - - - </div>
-
-    <div class="header">
-        <h3 style="margin:0">RÉCIPE E INDICACIONES</h3>
+    <!-- FOOTER -->
+    <div class="footer-info">
+        Granja Boraure, C.A. - Sistema de Gestión Médica GB Suite<br>
+        Generado el {{ date('d/m/Y H:i') }} - Este documento es válido únicamente con firma y sello del médico tratante<br>
+        © {{ date('Y') }} Todos los derechos reservados
     </div>
-
-    <div class="row">
-        <span class="label">Paciente:</span> {{ $consulta->paciente->nombre_completo }} <br>
-        <span class="label">Fecha:</span> {{ $consulta->fecha_formateada }}
-    </div>
-
-    <div class="section-title">TRATAMIENTO Y RECOMENDACIONES</div>
-    <div style="padding: 15px; border: 1px solid #ddd; min-height: 150px;">
-        {!! nl2br(e($consulta->plan_tratamiento)) !!}
-    </div>
-
-    <div class="footer">
-        <br><br>
-        Granja Boraure - Sistema de Gestión Médica GB Suite - {{ date('Y') }}
-    </div>
-
 </body>
 </html>

@@ -24,6 +24,9 @@
     {{-- POZOS   --}}
     @include('layouts.partials.sidebar.menu_pozos')
 
+    {{-- MEDICINA   --}}
+    @include('layouts.partials.sidebar.menu_medicina')
+
     {{-- CONFIGURACIONES Y PERFIL --}}
     @include('layouts.partials.sidebar.menu_administrador')
 

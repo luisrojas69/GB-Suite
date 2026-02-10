@@ -15,10 +15,10 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
 
      // --- RUTAS DE PACIENTES ---
      Route::get('/pacientes', [PacienteController::class, 'index'])->name('pacientes.index');
-     Route::get('/pacientes/listado', [PacienteController::class, 'getListado'])->name('pacientes.listado');
+     Route::get('/pacientes/listado', [PacienteController::class, 'getListado'])->name('pacientes.listado'); //JSON Empleados
       Route::get('paciente/{id}', [PacienteController::class, 'show'])->name('pacientes.show');
      Route::post('/pacientes/sync', [PacienteController::class, 'syncProfit'])->name('pacientes.sync');
-     Route::get('/pacientes/{id}/edit', [PacienteController::class, 'edit'])->name('pacientes.edit');
+     Route::get('/pacientes/{id}/edit', [PacienteController::class, 'edit'])->name('pacientes.edit'); //JSON Paciente for AJAX
      Route::put('/pacientes/{id}', [PacienteController::class, 'update'])->name('pacientes.update');
      Route::post('/pacientes/subir-archivo', [ConsultaController::class, 'subirArchivo'])->name('pacientes.subirArchivo');
 
@@ -31,7 +31,7 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
      Route::get('/consultas/{id}', [ConsultaController::class, 'show'])->name('consultas.show');
      Route::get('/consultas/{id}/edit', [ConsultaController::class, 'edit'])->name('consultas.edit');
      Route::put('/consultas/{id}', [ConsultaController::class, 'update'])->name('consultas.update');
-     Route::get('/buscarCie10', [ConsultaController::class, 'buscarCie10'])->name('buscarCie10');
+     Route::get('/buscarCie10', [ConsultaController::class, 'buscarCie10'])->name('buscarCie10'); //JSON de Cie10 for Query Ajax
 
      // Esta es la ruta que procesa el guardado del formulario
      Route::post('/consultas/store', [ConsultaController::class, 'store'])->name('consultas.store');
