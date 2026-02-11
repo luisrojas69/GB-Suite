@@ -3,11 +3,11 @@
             {{ __('Seguridad y Salud Laboral') }}
         </div>
 
-        @can('acceder_modulo_medicina')
+        @can('dashboard_medicina')
             <li class="nav-item {{ Nav::isRoute('medicina.dashboard') }}">
                 <a class="nav-link" href="{{ route('medicina.dashboard') }}">
                     <i class="fas fa-tachometer-alt"></i>
-                    <span>{{ __('Dashboard Medicina') }}</span>
+                    <span>{{ __('Dashboard Medicina/SSL') }}</span>
                 </a>
             </li>
         @endcan

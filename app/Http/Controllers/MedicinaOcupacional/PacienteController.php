@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MedicinaOcupacional\Paciente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Gate;
 
 class PacienteController extends Controller
 {
@@ -13,12 +14,13 @@ class PacienteController extends Controller
     {
         // Aplicar Gate de Spatie (Consistencia Corporativa)
         // $this->authorize('view-pacientes'); 
-        
+        Gate::authorize('gestionar_pacientes');
         return view('MedicinaOcupacional.pacientes.index');
     }
 
     public function getListado(Request $request)
     {
+        Gate::authorize('gestionar_activos');
         // Retornar datos para DataTables vía AJAX
         $pacientes = Paciente::all();
         return response()->json(['data' => $pacientes]);
@@ -26,6 +28,7 @@ class PacienteController extends Controller
 
     public function show($id)
     {
+        Gate::authorize('gestionar_pacientes');
         $paciente = Paciente::with([
             'consultas' => fn($q) => $q->latest()->limit(5),
             'accidentes' => fn($q) => $q->latest()->limit(5),
@@ -46,6 +49,7 @@ class PacienteController extends Controller
 
     public function syncProfit()
     {
+        Gate::authorize('gestionar_pacientes');
         try {
             Artisan::call('medicina:sync-pacientes');
             return response()->json([
@@ -64,12 +68,14 @@ class PacienteController extends Controller
 
     public function edit($id)
     {
+        Gate::authorize('gestionar_pacientes');
         $paciente = Paciente::findOrFail($id);
         return response()->json($paciente);
     }
 
     public function update(Request $request, $id)
     {
+        Gate::authorize('gestionar_pacientes');
         $paciente = Paciente::findOrFail($id);
         
         // Convertir el checkbox a booleano

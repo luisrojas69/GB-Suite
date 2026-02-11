@@ -19,8 +19,13 @@ class CertificadoController extends Controller
         $ultimaConsulta = Consulta::where('paciente_id', $paciente_id)->latest()->first();
 
         $pdf = PDF::loadView('MedicinaOcupacional.certificados.aptitud', compact('paciente', 'ultimaConsulta'))
-                  ->setPaper('letter')
-                  ->setOption('margin-top', 10);
+                    ->setPaper('letter')
+                    ->setOption('margin-top', '1.5cm')
+                    ->setOption('margin-right', '1.5cm')
+                    ->setOption('margin-bottom', '2cm')
+                    ->setOption('margin-left', '1.5cm')
+                    ->setOption('print-media-type', true)
+                    ->setOption('zoom', 0.90);
         
         return $pdf->inline('Certificado_Aptitud_'.$paciente->cedula.'.pdf');
     }
@@ -31,7 +36,13 @@ class CertificadoController extends Controller
         $consulta = Consulta::with('paciente')->findOrFail($consulta_id);
         
         $pdf = PDF::loadView('MedicinaOcupacional.certificados.constancia', compact('consulta'))
-                  ->setPaper('a5', 'landscape'); // Formato pequeño tipo receta
+                    ->setPaper('letter')
+                    ->setOption('margin-top', '1.5cm')
+                    ->setOption('margin-right', '1.5cm')
+                    ->setOption('margin-bottom', '2cm')
+                    ->setOption('margin-left', '1.5cm')
+                    ->setOption('print-media-type', true)
+                    ->setOption('zoom', 0.90);
         
         return $pdf->inline('Constancia_Asistencia.pdf');
     }
@@ -42,7 +53,13 @@ class CertificadoController extends Controller
         $paciente = Paciente::with(['consultas', 'accidentes'])->findOrFail($paciente_id);
         
         $pdf = PDF::loadView('MedicinaOcupacional.certificados.historial', compact('paciente'))
-                  ->setPaper('letter');
+                    ->setPaper('letter')
+                    ->setOption('margin-top', '1.5cm')
+                    ->setOption('margin-right', '1.5cm')
+                    ->setOption('margin-bottom', '2cm')
+                    ->setOption('margin-left', '1.5cm')
+                    ->setOption('print-media-type', true)
+                    ->setOption('zoom', 0.90);
         
         return $pdf->inline('Historial_Clinico_'.$paciente->cedula.'.pdf');
     }
@@ -52,7 +69,14 @@ class CertificadoController extends Controller
     {
         $paciente = Paciente::findOrFail($paciente_id);
         
-        $pdf = PDF::loadView('MedicinaOcupacional.certificados.entrega_epp', compact('paciente'));
+        $pdf = PDF::loadView('MedicinaOcupacional.certificados.entrega_epp', compact('paciente'))
+                    ->setPaper('letter')
+                    ->setOption('margin-top', '1.5cm')
+                    ->setOption('margin-right', '1.5cm')
+                    ->setOption('margin-bottom', '2cm')
+                    ->setOption('margin-left', '1.5cm')
+                    ->setOption('print-media-type', true)
+                    ->setOption('zoom', 0.80);
         
         return $pdf->inline('Entrega_EPP.pdf');
     }
