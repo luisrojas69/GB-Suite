@@ -59,6 +59,7 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
      Route::post('/accidentes/store', [AccidenteController::class, 'store'])->name('accidentes.store');
 
      Route::get('/accidentes/show/{id}', [AccidenteController::class, 'show'])->name('accidentes.show');
+     Route::get('/accidentes/{id}/edit', [AccidenteController::class, 'edit'])->name('accidentes.edit');
      Route::get('/accidentes/reporte-inpsasel/{id}', [AccidenteController::class, 'reporteInpsasel'])->name('accidentes.inpsasel');
 
      //REPORTES

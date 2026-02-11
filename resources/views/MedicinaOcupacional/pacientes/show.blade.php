@@ -22,7 +22,7 @@
                             </div>
                         </div>
                         <div class="col-auto">
-                            @if($paciente->status == 'A')
+                            @if($paciente->status = 'A')
                                 <span class="badge badge-success badge-lg px-3 py-2">
                                     <i class="fas fa-check-circle"></i> ACTIVO
                                 </span>

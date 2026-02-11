@@ -86,6 +86,12 @@ class AccidenteController extends Controller
         return view('MedicinaOcupacional.accidentes.show', compact('accidente'));
     }
 
+    public function edit($id)
+    {
+        $accidente = Accidente::with(['paciente', 'user', 'consulta'])->findOrFail($id);
+        return view('MedicinaOcupacional.accidentes.show', compact('accidente'));
+    }
+
     public function reporteInpsasel($id)
     {
         $accidente = Accidente::with(['paciente', 'user'])->findOrFail($id);
