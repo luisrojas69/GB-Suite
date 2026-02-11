@@ -7,10 +7,45 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-primary">
                     <h6 class="m-0 font-weight-bold text-white">Detalle de Consulta Médica #{{ $consulta->id }}</h6>
-                    <a href="{{ route('medicina.consultas.imprimir', $consulta->id) }}" class="btn btn-sm btn-light shadow-sm">
-                        <i class="fas fa-print"></i> Imprimir
-                    </a>
+                    <
+                    <div class="dropdown no-arrow">
+                        <a class="btn btn-light btn-sm dropdown-toggle shadow-sm" href="#" role="button" data-toggle="dropdown">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <i class="fa-solid fa-angle-down"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                            <div class="dropdown-header ">Acciones Posibles</div>
 
+                            <a class="dropdown-item" href="{{ route('medicina.consultas.imprimir', $consulta->id) }}" target="_blank">
+                                <i class="fas fa-print fa-sm fa-fw mr-2 text-body"></i> Imprimir Recipe
+                            </a>
+
+                            
+
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-header ">Certificados M&eacute;dicos:</div>
+
+                            <a class="dropdown-item" href="{{ route('medicina.pdf.aptitud', $consulta->paciente->id) }}" target="_blank">
+                                <i class="fas fa-person-circle-check fa-sm fa-fw mr-2 text-warning"></i> Certificado de Aptitud
+                            </a>
+
+                            <a class="dropdown-item" href="{{ route('medicina.pdf.constancia', $consulta->id) }}" target="_blank">
+                                <i class="fas fa-person-walking-arrow-right fa-sm fa-fw mr-2 text-info"></i> Constancia de Asistencia
+                            </a>
+
+                             <a class="dropdown-item" href="{{ route('medicina.pdf.historial', $consulta->id) }}" target="_blank">
+                                <i class="fas fa-virus fa-sm fa-fw mr-2 text-danger"></i> Historial Epidemiol&oacute;gico
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ route('medicina.pacientes.show', $consulta->paciente->id) }}">
+                                <i class="fas fa-person-circle-check fa-sm fa-fw mr-2 text-body"></i> Detalles del Paciente
+                            </a>
+
+                            <a class="dropdown-item" href="{{ route('medicina.pacientes.index') }}"><i class="fas fa-users mr-2"></i> Ir a Pacientes</a>
+                           
+                        </div>
+                    </div>
                    
 
                 </div>

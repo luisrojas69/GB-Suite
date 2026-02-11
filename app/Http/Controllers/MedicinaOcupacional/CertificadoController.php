@@ -16,7 +16,7 @@ class CertificadoController extends Controller
     {
         $paciente = Paciente::findOrFail($paciente_id);
         // Traemos la última consulta de tipo 'Examen Físico' o 'Pre-empleo'
-        $ultimaConsulta = Consulta::where('paciente_id', $paciente_id)->latest()->first();
+        $ultimaConsulta = Consulta::where('paciente_id', $paciente_id)->latest()->firstOrFail();
 
         $pdf = PDF::loadView('MedicinaOcupacional.certificados.aptitud', compact('paciente', 'ultimaConsulta'))
                     ->setPaper('letter')
