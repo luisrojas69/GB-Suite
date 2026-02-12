@@ -70,4 +70,6 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
       Route::get('/constancia/{consulta_id}', [CertificadoController::class, 'constancia'])->name('pdf.constancia');
       Route::get('/historial/{paciente_id}', [CertificadoController::class, 'historial'])->name('pdf.historial');
       Route::get('/epp/{paciente_id}', [CertificadoController::class, 'entregaEpp'])->name('pdf.epp');
+      Route::get('pacientes/exportar/excel', [PacienteController::class, 'exportarExcel'])->name('pacientes.export.excel');
+      Route::get('pacientes/exportar/tallas', [PacienteController::class, 'exportarTallas'])->name('pacientes.export.tallas');
 });
