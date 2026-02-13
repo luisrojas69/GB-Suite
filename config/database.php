@@ -134,7 +134,7 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST_PROFIT', '192.168.1.13'),
             'port' => env('DB_PORT'),
-            'database' => 'GB_N',
+            'database' => 'GB_N_E',
             'username' => env('DB_USERNAME'),
             'password' => env('DB_PASSWORD'),
             'charset' => env('DB_CHARSET', 'utf8'),

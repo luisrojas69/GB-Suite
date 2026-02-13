@@ -20,6 +20,9 @@ class Accidente extends Model
         'lugar_exacto',
         'tipo_evento', // ¡Importante!
         'causas_inmediatas',
+        'horas_trabajadas',
+        'parte_lesionada',
+        'gravedad',
         'causas_raiz', // ¡Importante!
         'descripcion_relato',
         'lesion_detallada',

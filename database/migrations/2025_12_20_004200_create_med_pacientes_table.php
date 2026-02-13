@@ -13,10 +13,24 @@ class CreateMedPacientesTable extends Migration
             // Identificación (Desde Profit Nomina)
             $table->string('cod_emp', 20)->unique(); // Ficha
             $table->string('ci', 20);
+            $table->string('rif')->nullable();
             $table->string('nombre_completo');
+            $table->char('profesion', 2)->nullable();
+            $table->char('nivel_acad', 2)->nullable();
             $table->char('sexo', 1);
+            $table->string('telefono')->nullable();
+            $table->string('correo_e')->nullable();
             $table->date('fecha_nac')->nullable();
-            $table->string('edo_civ', 10)->nullable();
+            $table->text('lugar_nac')->nullable();
+            $table->text('direccion')->nullable();
+            $table->string('estado', 20)->nullable();
+            $table->string('municipio', 30)->nullable();
+            $table->string('parroquia', 30)->nullable();
+            $table->char('edo_civ', 1);
+            $table->integer('cantidad_hijos')->nullable();
+            $table->float('sueldo_mensual')->nullable();
+            $table->text('observaciones')->nullable();
+
             
             // Datos Laborales
             $table->date('fecha_ing')->nullable();
@@ -30,8 +44,10 @@ class CreateMedPacientesTable extends Migration
             // Salud y Discapacidad (Datos Profit Nativos)
             $table->boolean('discapacitado')->default(false);
             $table->string('tipo_discapac')->nullable();
-            $table->string('co_cert', 50)->nullable(); // Carnet discapacidad
-            $table->date('fecha_venc_cert')->nullable();
+            $table->string('avisar_a')->nullable();
+            $table->string('telf_contact')->nullable();
+            $table->text('dir_contact')->nullable();
+
 
             // Datos Extendidos GB Suite (Editables por el médico)
             $table->string('tipo_sangre', 5)->nullable();

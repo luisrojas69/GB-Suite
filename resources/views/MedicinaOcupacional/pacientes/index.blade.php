@@ -344,12 +344,16 @@
                                         <label class="font-weight-bold">
                                             <i class="fas fa-tint text-danger"></i> Tipo de Sangre
                                         </label>
-                                        <select class="form-control form-control-lg" name="tipo_sangre" id="tipo_sangre">
+                                        <select class="form-control form-control-lg" old="tipo_sangre" name="tipo_sangre" id="tipo_sangre">
                                             <option value="">Seleccione...</option>
-                                            <option value="O+">O+</option><option value="O-">O-</option>
-                                            <option value="A+">A+</option><option value="A-">A-</option>
-                                            <option value="B+">B+</option><option value="B-">B-</option>
-                                            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
                                         </select>
                                     </div>
                                 </div>
@@ -523,8 +527,8 @@
 }
 
 /* Mejoras para la tabla */
-#tblPacientes tbody tr {
-    transition: all 0.2s ease;
+#tblPacientes {
+    border-collapse: separate !important; /* Ayuda con el manejo de capas */
 }
 
 #tblPacientes tbody tr:hover {
@@ -546,7 +550,19 @@
 
 /* Z-index para dropdowns */
 .table .dropdown-menu {
-    z-index: 1050 !important;
+    z-index: 9999 !important;
+    margin: 0; 
+    /* Si usas Bootstrap 4, esto ayuda a evitar saltos */
+    position: absolute;
+}
+
+/* Ajuste para que el grupo de botones no bloquee el flujo */
+.btn-group {
+    position: static !important;
+}
+
+#tblPacientes td:last-child {
+    position: static !important;
 }
 
 .table .dropdown {
@@ -793,7 +809,7 @@ $(document).ready(function() {
                             <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
                                 <i class="fas fa-user-md"></i>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-right shadow-lg animated--fade-in" style="z-index: 1050;">
+                            <div class="dropdown-menu dropdown-menu-right shadow-lg animated--fade-in">
                                 <div class="dropdown-header bg-gradient-primary text-white">
                                     <i class="fas fa-stethoscope"></i> Accesos Médicos
                                 </div>

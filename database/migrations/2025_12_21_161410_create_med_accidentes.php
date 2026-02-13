@@ -20,6 +20,9 @@ return new class extends Migration
             $table->dateTime('fecha_hora_accidente');
             $table->string('lugar_exacto'); // Ej: Galpón 4, Taller Mecánico, Lote de Caña X
             $table->string('tipo_evento'); // Accidente, Incidente (Casi-accidente), Enfermedad Ocupacional
+            $table->string('parte_lesionada'); //Parte del cuerpo Lesionada
+            $table->string('horas_trabajadas'); //Cantidad de Horas Trabajas al momento del Accidente
+            $table->string('gravedad'); //Gravedad del Accidente
             
             // Descripción y Análisis
             $table->text('descripcion_relato'); // Lo que ocurrió
