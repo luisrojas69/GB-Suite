@@ -31,6 +31,10 @@ class Consulta extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Relación con la Orden de Examenes
+    // Una consulta TIENE UNA orden.
+    
+    public function orden() { return $this->hasOne(OrdenExamen::class, 'consulta_id'); }
 
     // Formatear fecha para el PDF
     public function getFechaFormateadaAttribute()

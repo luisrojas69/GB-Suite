@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             
             // Relaciones
-            $table->foreignId('consulta_id')->constrained('med_consultas')->onDelete('cascade');
+            $table->foreignId('consulta_id')->unique()->constrained('med_consultas')->onDelete('cascade');
             $table->foreignId('paciente_id')->constrained('med_pacientes');
             $table->foreignId('user_id')->constrained('users'); // Médico que ordena
             

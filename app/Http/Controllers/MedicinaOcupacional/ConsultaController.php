@@ -90,9 +90,13 @@ class ConsultaController extends Controller
 
     public function show($id)
     {
-        $consulta = Consulta::with('paciente', 'medico')->findOrFail($id);
-        //dd($consulta);
-        return view('MedicinaOcupacional.consultas.show', compact('consulta'));
+        // Agregamos 'orden' para poder mostrar los resultados si existen
+        $consulta = Consulta::with(['paciente', 'medico', 'orden'])->findOrFail($id);
+        $archivos_orden = DB::table('med_paciente_archivos')
+                ->where('orden_id', $consulta->orden->id)
+                ->get();
+
+        return view('MedicinaOcupacional.consultas.show', compact('consulta', 'archivos_orden'));
     }
 
     public function edit($id)

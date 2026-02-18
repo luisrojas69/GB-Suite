@@ -118,6 +118,7 @@
                         <th width="5%">#</th>
                         <th width="15%">Fecha</th>
                         <th width="20%">Paciente</th>
+                        <th width="20%">Consulta Asoc.</th>
                         <th width="35%">Exámenes Solicitados</th>
                         <th width="10%">Estado</th>
                         <th class="table-actions">Acciones</th>
@@ -136,6 +137,14 @@
                                 {{ Str::limit($orden->paciente->nombre_completo, 25) }}
                             </div>
                             <small class="text-muted">CI: {{ number_format($orden->paciente->ci, 0, ',', '.') }}</small>
+                        </td>
+                        <td class="align-middle">
+                            <div class="font-weight-bold text-primary">
+                                <a href="{{ route('medicina.consultas.show', $orden->consulta_id ) }}">
+                                    Consulta Asoc #:{{ $orden->consulta_id }}
+                                </a> 
+                            </div>
+                            <small class="text-muted">Fecha: {{ $orden->consulta->fecha_consulta->format('d/m/Y') }}</small>
                         </td>
                         <td class="align-middle">
                             @if(is_array($orden->examenes) || is_object($orden->examenes))
@@ -173,6 +182,10 @@
 
                                  <a href="{{ route('medicina.ordenes.edit', $orden->id) }}" class="btn btn-info btn-sm" title="Cargar Resultados">
                                     <i class="fas fa-file-medical-alt"></i>
+                                </a>
+
+                                <a href="{{ route('medicina.ordenes.pdf', $orden->id) }}" class="btn btn-danger btn-sm" title="Imprimir Orden" target="_blank">
+                                    <i class="fas fa-file-pdf"></i>
                                 </a>
                                 
                                 {{-- Botón Completar (Solo si está pendiente) --}}

@@ -7,7 +7,7 @@ use App\Models\MedicinaOcupacional\Consulta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use PDF; 
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 
 class OrdenExamenController extends Controller
@@ -57,6 +57,17 @@ class OrdenExamenController extends Controller
                 'observaciones'=> $request->observaciones,
                 'status_orden' => 'Pendiente'
             ]);
+
+            // --- EL VÍNCULO CON LA CONSULTA ---
+            // Buscamos la consulta que generó esta orden y la cerramos también
+            $consulta = $orden->consulta;
+            if ($consulta) {
+                $consulta->update([
+                    'status_consulta' => 'Pendiente por exámenes' 
+                    // Podrías incluso concatenar los hallazgos al plan de tratamiento si quisieras
+                ]);
+            }
+
             
             // Redirigir al PDF o al Index
             return redirect()->route('medicina.ordenes.index')
@@ -73,41 +84,64 @@ class OrdenExamenController extends Controller
         }
 
 
-        public function edit($id)
+      public function edit($id)
         {
-            $orden = OrdenExamen::findOrFail($id);
-            return view('MedicinaOcupacional.ordenes.edit', compact('orden'));
+            // Traemos la orden con TODA la artillería de datos
+            $orden = OrdenExamen::with(['paciente', 'consulta', 'medico'])->findOrFail($id);
+            
+            // Traemos los archivos que ya se subieron específicamente para ESTA orden
+            $archivos_orden = DB::table('med_paciente_archivos')
+                ->where('orden_id', $id)
+                ->get();
+
+            return view('MedicinaOcupacional.ordenes.edit', compact('orden', 'archivos_orden'));
         }
 
-        //Editae Ordenes (Cargar Resultados)
         public function update(Request $request, $id)
         {
+            
 
             $request->validate([
-                'interpretacion'  => 'required',
-                'hallazgos'       => 'nullable|string',
-                'archivo_adjunto' => 'nullable|file|mimes:pdf,jpg,png|max:5120',
+                'interpretacion' => 'nullable|in:Normal,Alterado',
+                'hallazgos' => 'nullable|string',
+                'archivos.*' => 'nullable|mimes:pdf,jpg,jpeg,png|max:10240', // Múltiples archivos
             ]);
 
             try {
                 DB::beginTransaction();
-
                 $orden = OrdenExamen::findOrFail($id);
-                 
-                if ($request->hasFile('archivo_adjunto')) {
-                    $file = $request->file('archivo_adjunto');
-                    $nombreFinal = time() . '_' . $file->getClientOriginalName();
-                    // Guardamos en una carpeta privada: storage/app/public/examenes_medicos
-                    $ruta = $file->storeAs('examenes_medicos/' . $request->consulta_id, $nombreFinal, 'public');
+                // 1. Actualizamos datos básicos (Persistencia)
+                $orden->update([
+                    'interpretacion' => $request->interpretacion,
+                    'hallazgos' => $request->hallazgos, // El nombre que tengas en la DB
+                    'status_orden' => 'Completada', // Un estado intermedio si quieres
+                ]);
+
+                // 2. Manejo de múltiples archivos
+                if ($request->hasFile('archivos')) {
+                    foreach ($request->file('archivos') as $file) {
+                        $nombreFinal = time() . '_' . $file->getClientOriginalName();
+                        
+                        // Guardamos en storage/app/public/ordenes/{paciente_id}/{orden_id}
+                        $ruta = $file->storeAs(
+                            "examenes_medicos/{$orden->paciente_id}/orden_{$id}", 
+                            $nombreFinal, 
+                            'public'
+                        );
+
+                        // Registramos en la tabla de archivos general
+                        DB::table('med_paciente_archivos')->insert([
+                            'paciente_id' => $orden->paciente_id,
+                            'orden_id' => $orden->id, // Vinculamos a la orden
+                            'nombre_archivo' => $file->getClientOriginalName(),
+                            'ruta_archivo' => $ruta,
+                            'tipo_archivo' => $file->getClientOriginalExtension(),
+                            'user_id' => Auth::id(),
+                            'created_at' => now(),
+                        ]);
+                    }
                 }
 
-                // Actualizar la Orden
-                $orden->update([
-                    'interpretacion'  => $request->interpretacion,
-                    'hallazgos'       => $request->hallazgos,
-                    'archivo_adjunto' => $file->getClientOriginalExtension(),
-                    'status_orden'    => 'Completada',
-                ]);
                 // --- EL VÍNCULO CON LA CONSULTA ---
                 // Buscamos la consulta que generó esta orden y la cerramos también
                 $consulta = $orden->consulta;
@@ -118,13 +152,30 @@ class OrdenExamenController extends Controller
                     ]);
                 }
 
+
                 DB::commit();
-                return redirect()->route('medicina.ordenes.index')
-                                 ->with('success', 'Orden completada y consulta cerrada exitosamente.');
+                return redirect()->route('medicina.ordenes.edit', $id)
+                             ->with('success', 'Información y archivos actualizados correctamente.');
 
             } catch (\Exception $e) {
                 DB::rollback();
                 return back()->with('error', 'Error al procesar: ' . $e->getMessage());
             }
+
+        }
+
+        //Imprimir Orden
+        public function pdf($id)
+        {
+            $orden = OrdenExamen::with(['paciente', 'medico'])->findOrFail($id);
+
+            // Configuramos Snappy para un PDF limpio
+            $pdf = PDF::loadView('MedicinaOcupacional.ordenes.pdf', compact('orden'))
+                      ->setPaper('letter')
+                      ->setOption('margin-bottom', 0)
+                      ->setOption('margin-top', 0)
+                      ->setOption('enable-local-file-access', true); // Importante para las imágenes
+
+            return $pdf->inline('Orden_Medica_'.$orden->id.'.pdf');
         }
 }

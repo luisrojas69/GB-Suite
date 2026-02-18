@@ -517,7 +517,7 @@
                             <th><i class="fas fa-id-card"></i> Cédula</th>
                             <th><i class="fas fa-comment-medical"></i> Motivo</th>
                             <th><i class="fas fa-diagnoses"></i> Diagnóstico</th>
-                            <th><i class="fas fa-file-medical"></i> T-Consulta</th>
+                            <th><i class="fas fa-file-medical"></i> Det-Consulta</th>
                             <th class="text-center"><i class="fas fa-cogs"></i> Acciones</th>
                         </tr>
                     </thead>
@@ -603,6 +603,13 @@
                                         <i class="fas fa-stethoscope text-success"></i> Normal
                                     @endif
                                 </div>
+                                <div class="small text-muted">
+                                    @if($con->status_consulta == 'Cerrada')
+                                        <i class="fas fa-check text-success"></i> Consulta Cerrada
+                                    @elseif($con->status_consulta == 'Pendiente por exámenes')
+                                        <i class="fas fa-file-medical text-warning"></i> Pendiente por exámenes
+                                    @endif
+                                </div>                                
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
