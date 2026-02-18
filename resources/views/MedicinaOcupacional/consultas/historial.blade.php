@@ -257,7 +257,7 @@
                     <a class="nav-link active shadow-sm" id="consultas-tab" data-toggle="pill" href="#consultas" role="tab">
                         <i class="fas fa-notes-medical fa-lg d-block mb-1"></i>
                         <strong>Consultas Médicas</strong>
-                        <span class="badge badge-primary ml-2">{{ $paciente->consultas->count() }}</span>
+                        <span class="badge badge-info ml-2">{{ $paciente->consultas->count() }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -320,7 +320,7 @@
                                     </div>
                                     <div class="mt-2">
                                         <small class="text-muted">
-                                            <i class="fas fa-user-md"></i> Dr. {{ $c->medico->name ?? 'N/A' }}
+                                            <i class="fas fa-user-md"></i> Dr. {{ $c->medico->name." ".$c->medico->last_name ?? 'N/A' }}
                                         </small>
                                     </div>
                                 </div>
@@ -410,6 +410,10 @@
                             <i class="fas fa-shield-alt fa-4x text-success mb-3"></i>
                             <h5 class="text-success">Sin accidentes registrados</h5>
                             <p class="text-muted">Excelente registro de seguridad</p>
+                            <a href="{{ route('medicina.accidentes.create', ['paciente_id' => $paciente->id]) }}" 
+                               class="btn btn-danger mt-2">
+                                <i class="fas fa-plus"></i> Registrar Primer Accidente
+                            </a>
                         </div>
                     </div>
                     @endforelse
@@ -880,4 +884,16 @@ $(document).ready(function() {
     });
 });
 </script>
+
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: '¡Logrado!',
+            text: 'El documento se adjuntó al historial.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    @endif
 @endsection

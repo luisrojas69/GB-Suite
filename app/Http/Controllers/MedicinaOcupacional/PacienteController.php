@@ -33,7 +33,8 @@ class PacienteController extends Controller
         Gate::authorize('gestionar_pacientes');
 
         // 1. Obtener la data para la tabla
-        $pacientes = Paciente::all();
+        //$pacientes = Paciente::oldest('status')->get();
+        $pacientes = Paciente::Where('status', 'A')->get();
 
         // 2. Cálculos eficientes usando agregaciones de Base de Datos
         
@@ -116,11 +117,32 @@ class PacienteController extends Controller
         Gate::authorize('gestionar_pacientes');
         $paciente = Paciente::findOrFail($id);
         
-        // Convertir el checkbox a booleano
         $data = $request->all();
         $data['es_zurdo'] = $request->has('es_zurdo') ? 1 : 0;
         $data['discapacitado'] = $request->has('discapacitado') ? 1 : 0;
 
+        // Llenamos el modelo con los nuevos datos pero SIN guardar aún
+        $paciente->fill($data);
+
+        // Si el modelo detecta que hubo cambios en cualquier campo...
+        if ($paciente->isDirty()) {
+            $paciente->validado_medico = true;
+        }
+
+        $paciente->save();
+
+        return response()->json(['status' => 'success']);
+    }
+
+    public function updateOld(Request $request, $id)
+    {
+        Gate::authorize('gestionar_pacientes');
+        $paciente = Paciente::findOrFail($id);
+        
+        // Convertir el checkbox a booleano
+        $data = $request->all();
+        $data['es_zurdo'] = $request->has('es_zurdo') ? 1 : 0;
+        $data['discapacitado'] = $request->has('discapacitado') ? 1 : 0;
 
         $paciente->update($data);
 

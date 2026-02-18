@@ -9,6 +9,9 @@ class Consulta extends Model
 {
     protected $table = 'med_consultas';
     protected $guarded = ['id'];
+    protected $casts = [
+        'fecha_consulta' => 'date'
+    ];
 
     public function accidente()
     {
@@ -32,6 +35,12 @@ class Consulta extends Model
     // Formatear fecha para el PDF
     public function getFechaFormateadaAttribute()
     {
-        return $this->created_at->format('d/m/Y h:i A');
+        return $this->fecha_consulta->format('d/m/Y h:i A');
+    }
+
+    // Scope para filtrar consultas reales vs administrativas (útil para las gráficas)
+    public function scopeReales($query)
+    {
+        return $query->where('consulta_rapida', false);
     }
 }

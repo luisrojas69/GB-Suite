@@ -35,11 +35,12 @@
                 // Calculamos las alertas directamente para el Sidebar
                 $hoy_badge = now()->format('Y-m-d');
                 
-                $countReposo = App\Models\MedicinaOcupacional\Consulta::where('genera_reposo', 1)
-                    ->whereRaw("CAST(DATEADD(day, dias_reposo, created_at) AS DATE) = ?", [$hoy_badge])
+                $countReposo = App\Models\MedicinaOcupacional\Consulta::where('genera_reposo', 1)->where('reincorporado', 0)
+                    ->whereRaw("CAST(DATEADD(day, dias_reposo,fecha_consulta) AS DATE) <= ?", [$hoy_badge])
                     ->count();
                     
-                $countVacas = App\Models\MedicinaOcupacional\Paciente::whereDate('fecha_retorno_vacaciones', $hoy_badge)->count();
+                $countVacas = App\Models\MedicinaOcupacional\Paciente::where('de_vacaciones', 1)
+                 ->whereDate('fecha_retorno_vacaciones', '<=', $hoy_badge)->count();
                 
                 $totalAlertasBadge = $countReposo + $countVacas;
             @endphp
@@ -53,8 +54,16 @@
                     @endif
                 </a>
             </li>
-        @endcan
-       
+
+
+            <li class="nav-item {{ Nav::isRoute('medicina.ordenes.*') }}">
+                <a class="nav-link" href="{{ route('medicina.ordenes.index') }}">
+                    <i class="fas fa-list-alt"></i>
+                    <span>{{ __('Órdenes de Exámenes') }}</span>
+                </a>
+            </li>
+
+       @endcan
         @can('gestionar_accidentes')
             <li class="nav-item {{ Nav::isRoute('medicina.accidentes.*') }}">
                 <a class="nav-link" href="{{ route('medicina.accidentes.index') }}">

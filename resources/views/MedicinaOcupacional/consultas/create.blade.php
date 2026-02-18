@@ -95,6 +95,35 @@
         </div>
     </div>
 
+    @if($accidente)
+        <div class="alert alert-success shadow-lg border-left-success mb-4">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="fas fa-check-double fa-2x"></i>
+                </div>
+                <div class="col">
+                    <h6 class="font-weight-bold mb-1">
+                        <i class="fas fa-stethoscope"></i> Accidente sin Consulta Detectado
+                    </h6>
+                    <p class="mb-1">
+                        Se registró un <strong>ACCIDENTE LABORAL</strong> a este paciente el dia: {{ \Carbon\Carbon::parse($accidente->fecha_hora_accidente)->format('d/m/Y') }} a las {{ \Carbon\Carbon::parse($accidente->fecha_hora_accidente)->format('h:i A') }}, Que no tiene una consulta vinculada.
+                    </p>
+                    <p class="mb-1">
+                        Por lo que se vinculará esta consulta automaticamente a esa accidente
+                    </p>
+                    <span class="badge badge-success">
+                        Parte(s) Lesionada(s): {{ $accidente->parte_lesionada }}
+                    </span>
+                    <span class="badge badge-warning">
+                        Gravedad: {{ $accidente->gravedad }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
+
     <div class="row">
         {{-- Columna Izquierda: Información del Paciente --}}
         <div class="col-xl-4 col-lg-5 mb-4">
@@ -153,7 +182,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 mb-2">
+                            <div class="col-6 mb-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-calendar text-info fa-lg mr-2"></i>
                                     <div>
@@ -162,7 +191,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 mb-2">
+                            <div class="col-6 mb-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-door-open text-success fa-lg mr-2"></i>
                                     <div>
@@ -176,7 +205,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 mb-2">
+                            <div class="col-6 mb-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-wheelchair text-{{ $paciente->discapacitado ? 'warning' : 'secondary' }} fa-lg mr-2"></i>
                                     <div>
@@ -186,6 +215,24 @@
                                         @else
                                             <strong class="text-muted">No</strong>
                                         @endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-phone text-warnin fa-lg mr-2"></i>
+                                    <div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">Tel&eacute;fono:</div>
+                                        <strong>{{ $paciente->telefono ?? 'N/A'  }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-ambulance text-danger fa-lg mr-2"></i>
+                                    <div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">En caso de emergencia llamar a:</div>
+                                        <strong>{{ $paciente->avisar_a ?? 'N/A' }} - {{ $paciente->telf_contact ?? 'N/A'}}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -364,6 +411,7 @@
             <form action="{{ route('medicina.consultas.store') }}" method="POST" id="formConsulta">
                 @csrf
                 <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
+                <input type="hidden" name="accidente_id" value="{{ $accidente ? $accidente->id : '' }}">
 
                 {{-- Card Principal del Formulario --}}
                 <div class="card shadow-lg border-0 mb-4">
@@ -399,11 +447,13 @@
                                 </label>
                                 <select class="form-control form-control-lg border-left-primary" name="motivo_consulta" id="motivo_consulta" required>
                                     <option value="">Seleccione el motivo...</option>
-                                    <option>Enfermedad Común</option>
+                                     <option value="Enfermedad Común">Enfermedad Común</option>
                                     <option>Accidente Laboral</option>
-                                    <option>Control Médico Interno</option>
+                                    <option value="Control-interno">Control Médico Interno</option>
                                     <option value="Evaluación Ocupacional">Evaluación Ocupacional (Pre-empleo/Egreso)</option>
-                                    <option value="Pre-vacacional">Evaluación Pre-vacacional</option>
+                                    <option value="Pre-vacacional" >Evaluación Pre-vacacional</option>
+                                    <option value="Post-vacacional" {{ old('motivo_consulta', $motivo_prellenado) == 'Post-vacacional' ? 'selected' : '' }}>Evaluación Post-vacacional</option>
+                                    <option value="reincorporacion" {{ old('motivo_consulta', $motivo_prellenado) == 'reincorporacion' ? 'selected' : '' }}>Reincorporación Post-Reposo</option>
                                 </select>
                             </div>
 
@@ -419,13 +469,16 @@
                         </div>
 
                         <div class="row mb-4">
-                            <div class="col-12">
+                            <div class="col-10">
                                 <label class="font-weight-bold">
-                                    <i class="fas fa-diagnoses text-danger"></i> Diagnóstico (CIE-10)
+                                    <i class="fas fa-diagnoses text-danger"></i> Diagnóstico (CIE-10) | 
+                                    <button id="btn-cie10" class="btn btn-primary btn-circle btn-sm"><i class="fas fa-search"></i></button>
                                 </label>
                                 <select name="diagnostico_cie10" id="diagnostico_cie10" class="form-control form-control-lg" required>
                                     <option value="">Escriba al menos 3 caracteres para buscar...</option>
                                 </select>
+                                
+
                                 <div class="mt-2">
                                     <small class="text-muted">
                                         <i class="fas fa-lightbulb text-warning"></i> 
@@ -472,13 +525,70 @@
                             </div>
                         </div>
 
+                        {{-- BARRA DE HERRAMIENTAS / PLANTILLAS RÁPIDAS --}}
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary btn-sm dropdown-toggle shadow-sm" type="button" id="dropdownPlantillas" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-magic mr-1"></i> Usar Plantilla Rápida
+                                </button>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownPlantillas">
+                                        <h6 class="dropdown-header">Seleccione un escenario:</h6>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="sano">
+                                            <i class="fas fa-user-check text-success mr-2"></i> Paciente Sano / Rutina
+                                        </a>
+                                         <a class="dropdown-item template-trigger" href="#" data-tipo="hipertension">
+                                            <i class="fas fa-heartbeat text-danger mr-2"></i> Control Hipertensión
+                                        </a>
+                                        <h6 class="dropdown-header">Reincorporaciones / Aptitud:</h6>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="postvacacional">
+                                            <i class="fas fa-plane-arrival text-info mr-2"></i> Post-Vacacional (Apto)
+                                        </a>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="postreposo">
+                                            <i class="fas fa-user-clock text-primary mr-2"></i> Post-Reposo (Recuperado)
+                                        </a>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="preempleo">
+                                            <i class="fas fa-user-check text-success mr-2"></i> Pre-Empleo / Ingreso
+                                        </a>
+                                        
+                                        <div class="dropdown-divider"></div>
+                                        <h6 class="dropdown-header">Eventos / Patologías:</h6>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="accidente">
+                                            <i class="fas fa-user-injured text-danger mr-2"></i> Accidente Laboral (Plantilla)
+                                        </a>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="respiratorio">
+                                            <i class="fas fa-head-side-cough text-warning mr-2"></i> Cuadro Respiratorio
+                                        </a>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="lumbar">
+                                            <i class="fas fa-procedures text-secondary mr-2"></i> Lumbago Mecánico
+                                        </a>
+
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item template-trigger" href="#" data-tipo="limpiar">
+                                            <i class="fas fa-eraser text-muted mr-2"></i> Limpiar Campos
+                                        </a>
+                                    </div>
+                            </div>
+                        </div>
+                        {{-- Fin Barra de Herramientas --}}
+
                         {{-- Anamnesis --}}
                         <div class="form-group mb-4">
                             <label class="font-weight-bold">
                                 <i class="fas fa-comments text-info"></i> Anamnesis (Relato del Paciente y Antecedentes)
                             </label>
                             <textarea class="form-control border-left-info" name="anamnesis" rows="4" required 
-                                      placeholder="¿Qué refiere el paciente? ¿Desde cuándo? ¿Antecedentes relevantes?"></textarea>
+                                      placeholder="¿Qué refiere el paciente? ¿Desde cuándo? ¿Antecedentes relevantes?">
+                                          {{ old('anamnesis', isset($motivo_prellenado) ? 'Valoración para reincorporación laboral (' . strtoupper($motivo_prellenado) . ').
+RELATO DEL PACIENTE:
+-Paciente refiere encontrarse asintomático al momento de la evaluación. 
+-Manifiesta haber completado su periodo de recuperación [o tratamiento] sin complicaciones. 
+-Expresa sentirse en óptimas condiciones físicas y mentales para retomar sus funciones habituales.
+
+ANTECEDENTES:
+- Personales: Niega nuevas patologías o alergias recientes.
+- Familiares: Sin cambios relevantes.
+- Hábitos: Sueño reparador y alimentación adecuada.' : '') }}
+                                      </textarea>
                             <small class="text-muted">
                                 <i class="fas fa-info-circle"></i> Describa los síntomas, duración, intensidad y antecedentes.
                             </small>
@@ -490,7 +600,18 @@
                                 <i class="fas fa-stethoscope text-primary"></i> Examen Físico / Hallazgos Clínicos
                             </label>
                             <textarea class="form-control border-left-primary" name="examen_fisico" rows="3" required
-                                      placeholder="Describa los hallazgos del examen físico..."></textarea>
+                                      placeholder="Describa los hallazgos del examen físico...">
+                                          {{ old('examen_fisico', isset($motivo_prellenado) ? 'EXAMEN FÍSICO:
+- Estado General: Paciente alerta, orientado en tiempo, espacio y persona (LOTEP). Hidratado y afebril.
+- Signos Vitales: Dentro de parámetros normales.
+- Cabeza y Cuello: Normocéfalo, sin adenopatías.
+- Cardiopulmonar: Ruidos cardiacos rítmicos sin soplos. Campos pulmonares bien ventilados.
+- Abdomen: Blando, depresible, no doloroso a la palpación, sin masas.
+- Extremidades: Simétricas, eutróficas, con arcos de movilidad completos.
+- Neurológico: Sin déficit aparente. Marcha normal.
+
+HALLAZGOS: Examen físico dentro de la normalidad. No se evidencian limitaciones funcionales para su labor.' . strtolower($motivo_prellenado) . '' : '') }}
+                                      </textarea>
                         </div>
 
                         {{-- Plan de Tratamiento --}}
@@ -499,7 +620,20 @@
                                 <i class="fas fa-prescription text-success"></i> Plan de Tratamiento / Indicaciones Médicas
                             </label>
                             <textarea class="form-control border-left-success" name="plan_tratamiento" rows="4" required 
-                                      placeholder="Medicamentos (nombre, dosis, vía, frecuencia), recomendaciones, cuidados..."></textarea>
+                                      placeholder="Medicamentos (nombre, dosis, vía, frecuencia), recomendaciones, cuidados...">
+                                          {{ isset($motivo_prellenado) ? 'RECOMENDACIONES Y CUIDADOS:
+- Mantener una hidratación adecuada (mínimo 2 litros de agua al día).
+- Higiene postural: Mantener posturas ergonómicas y ajustar la estación de trabajo.
+- Pausas Activas: Cumplir estrictamente con los ejercicios de estiramiento cada 2-3 horas.
+- Adaptación: Reincorporación progresiva a las funciones habituales evitando sobreesfuerzos.
+- Seguridad: Uso continuo de EPP y cumplimiento de normas de seguridad industrial.
+- Reporte: Notificar cualquier cambio en su estado de salud al departamento médico.
+
+PLAN DE TRATAMIENTO:
+- No requiere medicación actual. 
+- Continuar con hábitos de vida saludable y actividad física regular.
+- Control médico preventivo en 6 meses (Si Aplica).' : '' }}
+                                      </textarea>
                             <small class="text-muted">
                                 <i class="fas fa-pills"></i> Especifique claramente medicamentos, dosis y duración del tratamiento.
                             </small>
@@ -539,6 +673,23 @@
                                         </label>
                                         <input type="number" class="form-control form-control-lg border-left-danger" name="dias_reposo" value="0" min="0">
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Sección de Switch para Exámenes --}}
+                        <div class="card-body border-top bg-light py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-12 text-right">
+                                    <div class="custom-control custom-switch custom-switch-lg">
+                                        <input type="checkbox" class="custom-control-input" name="requiere_examenes" id="switchExamenes" value="1">
+                                        <label class="custom-control-label font-weight-bold text-primary" for="switchExamenes" style="cursor: pointer;">
+                                            <i class="fas fa-microscope mr-1"></i> ¿Solicitar Órdenes de Exámenes?
+                                        </label>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Al activar, el sistema le redirigirá para seleccionar los laboratorios después de guardar.
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -916,6 +1067,278 @@ $(document).ready(function() {
             $('#tipo_discapac').val('');
         }
     });
+
+
+
+    $('#btn-cie10').on('click', function(e) {
+        e.preventDefault();
+
+        // 1. Loading inicial
+        Swal.fire({
+            title: 'Cargando Catálogo...',
+            html: '<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>',
+            showConfirmButton: false,
+            allowOutsideClick: false
+        });
+
+        // 2. Llamada AJAX con jQuery
+        $.ajax({
+            url: "{{ route('medicina.buscarCie10') }}",
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                // Construcción de la tabla
+                let tablaHtml = `
+                    <div class="table-responsive" style="max-height: 450px;">
+                        <table class="table table-sm table-hover table-bordered text-left">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 25%">Código</th>
+                                    <th>Diagnóstico / Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                $.each(data, function(index, item) {
+                    // Separamos el código del texto para que no sea redundante
+                    let descripcion = item.text.includes(' - ') ? item.text.split(' - ')[1] : item.text;
+                    
+                    tablaHtml += `
+                        <tr>
+                            <td class="align-middle">
+                                <code class="h6 text-primary font-weight-bold">${item.id}</code>
+                            </td>
+                            <td class="small align-middle text-dark">
+                                ${descripcion}
+                            </td>
+                        </tr>`;
+                });
+
+                tablaHtml += `</tbody></table></div>`;
+
+                // 3. Mostrar el resultado
+                Swal.fire({
+                    title: '<i class="fas fa-search-plus text-info"></i> Referencia CIE-10',
+                    html: tablaHtml,
+                    width: '800px',
+                    confirmButtonText: '<i class="fas fa-times"></i> Cerrar',
+                    confirmButtonColor: '#6e707e',
+                    customClass: {
+                        popup: 'animated fadeInDown faster'
+                    }
+                });
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'No se pudo obtener el listado de diagnósticos.'
+                });
+                console.error("Error CIE-10:", xhr.responseText);
+            }
+        });
+    });
+
+    // --- LÓGICA DE PLANTILLAS RÁPIDAS ---
+    
+    // 1. Definición de los textos (Aquí puedes editar lo que dicen las plantillas)
+    const templates = {
+        // --- COMUNES ---
+            'sano': {
+                anamnesis: "PACIENTE ASINTOMÁTICO.\n\nRefiere sentirse bien, niega sintomatología actual.\nNiega antecedentes patológicos recientes de importancia.\nAcude para evaluación de rutina / control.",
+                examen: "PACIENTE EN BUENAS CONDICIONES GENERALES.\n\n- LOTEP (Lúcido, Orientado en Tiempo, Espacio y Persona).\n- Mucosas húmedas y normocoloreadas.\n- Cardiopulmonar: Ruidos rítmicos, murmullo vesicular conservado, sin agregados.\n- Abdomen: Blando, depresible, no doloroso.\n- Extremidades: Sin edemas, movilidad conservada.",
+                plan: "- No requiere tratamiento farmacológico.\n- Se dan recomendaciones de estilos de vida saludable.\n- Control según cronograma."
+            },
+            'hipertension': {
+                anamnesis: "PACIENTE CON ANTECEDENTE DE HTA.\n\nAcude a control rutinario.\nRefiere adherencia al tratamiento: SÍ/NO.\nNiega cefalea, tinnitius (zumbidos), fosfenos (luces) o dolor torácico actual.",
+                examen: "- Ruidos cardiacos rítmicos, buena intensidad.\n- Pulsos periféricos presentes y simétricos.\n- Sin edemas en miembros inferiores.\n- Cifras tensionales actuales: [Ver Signos Vitales].",
+                plan: "- Continuar tratamiento habitual.\n- Dieta baja en sodio (sal).\n- Control de tensión arterial diario por 1 semana y traer registro.\n- Próxima cita en 1 mes."
+            },
+            // --- REINCORPORACIONES ---
+            'postvacacional': {
+                anamnesis: "EVALUACIÓN POST-VACACIONAL.\n\nPaciente acude para chequeo médico obligatorio tras reintegro de período vacacional.\nRefiere haber disfrutado su descanso sin eventualidades médicas.\nNiega sintomatología actual, accidentes o enfermedades durante su ausencia.\nSe siente en condiciones óptimas para retomar sus labores.",
+                examen: "PACIENTE EN BUENAS CONDICIONES GENERALES.\n\n- Signos vitales estables (Ver registro).\n- Examen físico segmentario sin hallazgos patológicos.\n- Peso y talla acordes.\n- No se evidencian limitaciones funcionales.",
+                plan: "- APTO para retomar sus funciones habituales.\n- Se indican medidas preventivas de seguridad y salud en el trabajo.\n- Mantener hidratación y pausas activas."
+            },
+            'postreposo': {
+                anamnesis: "EVALUACIÓN POST-REPOSO MÉDICO.\n\nPaciente se reincorpora tras ___ días de reposo por diagnóstico de [DIAGNOSTICO PREVIO].\nRefiere mejoría clínica total.\nNiega dolor o limitación funcional actual.\nTrae informe médico de alta (si aplica): SÍ/NO.",
+                examen: "EVALUACIÓN DE CONTROL:\n\n- Zona afectada: Sin signos de inflamación, edema o rubor.\n- Movilidad: Arcos de movimiento completos y no dolorosos.\n- Cicatrización (si hubo herida): En buen estado, bordes afrontados.\n- Resto del examen físico dentro de límites normales.",
+                plan: "- APTO para reincorporación laboral.\n- Se recomienda reintegro progresivo a cargas (si aplica).\n- Notificar al servicio médico ante reaparición de síntomas."
+            },
+            'preempleo': {
+                anamnesis: "EVALUACIÓN MÉDICA PRE-EMPLEO.\n\nPaciente acude para valoración de ingreso al cargo de: [CARGO].\nAntecedentes Personales: Niega patologías crónicas.\nAntecedentes Quirúrgicos: Niega.\nAlergias: Niega.\nHábitos: Niega tabaquismo.",
+                examen: "- Paciente mesomorfo, hidratado.\n- Cardiopulmonar: Estable.\n- Abdomen: Sin visceromegalias.\n- Osteomuscular: Tono y trofismo conservado. Spine/Columna alineada.\n- Pruebas funcionales: Phalen (-), Tinel (-).",
+                plan: "- APTO PARA EL CARGO.\n- Se instruye sobre riesgos laborales específicos del puesto.\n- Uso obligatorio de EPP."
+            },
+
+            // --- ACCIDENTES Y PATOLOGÍAS ---
+            'accidente': {
+                anamnesis: "REPORTE DE ACCIDENTE LABORAL.\n\nFecha y Hora del evento: [HOY] a las [HORA].\nLugar: [AREA DE TRABAJO].\nMecanismo: [GOLPE / CAÍDA / CORTE / SOBREESFUERZO].\n\nRelato: Paciente refiere que se encontraba realizando [ACTIVIDAD] cuando [DESCRIPCIÓN DEL HECHO].\nSíntoma principal: Dolor en [ZONA] intensidad __/10.",
+                examen: "HALLAZGOS CLÍNICOS:\n\n- Inspección: Se observa [HEMATOMA / HERIDA / EDEMA] en región [UBICACIÓN].\n- Palpación: Dolor a la palpación en [ZONA].\n- Movilidad: [LIMITADA / CONSERVADA].\n- Neurovascular distal: Conservado.\n- Resto del examen sin particularidades.",
+                plan: "- Limpieza y cura local (si aplica).\n- Analgesia: [INDICAR MEDICAMENTO].\n- Hielo local / Reposo relativo.\n- ¿Amerita Reposo?: SÍ/NO (__ días).\n- Se realiza reporte al Comité de Seguridad (CSSL)."
+            },
+            'respiratorio': {
+                anamnesis: "SÍNTOMAS RESPIRATORIOS.\n\nInicio: Hace ___ días.\nSíntomas: Rinorrea, malestar general, tos.\nNiega disnea (falta de aire) o fiebre alta.\nNexo epidemiológico: [DESCONOCIDO / FAMILIAR / LABORAL].",
+                examen: "- Orofaringe: Congestiva.\n- Cuello: Sin adenopatías.\n- Tórax: Normoexpansible.\n- Auscultación: Murmullo vesicular presente, sin agregados (No sibilantes, no crepitantes).\n- SatO2: Normal (>95%).",
+                plan: "- Tratamiento sintomático (Antigripal / AINEs).\n- Abundante líquido.\n- Uso de mascarilla respiratoria.\n- Reevaluar en 48h si persiste fiebre."
+            },
+            'lumbar': {
+                anamnesis: "LUMBAGO MECÁNICO.\n\nPaciente refiere dolor en región lumbar de aparición [SÚBITA / INSIDIOSA].\nRelacionado con: [LEVANTAMIENTO DE CARGA / MALA POSTURA].\nIrradiación: No irradia a miembros inferiores (No ciática).\nEVA (Dolor): __/10.",
+                examen: "- Columna: Dolor a la palpación de musculatura paravertebral.\n- Lasègue: Negativo (bilateral).\n- Fuerza y sensibilidad: Conservada en MMII.\n- Marcha: Independiente.",
+                plan: "- Analgésicos y relajante muscular por 3 días.\n- Calor local.\n- Higiene postural.\n- Evitar cargas pesadas temporalmente."
+            },
+            
+            // --- UTILIDADES ---
+            'limpiar': {
+                anamnesis: "",
+                examen_fisico: "", // Asegúrate que coincida con el name del textarea
+                plan: ""
+            }
+        };
+
+    // 2. Evento Click en las opciones
+    $('.template-trigger').click(function(e) {
+        e.preventDefault();
+        let tipo = $(this).data('tipo');
+        let data = templates[tipo];
+
+        // Validamos si ya hay texto escrito para no borrarlo por accidente
+        let currentAnamnesis = $('textarea[name="anamnesis"]').val();
+        let currentExamen = $('textarea[name="examen_fisico"]').val();
+        
+        // Si hay texto y no es la opción de limpiar, preguntamos
+        if ((currentAnamnesis.length > 10 || currentExamen.length > 10) && tipo !== 'limpiar') {
+            Swal.fire({
+                title: '¿Reemplazar contenido?',
+                text: "Ya has escrito información. ¿Quieres reemplazarla con la plantilla o agregarla al final?",
+                icon: 'question',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Reemplazar todo',
+                denyButtonText: 'Agregar al final',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    aplicarPlantilla(data, true); // True = Reemplazar
+                } else if (result.isDenied) {
+                    aplicarPlantilla(data, false); // False = Concatenar
+                }
+            });
+        } else {
+            // Si está vacío o es limpiar, aplicamos directo
+            aplicarPlantilla(data, true);
+        }
+    });
+
+    // 3. Función auxiliar para inyectar el texto
+    function aplicarPlantilla(data, reemplazar) {
+        if (reemplazar) {
+            $('textarea[name="anamnesis"]').val(data.anamnesis);
+            $('textarea[name="examen_fisico"]').val(data.examen);
+            $('textarea[name="plan_tratamiento"]').val(data.plan);
+        } else {
+            // Agregamos dos saltos de línea antes de pegar lo nuevo
+            let sep = "\n\n--- NOTA ADICIONAL ---\n";
+            $('textarea[name="anamnesis"]').val($('textarea[name="anamnesis"]').val() + sep + data.anamnesis);
+            $('textarea[name="examen_fisico"]').val($('textarea[name="examen_fisico"]').val() + sep + data.examen);
+            $('textarea[name="plan_tratamiento"]').val($('textarea[name="plan_tratamiento"]').val() + sep + data.plan);
+        }
+
+        // Efecto visual sutil para indicar que cambió
+        $('textarea').addClass('bg-light');
+        setTimeout(() => {
+            $('textarea').removeClass('bg-light');
+        }, 300);
+        
+        // Notificación Toast pequeña
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        Toast.fire({
+            icon: 'success',
+            title: 'Plantilla aplicada correctamente'
+        });
+    }
+
+    // Comportamiento del Switch "Necesita exámenes" (Versión jQuery)
+    const $switchExamenes = $('#switchExamenes');
+    const $btnFinalizar = $('#btnFinalizar');
+
+    // Configuración del Toast (si ya la definiste arriba para las plantillas, puedes reusarla)
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+
+    $switchExamenes.on('change', function() {
+        if ($(this).is(':checked')) {
+            // Cambio de estética a modo "Orden"
+            $btnFinalizar
+                .html('<i class="fas fa-file-medical-alt mr-1"></i> Guardar y Crear Orden')
+                .removeClass('btn-success')
+                .addClass('btn-primary'); // Azul para diferenciar
+
+            Toast.fire({
+                icon: 'info',
+                title: 'Modo: Generación de Orden activado'
+            });
+        } else {
+            // Regreso al modo "Guardado Normal"
+            $btnFinalizar
+                .html('<i class="fas fa-save mr-1"></i> Finalizar y Guardar Consulta')
+                .removeClass('btn-primary')
+                .addClass('btn-success');
+        }
+    });
+
+
+    //AutoSelect del Cie10
+    $('#motivo_consulta').on('change', function() {
+        let motivo = $(this).val();
+        let cie10Select = $('#diagnostico_cie10'); 
+
+        if (motivo === 'Post-vacacional' || motivo === 'Pre-vacacional' || motivo === 'reincorporacion') {
+            // Forzamos el Z02.7
+            if (cie10Select.find("option[value='Z02.7']").length) {
+                cie10Select.val('Z02.7').trigger('change');
+            } else {
+                // Si no existe en el DOM, lo agregamos dinámicamente
+                let newOption = new Option('Z02.7 - Expedición de certificado médico (Vacaciones/Aptitud)', 'Z02.7', true, true);
+                cie10Select.append(newOption).trigger('change');
+            }
+            
+            // Opcional: Bloquearlo para que no lo cambien por error
+               // cie10Select.prop('disabled', true); 
+        }else if (motivo === 'Control-interno') {
+            // Forzamos el Z00.0
+            if (cie10Select.find("option[value='Z00.0']").length) {
+                cie10Select.val('Z00.0').trigger('change');
+            } else {
+                // Si no existe en el DOM, lo agregamos dinámicamente
+                let newOption = new Option('Z00.0 - Examen médico general (Chequeo de rutina)', 'Z00.0', true, true);
+                cie10Select.append(newOption).trigger('change');
+            }
+            
+            // Opcional: Bloquearlo para que no lo cambien por error
+               // cie10Select.prop('disabled', true); 
+        } 
+
+         else {
+            // Si cambia a otro motivo, lo desbloqueamos y limpiamos
+            cie10Select.prop('disabled', false).val(null).trigger('change');
+        }
+    });
+
+    // Ejecutar al cargar por si ya viene prellenado desde la URL
+    $('#motivo_consulta').trigger('change');
+
 });
 </script>
 @endsection

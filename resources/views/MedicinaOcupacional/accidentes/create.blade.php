@@ -138,36 +138,6 @@
         </div>
     </div>
 
-    {{-- Alertas de Consulta Vinculada --}}
-    @if(request('consulta_id'))
-        @php $consultaPrevia = App\Models\MedicinaOcupacional\Consulta::find(request('consulta_id')); @endphp
-        @if($consultaPrevia)
-            <div class="alert alert-info shadow-lg border-left-info mb-4">
-                <div class="row align-items-center">
-                    <div class="col-auto">
-                        <i class="fas fa-link fa-2x"></i>
-                    </div>
-                    <div class="col">
-                        <h6 class="font-weight-bold mb-1">
-                            <i class="fas fa-notes-medical"></i> Referencia Médica Detectada
-                        </h6>
-                        <p class="mb-1">
-                            Este reporte se vinculará automáticamente a la consulta del <strong>{{ $consultaPrevia->created_at->format('d/m/Y') }}</strong>
-                        </p>
-                        <div class="small">
-                            <span class="badge badge-primary mr-2">
-                                Diagnóstico: {{ $consultaPrevia->diagnostico_cie10 }}
-                            </span>
-                            <span class="badge badge-info">
-                                Médico: {{ $consultaPrevia->medico->name." ".$consultaPrevia->medico->last_name }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    @endif
-
     @if($consultaHoy)
         <div class="alert alert-success shadow-lg border-left-success mb-4">
             <div class="row align-items-center">
@@ -179,7 +149,10 @@
                         <i class="fas fa-stethoscope"></i> Evaluación Médica Detectada
                     </h6>
                     <p class="mb-1">
-                        Accidente vinculado automáticamente a consulta de hoy a las {{ \Carbon\Carbon::parse($consultaHoy->created_at)->format('h:i A') }}
+                        Se registró una consulta de <strong>ACCIDENTE LABORAL</strong> a este paciente el dia: {{ \Carbon\Carbon::parse($consultaHoy->fecha_consulta)->format('d/m/Y') }} a las {{ \Carbon\Carbon::parse($consultaHoy->fecha_consulta)->format('h:i A') }}, Y este ACCIDENTE no ha sido reportado.
+                    </p>
+                    <p class="mb-1">
+                        Por lo que se vinculará este Accidente automaticamente a esa consulta
                     </p>
                     <span class="badge badge-success">
                         Diagnóstico: {{ $consultaHoy->diagnostico_cie10 }}
@@ -187,13 +160,29 @@
                 </div>
             </div>
         </div>
+    @else
+       <div class="alert alert-warning shadow-lg border-left-info mb-4">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="fas fa-unlink fa-2x"></i>
+                </div>
+                <div class="col">
+                    <h6 class="font-weight-bold mb-1">
+                        <i class="fas fa-notes-medical"></i> Referencia Médica <strong>NO ENCONTRADA</strong>
+                    </h6>
+                    <p class="mb-1">
+                        Este reporte NO se vinculará a ninguna consulta previa <strong>POR FAVOR INFORME AL MÉDICO LABORAL DE ESTE SUCESO</strong>
+                    </p>
+                </div>
+            </div>
+        </div> 
     @endif
 
     {{-- Formulario Principal --}}
     <form action="{{ route('medicina.accidentes.store') }}" method="POST" id="formAccidente">
         @csrf
         <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
-        <input type="hidden" name="consulta_id" value="{{ $consultaHoy ? $consultaHoy->id : request('consulta_id') }}">
+        <input type="hidden" name="consulta_id" value="{{ $consultaHoy ? $consultaHoy->id : '' }}">
 
         {{-- Sección 1: Datos del Suceso y Gravedad --}}
         <div class="row">
@@ -313,7 +302,7 @@
         {{-- Sección 2: Parte del Cuerpo y Análisis --}}
         <div class="row">
             <div class="col-lg-6 mb-4">
-                <div class="card shadow-lg border-0">
+                <div class="card shadow-lg border-0 h-100"> {{-- h-100 para que iguale altura si es necesario --}}
                     <div class="card-header bg-gradient-warning text-white py-3">
                         <h6 class="m-0 font-weight-bold">
                             <i class="fas fa-user-injured"></i> 2. Parte del Cuerpo Lesionada
@@ -350,21 +339,34 @@
                                     ['nombre' => 'Pie Derecho', 'icono' => 'fa-shoe-prints', 'color' => 'primary'],
                                     ['nombre' => 'Pie Izquierdo', 'icono' => 'fa-shoe-prints', 'color' => 'primary'],
                                     ['nombre' => 'Dedos Pie', 'icono' => 'fa-socks', 'color' => 'warning'],
+                                    ['nombre' => 'Cara (Nariz, Mejillas)', 'icono' => 'fa-user-injured', 'color' => 'info'],
+                                    ['nombre' => 'Muñeca Derecha', 'icono' => 'fa-hand-sparkles', 'color' => 'warning'],
+                                    ['nombre' => 'Muñeca Izquierda', 'icono' => 'fa-hand-sparkles', 'color' => 'warning'],
+                                    ['nombre' => 'Codo Derecho', 'icono' => 'fa-mitten', 'color' => 'info'],
+                                    ['nombre' => 'Codo Izquierdo', 'icono' => 'fa-mitten', 'color' => 'info'],
+                                    ['nombre' => 'Zona Lumbar', 'icono' => 'fa-couch', 'color' => 'danger'],
+                                    ['nombre' => 'Tobillo Derecho', 'icono' => 'fa-socks', 'color' => 'success'],
+                                    ['nombre' => 'Tobillo Izquierdo', 'icono' => 'fa-socks', 'color' => 'success'],
+                                    ['nombre' => 'Órganos Internos', 'icono' => 'fa-lungs', 'color' => 'danger'],
+                                    ['nombre' => 'Sistema Sistémico', 'icono' => 'fa-biohazard', 'color' => 'dark'],
                                     ['nombre' => 'Múltiples Partes', 'icono' => 'fa-notes-medical', 'color' => 'danger'],
-                                    ['nombre' => 'Otra', 'icono' => 'fa-question-circle', 'color' => 'secondary']
+                                    ['nombre' => 'Otra', 'icono' => 'fa-question-circle', 'color' => 'secondary'],
                                 ];
                                 @endphp
-                                @foreach($partesCuerpo as $parte)
-                                <div class="col-md-4 col-sm-6 mb-2">
-                                    <div class="card body-part-selector border border-{{ $parte['color'] }}" 
-                                         data-parte="{{ $parte['nombre'] }}">
-                                        <div class="card-body text-center py-2">
-                                            <i class="fas {{ $parte['icono'] }} text-{{ $parte['color'] }} fa-lg"></i>
-                                            <div class="small font-weight-bold mt-1">{{ $parte['nombre'] }}</div>
+
+            
+                                    @foreach($partesCuerpo as $parte)
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <div class="card body-part-selector border border-{{ $parte['color'] }}" 
+                                             data-parte="{{ $parte['nombre'] }}">
+                                            <div class="card-body text-center py-2">
+                                                <i class="fas {{ $parte['icono'] }} text-{{ $parte['color'] }} fa-lg"></i>
+                                                <div class="small font-weight-bold mt-1">{{ $parte['nombre'] }}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                @endforeach
+                                    @endforeach
+                
                             </div>
                             <div id="selected-parts" class="mt-3">
                                 <strong class="d-block mb-2">Partes seleccionadas:</strong>
@@ -376,101 +378,108 @@
             </div>
 
             {{-- Análisis de Causas --}}
-            <div class="col-lg-6 mb-4">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header bg-gradient-info text-white py-3">
-                        <h6 class="m-0 font-weight-bold">
-                            <i class="fas fa-microscope"></i> 3. Análisis de Causas
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label class="font-weight-bold text-danger">
-                                <i class="fas fa-bolt"></i> Causas Inmediatas (Actos/Condiciones Inseguras)
-                            </label>
-                            <textarea name="causas_inmediatas" 
-                                      class="form-control border-left-danger" 
-                                      rows="4" 
-                                      placeholder="Ej: Piso resbaladizo por derrame de aceite, falta de uso de botas antideslizantes, iluminación deficiente..."
-                                      required></textarea>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Condiciones o actos inseguros que causaron directamente el accidente
-                            </small>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="font-weight-bold text-warning">
-                                <i class="fas fa-search"></i> Causas Raíz (Fallas Sistémicas)
-                            </label>
-                            <textarea name="causas_raiz" 
-                                      class="form-control border-left-warning" 
-                                      rows="4" 
-                                      placeholder="Ej: Programa de orden y limpieza deficiente, falta de supervisión constante, ausencia de señalización..."
-                                      required></textarea>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Fallas en los sistemas de gestión que permitieron el accidente
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Sección 3: Testigos y Relatos --}}
-        <div class="card shadow-lg border-0 mb-4">
-            <div class="card-header bg-gradient-secondary text-white py-3">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-users"></i> 4. Testigos y Descripción del Evento
-                </h6>
-            </div>
-            <div class="card-body">
+            <div class="col-lg-6">
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="font-weight-bold">
-                                <i class="fas fa-user-friends text-info"></i> Testigos Presenciales
-                            </label>
-                            <textarea name="testigos" 
-                                      class="form-control" 
-                                      rows="4" 
-                                      placeholder="Nombre completo y cédula de identidad de los testigos (si aplica)&#10;Ej:&#10;- Juan Pérez (V-12.345.678)&#10;- María González (V-23.456.789)"></textarea>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Liste los nombres y cédulas de personas que presenciaron el accidente
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="font-weight-bold text-primary">
-                                <i class="fas fa-comment-dots"></i> Relato del Acontecido
-                            </label>
-                            <textarea name="descripcion_relato" 
-                                      class="form-control border-left-primary" 
-                                      rows="4" 
-                                      placeholder="Describa cronológicamente cómo ocurrió el accidente, qué estaba haciendo el trabajador, qué sucedió..."
-                                      required></textarea>
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> Relato cronológico del evento
-                            </small>
+                    <div class="col-12 mb-4">
+                        <div class="card shadow-lg border-0">
+                            <div class="card-header bg-gradient-info text-white py-3">
+                                <h6 class="m-0 font-weight-bold">
+                                    <i class="fas fa-microscope"></i> 3. Análisis de Causas
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-danger">
+                                        <i class="fas fa-bolt"></i> Causas Inmediatas (Actos/Condiciones Inseguras)
+                                    </label>
+                                    <textarea name="causas_inmediatas" 
+                                              class="form-control border-left-danger" 
+                                              rows="4" 
+                                              placeholder="Ej: Piso resbaladizo por derrame de aceite, falta de uso de botas antideslizantes, iluminación deficiente..."
+                                              required></textarea>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> Condiciones o actos inseguros que causaron directamente el accidente
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold text-warning">
+                                        <i class="fas fa-search"></i> Causas Raíz (Fallas Sistémicas)
+                                    </label>
+                                    <textarea name="causas_raiz" 
+                                              class="form-control border-left-warning" 
+                                              rows="4" 
+                                              placeholder="Ej: Programa de orden y limpieza deficiente, falta de supervisión constante, ausencia de señalización..."
+                                              required></textarea>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> Fallas en los sistemas de gestión que permitieron el accidente
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="font-weight-bold text-danger">
-                        <i class="fas fa-band-aid"></i> Descripción Detallada de Lesiones
-                    </label>
-                    <textarea name="lesion_detallada" 
-                              class="form-control border-left-danger" 
-                              rows="3" 
-                              placeholder="Ej: Traumatismo en falange distal del dedo índice derecho con herida cortante de 3 cm, fractura expuesta de tibia..."
-                              required></textarea>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i> Describa detalladamente las lesiones, su ubicación y severidad
-                    </small>
-                </div>
+                {{-- Sección 3: Testigos y Relatos --}}
+                <div class="col-12 mb-4">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-gradient-secondary text-white py-3">
+                            <h6 class="m-0 font-weight-bold">
+                                <i class="fas fa-users"></i> 4. Testigos y Descripción del Evento
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-user-friends text-info"></i> Testigos Presenciales
+                                </label>
+                                <textarea name="testigos" 
+                                          class="form-control" 
+                                          rows="2"
+                                          maxlength="150" 
+                                          placeholder="Ej:- Juan Pérez (V-12.345.678)&#10; - María González (V-23.456.789)"></textarea>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Liste los nombres y cédulas de personas que presenciaron el accidente
+                                </small>
+                            </div>
+                        
+                        
+                            <div class="form-group">
+                                <label class="font-weight-bold text-primary">
+                                    <i class="fas fa-comment-dots"></i> Relato del Acontecido
+                                </label>
+                                <textarea name="descripcion_relato" 
+                                          class="form-control border-left-primary" 
+                                          rows="5" 
+                                          placeholder="Describa cronológicamente cómo ocurrió el accidente, qué estaba haciendo el trabajador, qué sucedió..."
+                                          required></textarea>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Relato cronológico del evento
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold text-danger">
+                                    <i class="fas fa-band-aid"></i> Descripción Detallada de Lesiones
+                                </label>
+                                <textarea name="lesion_detallada" 
+                                          class="form-control border-left-danger" 
+                                          rows="5" 
+                                          placeholder="Ej: Traumatismo en falange distal del dedo índice derecho con herida cortante de 3 cm, fractura expuesta de tibia..."
+                                          required></textarea>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Describa detalladamente las lesiones, su ubicación y severidad
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
             </div>
+
         </div>
+
+        
+        
 
         {{-- Sección 4: Plan de Acción --}}
         <div class="card shadow-lg border-0 mb-4">
@@ -486,7 +495,7 @@
                     </label>
                     <textarea name="acciones_correctivas" 
                               class="form-control border-left-success" 
-                              rows="4" 
+                              rows="8" 
                               placeholder="¿Qué medidas inmediatas se tomaron? ¿Qué acciones se implementarán para evitar que esto vuelva a ocurrir?&#10;&#10;Ej:&#10;- Limpieza inmediata del área&#10;- Señalización de zona peligrosa&#10;- Capacitación adicional al personal&#10;- Revisión del procedimiento de trabajo&#10;- Implementación de barandas de seguridad"
                               required></textarea>
                     <small class="text-muted">

@@ -254,12 +254,12 @@
                                 <i class="fas fa-heartbeat"></i> Signos Vitales
                             </small>
                             <div class="row">
-                                @if(isset($consulta->presion_arterial))
+                                @if(isset($consulta->tension_arterial))
                                 <div class="col-md-4">
                                     <div class="text-center p-2 bg-light rounded">
                                         <i class="fas fa-heart text-danger"></i>
                                         <div class="small text-muted">Presión Arterial</div>
-                                        <strong>{{ $consulta->presion_arterial }}</strong>
+                                        <strong>{{ $consulta->tension_arterial }}</strong>
                                     </div>
                                 </div>
                                 @endif

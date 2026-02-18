@@ -9,12 +9,17 @@ use Illuminate\Http\Request;
 use Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use DB;
+use App\Mail\NuevaDotacionMail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
+use App\Exports\MedicinaOcupacional\Dotaciones\DotacionesExport;
 
 
 class DotacionController extends Controller
 {
 
-    public function index()
+    public function indexOLD()
     {
         // Si la petición es AJAX (para el DataTable)
         if (request()->ajax()) {
@@ -23,6 +28,148 @@ class DotacionController extends Controller
         }
         return view('MedicinaOcupacional.dotaciones.index');
     }
+
+
+
+    public function index()
+    {
+        // Si es petición AJAX para la tabla
+        if (request()->ajax()) {
+            $dotaciones = Dotacion::with('paciente')->orderBy('id', 'desc')->get();
+            return response()->json(['data' => $dotaciones]);
+        }
+
+        // --- SECCIÓN 1: KPIs SUPERIORES ---
+        $stats = [
+            'total_mes' => Dotacion::whereMonth('fecha_entrega', now()->month)->whereYear('fecha_entrega', now()->year)->count(),
+            'pendientes' => Dotacion::where('entregado_en_almacen', false)->count(),
+            'dotaciones_hoy' => Dotacion::whereDate('fecha_entrega', now()->today())->count(),
+            'botas_entregadas' => Dotacion::whereMonth('fecha_entrega', now()->month)->where('calzado_entregado', true)->count(),
+        ];
+
+        // --- SECCIÓN 2: TENDENCIA (Últimos 6 meses) ---
+        $mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        // Agrupamos por mes
+        $tendenciaRaw = Dotacion::selectRaw("MONTH(fecha_entrega) as mes, COUNT(*) as total")
+            ->where('fecha_entrega', '>=', now()->subMonths(6))
+            ->groupByRaw("MONTH(fecha_entrega)")
+            ->orderBy('mes')
+            ->get();
+
+        $labelsMeses = [];
+        $dataValores = [];
+
+        // Llenamos los arrays para ChartJS
+        foreach ($tendenciaRaw as $t) {
+            $labelsMeses[] = $mesesNombres[$t->mes - 1]; // Ajuste índice array (0-11)
+            $dataValores[] = $t->total;
+        }
+
+        // --- SECCIÓN 3: TOP 5 DEPARTAMENTOS (Mapa de Consumo) ---
+        // Hacemos join con pacientes para obtener el departamento
+        $topDepartamentos = Dotacion::join('med_pacientes', 'med_dotaciones.paciente_id', '=', 'med_pacientes.id')
+            ->select('med_pacientes.des_depart as departamento', DB::raw('count(*) as total'))
+            ->whereYear('med_dotaciones.fecha_entrega', now()->year)
+            ->groupBy('med_pacientes.des_depart')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        // --- SECCIÓN 4: TOP 5 PACIENTES (Frecuencia) ---
+        $topPacientes = Dotacion::with('paciente')
+            ->select('paciente_id', DB::raw('count(*) as total'))
+            ->whereYear('fecha_entrega', now()->year)
+            ->groupBy('paciente_id')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        return view('MedicinaOcupacional.dotaciones.index', compact('stats', 'labelsMeses', 'dataValores', 'topDepartamentos', 'topPacientes'));
+    }
+
+    // MÉTODO CREATE MODIFICADO
+    public function create($paciente_id)
+    {
+        $paciente = Paciente::findOrFail($paciente_id);
+        
+        // 1. Traemos TODO lo que empiece por 308 (Seguridad Industrial) con Stock > 0
+        $rawArticulos = DB::connection('sqlsrv_administrativo')
+            ->table('art')
+            ->select('co_art', 'art_des', 'stock_act')
+            ->where('co_art', 'LIKE', '308%')
+            //->where('stock_act', '>', 0) // Solo lo que hay en existencia
+            ->get();
+
+        // 2. Clasificamos en colecciones para facilitar la vista
+        $stock = [
+            'botas' => $rawArticulos->filter(fn($a) => Str::contains(strtoupper($a->art_des), ['BOTA', 'ZAPATO', 'CALZADO'])),
+            'pantalones' => $rawArticulos->filter(fn($a) => Str::contains(strtoupper($a->art_des), ['PANTALON'])),
+            'camisas' => $rawArticulos->filter(fn($a) => Str::contains(strtoupper($a->art_des), ['CAMISA', 'FRANELA', 'CHEMISE'])),
+            // Todo lo que NO sea lo anterior, va a "Otros"
+            'otros' => $rawArticulos->filter(fn($a) => !Str::contains(strtoupper($a->art_des), ['BOTA', 'ZAPATO', 'PANTALON', 'JEAN', 'CAMISA', 'FRANELA']))
+        ];
+
+        return view('MedicinaOcupacional.dotaciones.create', compact('paciente', 'stock'));
+    }
+
+    // MÉTODO STORE MODIFICADO
+    public function store(Request $request)
+    {
+        // Validaciones básicas...
+        $request->validate(['motivo' => 'required', 'firma_digital' => 'required']);
+
+        $data = $request->all();
+        $data['user_id'] = Auth::id();
+        $data['fecha_entrega'] = now();
+        $data['qr_token'] = Str::random(40);
+        $data['entregado_en_almacen'] = false; // Nace falso, espera confirmación
+
+        // Guardamos los checkbos booleanos
+        $data['calzado_entregado'] = $request->has('co_art_calzado') && $request->co_art_calzado != null;
+        $data['pantalon_entregado'] = $request->has('co_art_pantalon') && $request->co_art_pantalon != null;
+        $data['camisa_entregado'] = $request->has('co_art_camisa') && $request->co_art_camisa != null;
+
+        // Procesamos el Select2 Múltiple de Otros EPP (Array a JSON)
+        if($request->has('otros_epp_codigos')){
+            $data['otros_epp_codigos'] = json_encode($request->otros_epp_codigos);
+            // Opcional: Guardar los nombres en texto plano en el campo viejo 'otros_epp' para lectura humana rápida
+            $data['otros_epp'] = "Artículos varios según códigos: " . implode(", ", $request->otros_epp_codigos);
+        }
+
+        $dotacion = Dotacion::create($data);
+
+        // --- DISPARAR CORREO AL ALMACÉN ---
+        // Usamos try-catch para que si falla el correo, no rompa el guardado
+        try {
+            // Define el correo del jefe de almacén o una lista de distribución
+            Mail::to('lrojas@granjaboraure.com')
+                ->cc('info@granjaboraure.com')
+                ->queue(new NuevaDotacionMail($dotacion)); 
+                // Usamos queue (cola) para que el usuario no espere a que se envíe el mail
+        } catch (\Exception $e) {
+            \Log::error("Error enviando correo de dotación: " . $e->getMessage());
+        }
+
+        // Enviamos el ID de la consulta para que la vista sepa cuál imprimir
+            return redirect()->route('medicina.dotaciones.index')
+                             ->with('success', 'Dotación registrada exitosamente.')
+                             ->with('print_id', $dotacion->id);
+    }
+
+    public function exportar(Request $request) 
+    {
+        $desde = $request->get('desde');
+        $hasta = $request->get('hasta');
+        $motivo = $request->get('motivo');
+
+        $nombreArchivo = "Dotaciones_{$desde}_al_{$hasta}.xlsx";
+
+        return (new DotacionesExport($desde, $hasta, $motivo))->download($nombreArchivo);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////
 
      public function index2()
     {
@@ -43,7 +190,7 @@ class DotacionController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function create($paciente_id)
+    public function createold($paciente_id)
     {
         $paciente = Paciente::findOrFail($paciente_id);
         $stockProfit = DB::connection('sqlsrv_administrativo')
@@ -56,7 +203,7 @@ class DotacionController extends Controller
         return view('MedicinaOcupacional.dotaciones.create', compact('paciente' , 'stockProfit'));
     }
 
-    public function store(Request $request)
+    public function storeold(Request $request)
     {
 
         $request->validate([
@@ -74,6 +221,7 @@ class DotacionController extends Controller
         $data['calzado_entregado'] = $request->has('calzado_entregado');
         $data['pantalon_entregado'] = $request->has('pantalon_entregado');
         $data['camisa_entregado'] = $request->has('camisa_entregado');
+        $data['otros_epp'] = $request->has('otros_epp');
 
         Dotacion::create($data);
 

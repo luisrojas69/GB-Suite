@@ -30,6 +30,9 @@ class CreateMedPacientesTable extends Migration
             $table->integer('cantidad_hijos')->nullable();
             $table->float('sueldo_mensual')->nullable();
             $table->text('observaciones')->nullable();
+            $table->string('avisar_a')->nullable();
+            $table->string('telf_contact')->nullable();
+            $table->text('dir_contact')->nullable();
 
             
             // Datos Laborales
@@ -39,22 +42,19 @@ class CreateMedPacientesTable extends Migration
             $table->string('co_cargo', 20);
             $table->string('des_cargo');
             $table->char('status', 2); // A: Activo, V: Vacaciones, L: Liquidado
+            $table->boolean('validado_medico')->default(false); //para determinar si ya fue editado manualmente por el Medico
             $table->string('co_ubicacion', 20)->nullable();
 
             // Salud y Discapacidad (Datos Profit Nativos)
-            $table->boolean('discapacitado')->default(false);
-            $table->string('tipo_discapac')->nullable();
-            $table->string('avisar_a')->nullable();
-            $table->string('telf_contact')->nullable();
-            $table->text('dir_contact')->nullable();
-
-
             // Datos Extendidos GB Suite (Editables por el médico)
             $table->string('tipo_sangre', 5)->nullable();
             $table->float('peso_inicial')->nullable();
             $table->float('estatura')->nullable();
             $table->boolean('es_zurdo')->default(false);
             $table->text('alergias')->nullable();
+            $table->boolean('discapacitado')->default(false);
+            $table->string('tipo_discapac')->nullable();
+            $table->boolean('de_vacaciones')->default(false);
             $table->date('fecha_retorno_vacaciones')->nullable();
             $table->text('enfermedades_base')->nullable();
             $table->string('foto_path')->nullable();

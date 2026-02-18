@@ -889,7 +889,7 @@ $(document).ready(function() {
         if(filter === 'all') {
             table.search('').columns().search('').draw();
         } else if(filter === 'active') {
-            table.column(5).search('Activo').draw();
+            table.column(4).search('Activo').draw();
         } else if(filter === 'critical') {
             table.column(3).search('Patología').draw();
         } else if(filter === 'disability') {

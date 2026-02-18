@@ -27,9 +27,9 @@ class DashboardMedicinaController extends Controller
         // 2. Tendencia de Consultas (Últimos 6 meses)
         // Usamos una colección para asegurar que los meses tengan nombres en español
         $mesesNombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        $tendenciaRaw = Consulta::selectRaw("MONTH(created_at) as mes, COUNT(*) as total")
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupByRaw("MONTH(created_at)")
+        $tendenciaRaw = Consulta::selectRaw("MONTH(fecha_consulta) as mes, COUNT(*) as total")
+            ->where('fecha_consulta', '>=', now()->subMonths(6))
+            ->groupByRaw("MONTH(fecha_consulta)")
             ->orderBy('mes')
             ->get();
 
@@ -44,19 +44,21 @@ class DashboardMedicinaController extends Controller
 
         // 3. KPIs Rápidos
         $data['total_personal'] = Paciente::count();
-        $data['consultas_mes'] = Consulta::whereMonth('created_at', $mes_actual)->count();
+        $data['consultas_mes'] = Consulta::whereMonth('fecha_consulta', $mes_actual)->count();
         $data['accidentes_mes'] = Accidente::whereMonth('fecha_hora_accidente', $mes_actual)->count();
         $data['dotaciones_mes'] = Dotacion::whereMonth('fecha_entrega', $mes_actual)->count();
         
         // 4. Alertas (Sintaxis SQL Server)
         $data['alertas_reposo'] = Consulta::where('genera_reposo', 1)
-            ->whereRaw("CAST(DATEADD(day, dias_reposo, created_at) AS DATE) = ?", [$hoy])->count();
-        $data['alertas_vacas'] = Paciente::whereDate('fecha_retorno_vacaciones', $hoy)->count();
+            ->whereRaw("CAST(DATEADD(day, dias_reposo, fecha_consulta) AS DATE) = ?", [$hoy])->count();
+        $data['alertas_vacas'] = Paciente::where('de_vacaciones', 1)
+            ->whereDate('fecha_retorno_vacaciones', '<=' ,$hoy)
+            ->count();
 
         // 5. Tendencia de Consultas (Últimos 6 meses para la gráfica)
-        $data['tendencia'] = Consulta::selectRaw("MONTH(created_at) as mes, COUNT(*) as total")
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupByRaw("MONTH(created_at)")
+        $data['tendencia'] = Consulta::selectRaw("MONTH(fecha_consulta) as mes, COUNT(*) as total")
+            ->where('fecha_consulta', '>=', now()->subMonths(6))
+            ->groupByRaw("MONTH(fecha_consulta)")
             ->orderBy('mes')
             ->get();
 
@@ -64,8 +66,8 @@ class DashboardMedicinaController extends Controller
         $topPacientes = Consulta::with('paciente')
             ->select('paciente_id')
             ->selectRaw('COUNT(*) as total')
-            ->whereMonth('created_at', $mes_actual)
-            ->whereYear('created_at', $anio_actual)
+            ->whereMonth('fecha_consulta', $mes_actual)
+            ->whereYear('fecha_consulta', $anio_actual)
             ->groupBy('paciente_id')
             ->orderByDesc('total')
             ->limit(5)

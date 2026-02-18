@@ -1,5 +1,135 @@
 @extends('layouts.app')
+@section('styles')
+{{-- Estilos adicionales --}}
+<style>
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.badge-lg {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+@media print {
+    .btn, .card-header, .alert-warning, .no-print,
+    .navbar, .sidebar, footer {
+        display: none !important;
+    }
+    .card {
+        page-break-inside: avoid;
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+    /* ========================================
+       MODAL MEJORADO
+    ======================================== */
+    .modal-enhanced .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-enhanced .modal-header {
+        background: linear-gradient(135deg, #5a5c69, #373840);
+        color: white;
+        padding: 20px 25px;
+        border-radius: 12px 12px 0 0;
+        border: none;
+    }
+
+    .modal-enhanced .modal-title {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .modal-enhanced .modal-body {
+        padding: 0;
+    }
+
+    .modal-detail-section {
+        padding: 25px;
+    }
+
+    .detail-section-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #858796;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+    }
+
+    .detail-value-primary {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4e73df;
+        margin-bottom: 10px;
+    }
+
+    .detail-item-modal {
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .detail-item-modal strong {
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    .items-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .items-list li {
+        padding: 12px 15px;
+        background: #f8f9fc;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+
+    .items-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .observations-box {
+        background: #f8f9fc;
+        padding: 18px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .signature-box {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fc;
+        border-radius: 8px;
+    }
+
+    .signature-box img {
+        max-height: 150px;
+        border: 2px solid #e3e6f0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+</style>
+
+@endsection
 @section('content')
 <div class="container-fluid">
     {{-- Mensajes de sesión --}}
@@ -266,9 +396,9 @@
                                         <strong class="small">{{ $accidente->created_at->format('d/m/Y') }}</strong>
                                     </div>
                                     <div class="border-left border-right px-3">
-                                        <i class="fas fa-user-tie fa-2x text-info mb-2"></i>
+                                        <i class="fas fa-user-secret fa-2x text-info mb-2"></i>
                                         <div class="small text-muted">Investigador</div>
-                                        <strong class="small">{{ $accidente->user->name }}</strong>
+                                        <strong class="small">{{ $accidente->user->name ." ".$accidente->user->last_name }}</strong>
                                     </div>
                                     <div>
                                         <i class="fas fa-clock fa-2x text-warning mb-2"></i>
@@ -315,6 +445,18 @@
                                         <i class="fas fa-notes-medical"></i> Lesión Detallada
                                     </strong>
                                     <p class="mb-0 text-justify">{{ $accidente->lesion_detallada }}</p>
+                                    <hr class="sidebar-divider">
+                                    <p class="mb-0 text-justify"><strong>Partes Lesionadas:</strong> 
+                                        <span class="badge badge-info badge-lg px-3 py-2">
+                                            {{ $accidente->parte_lesionada }}
+                                        </span>
+                                    </p>
+                                    <hr class="sidebar-divider">
+                                    <p class="mb-0 text-justify"><strong>Gravedad:</strong> 
+                                        <span class="badge badge-warning badge-lg px-3 py-2">
+                                            {{ $accidente->gravedad }}
+                                        </span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -384,16 +526,52 @@
                     @endif
 
                     {{-- Acciones Correctivas --}}
-                    <div>
+                    <div class="mb-4">
                         <div class="alert alert-success border-left-success mb-0">
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-check-double fa-2x mr-3 text-success"></i>
                                 <div>
                                     <strong class="text-uppercase small d-block mb-2">
-                                        <i class="fas fa-tasks"></i> Acciones Correctivas Implementadas
+                                        <i class="fas fa-tshirt"></i> Acciones Correctivas Implementadas
                                     </strong>
                                     <p class="mb-0 small">{{ $accidente->acciones_correctivas }}</p>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {{-- Ultima Dotacion --}}
+                    <div>
+                        <div class="alert alert-info border-left-info mb-0">
+                            <div class="d-flex align-items-center">
+                                
+                                <i class="fas fa-box-open fa-2x mr-3 text-info"></i>
+                                
+                                <div>
+                                    <strong class="text-uppercase small d-block mb-1">
+                                        <i class="fas fa-tshirt"></i> Última Dotación
+                                    </strong>
+                                    <p class="mb-0 small">Historial de entregas del paciente</p>
+                                </div>
+
+                                @php
+                                    $ultimaDotacion = \App\Models\MedicinaOcupacional\Dotacion::where('paciente_id', $accidente->paciente->id)
+                                        ->where('entregado_en_almacen', true)
+                                        ->latest()
+                                        ->first();
+                                @endphp
+
+                                <div class="ml-auto">
+                                    @if($ultimaDotacion)
+                                        <button type="button" class="btn btn-sm btn-info shadow-sm btnShow" data-id="{{ $ultimaDotacion->id }}" title="Ver Ultima Dotacion">
+                                            <i class="fas fa-history"></i> Ver EPP / Última Dotación
+                                        </button>
+                                    @else
+                                        <span class="badge badge-secondary">Sin registros</span>
+                                    @endif
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -501,38 +679,29 @@
     </div>
 </div>
 
-{{-- Estilos adicionales --}}
-<style>
-.icon-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.badge-lg {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-}
+<!-- MODAL DE DETALLES -->
+<div class="modal fade modal-enhanced" id="modalShowDotacion" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle mr-2"></i>Detalles de la Ultima Dotación
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="detalleContenido"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-2"></i>Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-@media print {
-    .btn, .card-header, .alert-warning, .no-print,
-    .navbar, .sidebar, footer {
-        display: none !important;
-    }
-    .card {
-        page-break-inside: avoid;
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-    }
-    body {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-    }
-}
-</style>
 @endsection
 
 @section('scripts')
@@ -540,6 +709,56 @@
 // Animación de entrada suave
 $(document).ready(function() {
     $('.card').hide().fadeIn(800);
+
+
+// ========================================
+// VER DETALLES (MODAL)
+// ========================================
+$(document).on('click', '.btnShow', function() {
+    let id = $(this).data('id');
+    $.get(`/medicina/dotaciones/${id}`, function(data) {
+        let itemsHtml = '';
+        if(data.co_art_calzado) itemsHtml += `<li><i class="fas fa-shoe-prints text-success mr-2"></i><strong>Calzado:</strong> ${data.co_art_calzado} (Talla: ${data.calzado_talla})</li>`;
+        if(data.co_art_pantalon) itemsHtml += `<li><i class="fas fa-user-tag text-primary mr-2"></i><strong>Pantalón:</strong> ${data.co_art_pantalon} (Talla: ${data.pantalon_talla})</li>`;
+        if(data.co_art_camisa) itemsHtml += `<li><i class="fas fa-tshirt text-warning mr-2"></i><strong>Camisa:</strong> ${data.co_art_camisa} (Talla: ${data.camisa_talla})</li>
+             <div class="detail-item-modal"><strong>Fecha Despacho Almacén:</strong> ${data.fecha_despacho_almacen}</div>`;
+
+        let html = `
+            <div class="modal-detail-section">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-section-title">Información del Trabajador</div>
+                        <div class="detail-value-primary">${data.paciente.nombre_completo}</div>
+                        <div class="detail-item-modal"><strong>Cédula:</strong> ${data.paciente.ci}</div>
+                        <div class="detail-item-modal"><strong>Departamento:</strong> ${data.paciente.des_depart}</div>
+                        <div class="detail-item-modal"><strong>Cargo:</strong> ${data.paciente.des_cargo || 'No especificado'}</div>
+                        <div class="detail-item-modal"><strong>Motivo:</strong> ${data.motivo}</div>
+                        <div class="detail-item-modal"><strong>Fecha Entrega SSL:</strong> ${data.fecha_entrega}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-section-title">Items Autorizados</div>
+                        <ul class="items-list">
+                            ${itemsHtml || '<li>No se especificaron items</li>'}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="observations-box">
+                    <div class="detail-section-title">Observaciones del Servicio SSL</div>
+                    <p class="mb-0">${data.observaciones || 'Sin observaciones registradas.'}</p>
+                </div>
+
+                <div class="signature-box mt-3">
+                    <div class="detail-section-title">Firma de Conformidad del Trabajador</div>
+                    <img src="${data.firma_digital}" class="img-fluid" alt="Firma">
+                </div>
+            </div>
+        `;
+        $('#detalleContenido').html(html);
+        $('#modalShowDotacion').modal('show');
+    });
+});
+
 });
 </script>
 @endsection

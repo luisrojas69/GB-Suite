@@ -19,25 +19,29 @@ return new class extends Migration
             
             // Equipos entregados (Podemos usar JSON o campos fijos según tu preferencia)
             $table->string('calzado_talla')->nullable();
+            $table->string('co_art_calzado')->nullable();
             $table->boolean('calzado_entregado')->default(false);
             
             $table->boolean('entregado_en_almacen')->default(false);
             $table->date('fecha_despacho_almacen')->nullable();
 
             $table->string('pantalon_talla')->nullable();
+            $table->string('co_art_pantalon')->nullable();
             $table->boolean('pantalon_entregado')->default(false);
             
             $table->string('camisa_talla')->nullable();
+             $table->string('co_art_camisa')->nullable();
             $table->boolean('camisa_entregado')->default(false);
             
             $table->text('otros_epp')->nullable(); // Ej: Casco, Lentes, Guantes
+             $table->json('otros_epp_codigos')->nullable();
             $table->text('observaciones')->nullable();
 
             $table->longText('firma_digital')->nullable(); // Guardará el trazo de la firma
             $table->string('qr_token')->unique(); // Para validar el ticket después
             
             $table->foreignId('user_id')->constrained('users'); // Quién entrega
-            $table->timestamps();
+            $table->timestamps();       
         });
     }
 

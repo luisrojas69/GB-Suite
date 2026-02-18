@@ -93,6 +93,21 @@
         </div>
     </div>
 
+    {{-- Aviso de datos no validados --}}
+    @if($paciente->validado_medico == false)
+        <div class="alert alert-warning alert-dismissible fade show shadow-lg border-left-warning" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bell fa-2x mr-3"></i>
+                <div>
+                    <strong>¡Aviso!</strong> Los datos Biometricos y Medicos de este paciente fueron extraidos desde Profit Plus Nómina y No han sido modificados en este sistema. (Realice al menos un cambio para validar su revisión)
+                </div>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
     {{-- Tarjetas de Estadísticas --}}
     <div class="row">
         <div class="col-lg-3 col-md-6 mb-4">

@@ -19,8 +19,8 @@ class ReporteSaludController extends Controller
 
         $data = Consulta::select('diagnostico_cie10')
             ->selectRaw('COUNT(*) as total')
-            ->whereMonth('created_at', $mes)
-            ->whereYear('created_at', $anio)
+            ->whereMonth('fecha_consulta', $mes)
+            ->whereYear('fecha_consulta', $anio)
             ->groupBy('diagnostico_cie10')
             ->orderByDesc('total')
             ->get();
@@ -72,7 +72,7 @@ class ReporteSaludController extends Controller
                 END as sistema
             ")
             ->selectRaw('COUNT(*) as total')
-            ->whereYear('created_at', $anioActual)
+            ->whereYear('fecha_consulta', $anioActual)
             ->groupByRaw("
                 CASE 
                     WHEN diagnostico_cie10 LIKE 'M%' THEN 'Osteomuscular (Espalda/Huesos)'

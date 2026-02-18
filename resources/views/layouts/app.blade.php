@@ -67,7 +67,7 @@
         <footer class="sticky-footer bg-white">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <span>Sistema desarrollado por: <a href="https://github.com/luisrojas69" target="_blank">Ing. Luis Rojas</a>. {{ now()->year }} | Versi&oacute;n 1.0</span>
+                    <span>Sistema desarrollado por: <a href="https://github.com/luisrojas69" target="_blank">Ing. Luis Rojas</a>. {{ now()->year }} | Versi&oacute;n 2.0</span>
                 </div>
             </div>
         </footer>

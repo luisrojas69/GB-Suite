@@ -13,8 +13,8 @@ class SyncPacientes extends Command
 
    public function handle()
     {
-        $this->info('Iniciando sincronización de personal desde Profit...');
-
+        $this->info('Iniciando sincronización inteligente...');
+        
         try {
             $empleadosProfit = DB::connection('sqlsrv_nomina')
                 ->table('snemple as e')
@@ -34,16 +34,13 @@ class SyncPacientes extends Command
                 )
                 ->get();
 
-            $count = 0;
-
             foreach ($empleadosProfit as $emp) {
-                $grupoSangre = trim($emp->grupo_sang);
-                $tipo_sangre = ($grupoSangre === 'ND' || empty($grupoSangre)) ? null : $grupoSangre;
-                $estaturaCm = ($emp->estatura > 0) ? (float)$emp->estatura * 100 : null;
-                Paciente::updateOrCreate(
-                    ['cod_emp' => trim($emp->cod_emp)],
-                    [
-                        'ci' => trim(str_replace(['-', '.'], '', $emp->ci)),
+                $codEmp = trim($emp->cod_emp);
+                $paciente = Paciente::where('cod_emp', $codEmp)->first();
+
+                // Preparar datos de IDENTIDAD (Siempre se actualizan)
+                $datosIdentidad = [
+                        'ci' => substr(trim(str_replace(['-', '.'], '', $emp->ci)), 0, 20), //hacer esto con todos 
                         'rif' => trim(str_replace(['-', '.'], '', $emp->rif)),
                         'lugar_nac' => $emp->lugar_nac,
                         'estado' => $emp->estado,
@@ -64,78 +61,109 @@ class SyncPacientes extends Command
                         'co_cargo' => trim($emp->co_cargo),
                         'des_cargo' => trim($emp->des_cargo),
                         'status' => substr(trim($emp->status), 0, 1),
-                        'discapacitado' => $emp->discapacitado,
-                        'tipo_discapac' => $emp->tipo_discapac,
                         'avisar_a' => $emp->avisar_a,
                         'telf_contact' => $emp->telf_contact,
                         'dir_contact' => $emp->dir_contact,
                         'sueldo_mensual' => round((float)$emp->sueldo_mensual, 2),
                         'cantidad_hijos' => $emp->cantidad_hijos,
-                        'es_zurdo' => $emp->zurdo ?? false,
-                        'peso_inicial'   => round((float)$emp->peso, 2),
+
+                ];
+
+                if (!$paciente) {
+                    // CASO 1: NO EXISTE - Semilla inicial completa
+                    $this->line("Creando nuevo paciente: {$codEmp}");
+
+                    $grupoSangre = trim($emp->grupo_sang);
+                    $tipo_sangre = ($grupoSangre === 'ND' || empty($grupoSangre)) ? null : $grupoSangre;
+                    $estaturaCm = ($emp->estatura > 0) ? (float)$emp->estatura * 100 : null;
+                    
+                    $datosClinicosIniciales = [
+                        'cod_emp' => $codEmp,
+                        'peso_inicial' => round((float)$emp->peso, 2),
+                        'estatura' => $estaturaCm,
+                        'tipo_sangre' => $tipo_sangre,
+                        'alergias' => $emp->alergico_a,
                         'talla_calzado' => $emp->talla_zap,
                         'talla_pantalon' => $emp->talla_pant,
                         'talla_camisa' => $emp->talla_camisa,
-                        'estatura' => $estaturaCm,
-                        'tipo_sangre' => $tipo_sangre,
-                        'alergias' => $emp->alergico_a
+                        'discapacitado' => $emp->discapacitado,
+                        'tipo_discapac' => $emp->tipo_discapac,
+                        'es_zurdo' => $emp->zurdo ?? false,
+                        'validado_medico' => false // Por defecto
+                    ];
+                    
+                    Paciente::create(array_merge($datosIdentidad, $datosClinicosIniciales));
+                    
+                } else {
+                    // CASO 2: YA EXISTE - Actualización selectiva
+                    
+                    // Si el médico YA validó, solo actualizamos identidad
+                    if ($paciente->validado_medico) {
+                        $this->line("Actualizando datos de identidad de empleado: {$codEmp}");
+                        $paciente->update($datosIdentidad);
+                    } else {
+                        // Si NO ha sido validado, actualizamos identidad + huecos clínicos
+                        $this->line("Actualizando datos de identidad y medicos del empleado: {$codEmp}");
+                        $datosUpdate = $datosIdentidad;
 
-                    ]
-                );
-                $count++;
+                        // Lógica de "Llenar solo si está vacío en GbSuite"
+                        if (empty($paciente->tipo_sangre)) {
+                            $grupo = trim($emp->grupo_sang);
+                            $datosUpdate['tipo_sangre'] = ($grupo !== 'ND' && !empty($grupo)) ? $grupo : null;
+                        }
+                        
+                        if (empty($paciente->peso_inicial)) {
+                            $datosUpdate['peso_inicial'] = round((float)$emp->peso, 2);
+                        }
+
+                        if (empty($paciente->estatura)) {
+                            $estaturaCm = ($emp->estatura > 0) ? (float)$emp->estatura * 100 : null;
+                            $datosUpdate['estatura'] = $estaturaCm;
+                        }
+
+                        if (empty($paciente->alergias)) {
+                            $datosUpdate['alergias'] = $emp->alergico_a;
+                        }
+
+                        if (empty($paciente->es_zurdo)) {
+                           $datosUpdate['es_zurdo'] = $emp->zurdo ?? false;
+                        }
+
+                        if (empty($paciente->discapacitado)) {
+                           $datosUpdate['discapacitado'] = $emp->discapacitado;
+                        }
+
+                        if (empty($paciente->tipo_discapac)) {
+                           $datosUpdate['tipo_discapac'] = $emp->tipo_discapac;
+                        }
+
+                        //Tallas
+                        if (empty($paciente->talla_calzado)) {
+                           $datosUpdate['talla_calzado'] = $emp->talla_zap;
+                        }
+
+                        if (empty($paciente->talla_pantalon)) {
+                           $datosUpdate['talla_pantalon'] = $emp->talla_pant;
+                        }
+
+                        if (empty($paciente->talla_camisa)) {
+                           $datosUpdate['talla_camisa'] = $emp->talla_camisa;
+                        }
+
+                        
+                        $paciente->update($datosUpdate);
+                    }
+                }
             }
 
-            // Marcar como 'L' a los que ya no están en nómina
+            // Marcar bajas (Estatus 'L' para los que no vinieron en el fetch)
             $codigosActivos = $empleadosProfit->pluck('cod_emp')->map(fn($item) => trim($item))->toArray();
             Paciente::whereNotIn('cod_emp', $codigosActivos)->update(['status' => 'L']);
 
-            $this->info("Sincronización completada. Se procesaron {$count} registros.");
+            $this->info("Sincronización finalizada.");
 
         } catch (\Exception $e) {
-            $this->error("Error en la sincronización: " . $e->getMessage());
+            $this->error("Error: " . $e->getMessage());
         }
-    }
-
-
-    public function handle_completo()
-    {
-        //Trae todos los trabajadores Incluyendo Egresados
-        $this->info('Iniciando sincronización desde Profit Nómina...');
-
-        // 1. Obtenemos los empleados desde la conexión sqlsrv_nomina
-        $empleadosProfit = DB::connection('sqlsrv_nomina')
-            ->table('snemple as e')
-            ->join('sndepart as d', 'e.co_depart', '=', 'd.co_depart')
-            ->join('sncargo as c', 'e.co_cargo', '=', 'c.co_cargo')
-            ->select(
-                'e.cod_emp', 'e.ci', 'e.nombre_completo', 'e.sexo', 'e.fecha_nac',
-                'e.fecha_ing', 'e.status', 'e.direccion', 'e.telefono', 'e.edo_civ',
-                'd.co_depart', 'd.des_depart', 'c.co_cargo', 'c.des_cargo',
-                'e.discapacitado', 'e.tipo_discapac', 'e.co_cert', 'e.fecha_venc'
-            )->get();
-
-        foreach ($empleadosProfit as $emp) {
-            Paciente::updateOrCreate(
-                ['cod_emp' => trim($emp->cod_emp)],
-                [
-                    'ci' => trim(str_replace(['-', '.'], '', $emp->ci)),
-                    'nombre_completo' => trim($emp->nombre_completo),
-                    'sexo' => $emp->sexo,
-                    'fecha_nac' => $emp->fecha_nac,
-                    'fecha_ing' => $emp->fecha_ing,
-                    'co_depart' => trim($emp->co_depart),
-                    'des_depart' => trim($emp->des_depart),
-                    'co_cargo' => trim($emp->co_cargo),
-                    'des_cargo' => trim($emp->des_cargo),
-                    'status' => trim($emp->status), // Limpia espacios como "A " o "V "
-                    'discapacitado' => $emp->discapacitado,
-                    'tipo_discapac' => $emp->tipo_discapac,
-                    'co_cert' => $emp->co_cert,
-                    'fecha_venc_cert' => $emp->fecha_venc,
-                ]
-            );
-        }
-
-        $this->info('Sincronización completada con éxito.');
     }
 }

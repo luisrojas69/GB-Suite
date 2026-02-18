@@ -14,8 +14,16 @@ return new class extends Migration
         Schema::create('med_consultas', function (Blueprint $table) {
         $table->id();
         $table->foreignId('paciente_id')->constrained('med_pacientes');
+        $table->date('fecha_consulta');
         $table->string('motivo_consulta'); // Ej: Accidente, Control, Enfermedad Común
-        
+        $table->boolean('requiere_examenes')->default(false);
+        $table->enum('status_consulta', [
+            'Registrada', 
+            'Pendiente por exámenes', 
+            'En evaluación', 
+            'Cerrada'
+        ])->default('Cerrada');
+    
         // Signos Vitales
         $table->string('tension_arterial', 10)->nullable();
         $table->integer('frecuencia_cardiaca')->nullable(); // bpm
@@ -26,11 +34,18 @@ return new class extends Migration
         $table->text('anamnesis'); // Lo que el paciente cuenta
         $table->text('examen_fisico'); // Lo que el médico observa
         $table->string('diagnostico_cie10')->nullable(); // Código estándar médico
+        $table->string('diagnostico_descripcion')->nullable();
         $table->text('plan_tratamiento');
-        
+
         // Reposo y Aptitud
         $table->boolean('genera_reposo')->default(false);
         $table->integer('dias_reposo')->default(0);
+        $table->boolean('reincorporado')->default(false)->comment('Indica si el reposo ya tuvo su chequeo de retorno');
+        $table->boolean('tiene_accidente_vinculado')->default(false)->comment('Indica si la consulta tiene un acidnte vinculado');
+        //$table->unsignedBigInteger('accidente_id')->nullable(); // Relación opcional
+        //$table->foreign('accidente_id')->references('id')->on('med_accidentes');
+
+        $table->boolean('consulta_rapida')->default(false);
         $table->enum('aptitud', ['Apto', 'Apto con Restricción', 'No Apto'])->default('Apto');
         
         $table->foreignId('user_id')->constrained('users'); // Médico que atiende
