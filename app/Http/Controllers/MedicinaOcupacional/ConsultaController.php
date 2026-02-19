@@ -92,10 +92,15 @@ class ConsultaController extends Controller
     {
         // Agregamos 'orden' para poder mostrar los resultados si existen
         $consulta = Consulta::with(['paciente', 'medico', 'orden'])->findOrFail($id);
-        $archivos_orden = DB::table('med_paciente_archivos')
-                ->where('orden_id', $consulta->orden->id)
-                ->get();
-
+        // Verificamos si existe la relación orden antes de buscar archivos
+        if ($consulta->orden) {
+            $archivos_orden = DB::table('med_paciente_archivos')
+                    ->where('orden_id', $consulta->orden->id)
+                    ->get();
+        } else {
+            // Si no hay orden, devolvemos una colección vacía para evitar errores en el foreach de la vista
+            $archivos_orden = collect(); 
+        }
         return view('MedicinaOcupacional.consultas.show', compact('consulta', 'archivos_orden'));
     }
 
@@ -202,7 +207,8 @@ class ConsultaController extends Controller
             if ($request->has('requiere_examenes')) {
                 // Si requiere exámenes, vamos a la vista de creación de orden
                 return redirect()->route('medicina.ordenes.create', ['consulta_id' => $consulta->id])
-                                 ->with('success', 'Consulta guardada. Por favor, genere la orden de exámenes.');
+                                 ->with('success', 'Consulta guardada. Por favor, genere la orden de exámenes.')
+                                 ->with('print_id', $consulta->id);
             }
 
             // Si NO requiere, flujo normal al index

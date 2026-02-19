@@ -609,7 +609,14 @@
                                     @elseif($con->status_consulta == 'Pendiente por exámenes')
                                         <i class="fas fa-file-medical text-warning"></i> Pendiente por exámenes
                                     @endif
-                                </div>                                
+                                </div>
+                                 <div class="small text-muted">
+                                    @if($con->requiere_examenes==true && $con->orden)
+                                        <i class="fas fa-file-medical  text-info"></i> Orden Registrada
+                                    @elseif($con->requiere_examenes==true && !$con->orden)
+                                        <i class="fas fa-file-medical text-danger"></i> Orden NO Registrada
+                                    @endif
+                                </div>                                 
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">

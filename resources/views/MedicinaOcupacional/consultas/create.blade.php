@@ -924,7 +924,7 @@ $(document).ready(function() {
             $('input[name="dias_reposo"]').attr('min', '1').val('1');
         } else {
             $('#div_dias').slideUp();
-            $('input[name="dias_reposo"]').val(0);
+            $('input[name="dias_reposo"]').attr('min', '0').val('0');
         }
     });
 
@@ -1341,4 +1341,5 @@ $(document).ready(function() {
 
 });
 </script>
+
 @endsection

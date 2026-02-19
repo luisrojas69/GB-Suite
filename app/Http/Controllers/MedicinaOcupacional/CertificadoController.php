@@ -27,8 +27,26 @@ class CertificadoController extends Controller
                     ->setOption('print-media-type', true)
                     ->setOption('zoom', 0.90);
         
-        return $pdf->inline('Certificado_Aptitud_'.$paciente->cedula.'.pdf');
+        return $pdf->inline('Certificado_Aptitud_'.$paciente->ci.'.pdf');
     }
+
+    // 1. Certificado de Aptitud Física
+    public function reposo($consulta_id)
+    {
+        $consulta = Consulta::with(['paciente'])->findOrFail($consulta_id);
+
+        $pdf = PDF::loadView('MedicinaOcupacional.certificados.reposo', compact('consulta'))
+                    ->setPaper('letter')
+                    ->setOption('margin-top', '1.5cm')
+                    ->setOption('margin-right', '1.5cm')
+                    ->setOption('margin-bottom', '2cm')
+                    ->setOption('margin-left', '1.5cm')
+                    ->setOption('print-media-type', true)
+                    ->setOption('zoom', 0.90);
+        
+        return $pdf->inline('Certificado_Reposo_'.$consulta->paciente->ci.'.pdf');
+    }
+
 
     // 2. Constancia de Asistencia (Sin diagnóstico por confidencialidad)
     public function constancia($consulta_id)

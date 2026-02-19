@@ -40,11 +40,7 @@ return new class extends Migration
         $table->integer('dias_reposo')->default(0);
         $table->boolean('reincorporado')->default(false)->comment('Indica si el reposo ya tuvo su chequeo de retorno');
         $table->boolean('tiene_accidente_vinculado')->default(false)->comment('Indica si la consulta tiene un acidnte vinculado');
-        $table->unsignedBigInteger('accidente_id')->nullable();
-        // $table->foreign('accidente_id')->references('id')->on('med_accidentes');
-        // $table->unsignedBigInteger('orden_id')->nullable();
-        // $table->foreign('orden_id')->references('id')->on('med_ordenes_examenes');
-        // $table->boolean('consulta_rapida')->default(false);
+        $table->boolean('consulta_rapida')->default(false);
         $table->enum('aptitud', ['Apto', 'Apto con Restricción', 'No Apto'])->default('Apto');
         
         $table->foreignId('user_id')->constrained('users'); // Médico que atiende

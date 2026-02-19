@@ -1188,4 +1188,46 @@ $(document).ready(function() {
     });
 });
 </script>
+
+@if(session('print_id'))
+<script>
+    Swal.fire({
+        title: '¡Consulta Guardada Exitosamente!',
+        html: '<p>La atención médica ha sido registrada correctamente.</p> <p>Por favor genere la Orden de Examanes.</p> <p class="text-muted small">¿Desea imprimir el récipe ahora?</p>',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#4e73df',
+        cancelButtonColor: '#858796',
+        confirmButtonText: '<i class="fas fa-print"></i> Imprimir Récipe',
+        cancelButtonText: '<i class="fas fa-file-medical-alt"></i> Generar Orden de Examenes'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let timerInterval;
+        Swal.fire({
+          title: "No olvdide generar la orden de Examenes para esta consulta!",
+          html: "Redirigiendo al recipe en <b></b> millisegundos.",
+          timer: 5000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          }
+        }).then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+             window.open("{{ route('medicina.consultas.imprimir', session('print_id')) }}", '_blank');
+            console.log("I was closed by the timer");
+          }
+        });
+           
+        }
+    });
+</script>
+@endif
+
 @endsection

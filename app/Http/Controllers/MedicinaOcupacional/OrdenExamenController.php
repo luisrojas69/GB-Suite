@@ -25,7 +25,9 @@ class OrdenExamenController extends Controller
                 'hoy'        => $ordenes->where('created_at', '>=', now()->startOfDay())->count(),
             ];
 
-            return view('MedicinaOcupacional.ordenes.index', compact('ordenes', 'stats'));
+            $consultasSinOrden = Consulta::where('requiere_examenes', true)->whereDoesntHave('orden')->get();
+
+            return view('MedicinaOcupacional.ordenes.index', compact('ordenes', 'stats', 'consultasSinOrden'));
         }
 
         public function create(Request $request)
@@ -64,7 +66,7 @@ class OrdenExamenController extends Controller
             if ($consulta) {
                 $consulta->update([
                     'status_consulta' => 'Pendiente por exámenes' 
-                    // Podrías incluso concatenar los hallazgos al plan de tratamiento si quisieras
+                    // Podríamos aqui concatenar los hallazgos al plan de tratamiento (PREGUNTAR)
                 ]);
             }
 
@@ -72,7 +74,7 @@ class OrdenExamenController extends Controller
             // Redirigir al PDF o al Index
             return redirect()->route('medicina.ordenes.index')
                              ->with('success', 'Orden generada correctamente.')
-                             ->with('print_id', $orden->id); // Para abrir el PDF automáticamente si quieres
+                             ->with('print_id', $orden->id);
         }
 
         // Método para cambiar estatus (opcional, para usar con AJAX o botón simple)
@@ -178,4 +180,16 @@ class OrdenExamenController extends Controller
 
             return $pdf->inline('Orden_Medica_'.$orden->id.'.pdf');
         }
+
+        public function show($id)
+        {
+            $orden = OrdenExamen::with(['consulta', 'medico', 'paciente'])->findOrFail($id);
+
+            $archivos = DB::table('med_paciente_archivos')
+                    ->where('orden_id', $orden->id)
+                    ->get();
+            //return response()->json($orden);
+            return view('MedicinaOcupacional.ordenes.show', compact('orden', 'archivos'));
+        }
+
 }

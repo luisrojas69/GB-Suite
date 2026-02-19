@@ -72,7 +72,10 @@
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('medicina.pacientes.show', $consulta->paciente->id) }}">
-                                        <i class="fas fa-user text-secondary mr-2"></i> Ver Perfil del Paciente
+                                        <i class="fas fa-user text-success mr-2"></i> Ver Perfil del Paciente
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('medicina.consultas.historial', $consulta->paciente->id) }}">
+                                        <i class="fas fa-history text-info mr-2"></i> Ver Historial del Paciente
                                     </a>
                                     <a class="dropdown-item" href="{{ route('medicina.pacientes.index') }}">
                                         <i class="fas fa-users text-secondary mr-2"></i> Lista de Pacientes
@@ -599,6 +602,14 @@
                         {{-- CASO 1: RESULTADOS YA CARGADOS --}}
                         <div class="row">
                             <div class="col-md-8">
+                                <div class="alert alert-light border mb-4">
+                                                <label class="font-weight-bold text-xs text-uppercase">Exámenes que se solicitaron:</label>
+                                                <div class="mt-1">
+                                                    @foreach($consulta->orden->examenes as $examen)
+                                                        <span class="badge badge-info shadow-sm mr-1 mb-1 p-2"><i class="fas fa-microscope"></i> {{ $examen }}</span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
                                 <div class="alert alert-{{ $consulta->orden->interpretacion == 'Normal' ? 'success' : 'danger' }} mb-3">
                                     <div class="d-flex align-items-center">
                                         <div class="icon-circle bg-white text-{{ $consulta->orden->interpretacion == 'Normal' ? 'success' : 'danger' }} mr-3">
@@ -682,7 +693,7 @@
                             <div class="d-flex justify-content-center">
                                 @if($consulta->orden)
                                     {{-- Si ya existe la orden, botón para ir a cargar --}}
-                                    <a href="{{ route('medicina.ordenes.edit', $consulta->orden->id) }}" class="btn btn-warning btn-lg shadow px-4">
+                                    <a href="{{ route('medicina.ordenes.edit', $consulta->orden->id) }}" class="btn btn-info btn-lg shadow px-4">
                                         <i class="fas fa-upload mr-2"></i> Cargar Resultados Ahora
                                     </a>
                                 @else
@@ -700,7 +711,7 @@
     </div>
     @endif
     {{-- Observaciones y Datos Adicionales --}}
-    @if($consulta->observaciones || $consulta->examenes_solicitados)
+    @if($consulta->requiere_examenes)
     <div class="row">
         @if($consulta->observaciones)
         <div class="col-lg-6 mb-4">

@@ -32,6 +32,7 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
       Route::post('/ordenes/store', [OrdenExamenController::class, 'store'])->name('ordenes.store');
       Route::get('/ordenes/{id}/edit', [OrdenExamenController::class, 'edit'])->name('ordenes.edit');
       Route::put('/ordenes/{id}', [OrdenExamenController::class, 'update'])->name('ordenes.update');
+      Route::get('/ordenes/{id}', [OrdenExamenController::class, 'show'])->name('ordenes.show');
 
       // Ruta extra para imprimir (PDF)
       Route::get('ordenes/{orden}/pdf', [OrdenExamenController::class, 'pdf'])->name('ordenes.pdf');
@@ -84,6 +85,7 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
       Route::get('reportes/accidentalidad', [ReporteSaludController::class, 'reporteAccidentalidad'])->name('reportes.accidentalidad');
       Route::get('reportes/vigilancia-epidemiologica', [ReporteSaludController::class, 'reporteVigilancia'])->name('reportes.vigilancia');
       Route::get('/aptitud/{paciente_id}', [CertificadoController::class, 'aptitud'])->name('pdf.aptitud');
+      Route::get('/reposo/{consulta_id}', [CertificadoController::class, 'reposo'])->name('pdf.reposo');
       Route::get('/constancia/{consulta_id}', [CertificadoController::class, 'constancia'])->name('pdf.constancia');
       Route::get('/historial/{paciente_id}', [CertificadoController::class, 'historial'])->name('pdf.historial');
       Route::get('/epp/{paciente_id}', [CertificadoController::class, 'entregaEpp'])->name('pdf.epp');
