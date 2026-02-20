@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Control de Accidentes Laborales')
 @section('styles')
 <style>
     .kpi-card {

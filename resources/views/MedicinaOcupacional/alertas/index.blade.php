@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Centro de Retornos Médicos')
 @section('styles')
 <style>
     /* ========================================
@@ -894,7 +894,7 @@
                                                     
                                                     // Usamos PHP_EOL para saltos de línea que mailto reconozca como %0D%0A
                                                     $cuerpoMensaje = "Estimado(a) $nombrePaciente," . "\r\n\r\n" .
-                                                        "Reciba un cordial saludo. Notamos que su fecha de retorno de vacaciones fue el ".$fechaFinReposo->format('d/m/Y')." . Por medio de la presente, le recordamos que, conforme a los protocolos de salud ocupacional, es indispensable realizar su evaluación médica de reincorporación (Post-Vacacional ) tras su periodo de ausencia." . "\r\n\r\n" .
+                                                        "Reciba un cordial saludo. Notamos que su fecha de retorno de vacaciones fue el ".$fechaRetorno->format('d/m/Y')." . Por medio de la presente, le recordamos que, conforme a los protocolos de salud ocupacional, es indispensable realizar su evaluación médica de reincorporación (Post-Vacacional ) tras su periodo de ausencia." . "\r\n\r\n" .
                                                         "Este paso es fundamental para validar su estado de salud actual y asegurar un retorno seguro a sus actividades laborales." . "\r\n\r\n" .
                                                         "Por favor, acuda al consultorio médico a la brevedad posible o póngase en contacto para agendar su cita." . "\r\n\r\n" .
                                                         "Atentamente," . "\r\n" .

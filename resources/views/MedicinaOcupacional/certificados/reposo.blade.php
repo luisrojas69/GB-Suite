@@ -51,20 +51,20 @@
         <div class="box-title">Datos del Trabajador</div>
         <table class="info-table">
             <tr>
-                <td class="label">Nombres y Apellidos:</td>
+                <td class="label">Apellidos y Nombres:</td>
                 <td class="value" colspan="3">{{ $consulta->paciente->nombre_completo }}</td>
             </tr>
             <tr>
                 <td class="label">Cédula de Identidad:</td>
                 <td class="value">{{ number_format($consulta->paciente->ci, 0, ',', '.') }}</td>
-                <td class="label">Ficha / Legajo:</td>
-                <td class="value">{{ $consulta->paciente->ficha ?? 'N/A' }}</td>
+                <td class="label">Ficha / Codigo:</td>
+                <td class="value">{{ $consulta->paciente->cod_emp ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <td class="label">Cargo:</td>
-                <td class="value">{{ $consulta->paciente->cargo ?? 'No definido' }}</td>
+                <td class="value">{{ $consulta->paciente->des_cargo ?? 'No definido' }}</td>
                 <td class="label">Departamento:</td>
-                <td class="value">{{ $consulta->paciente->departamento ?? 'No definido' }}</td>
+                <td class="value">{{ $consulta->paciente->des_depart ?? 'No definido' }}</td>
             </tr>
         </table>
     </div>
@@ -75,17 +75,18 @@
 
     <div class="diagnostico-box">
         <strong>Motivo de Consulta:</strong> {{ $consulta->motivo_consulta }}<br><br>
+        <strong>Fecha de Consulta:</strong> {{ \Carbon\Carbon::parse($consulta->fecha_consulta)->format('d/m/Y') }}<br><br>
         <strong>Diagnóstico Clínico (CIE-10):</strong> <span class="text-danger">{{ $consulta->diagnostico_cie10 ?? 'No especificado' }}</span>
     </div>
 
     <div class="reposo-highlight">
         Se otorga un reposo médico por <strong>{{ $consulta->dias_reposo }} DÍAS</strong> continuos.<br>
         <span style="font-size: 13px; color: #555; display: block; margin-top: 5px;">
-            Inicia el: <strong>{{ \Carbon\Carbon::parse($consulta->fecha_inicio_reposo)->format('d/m/Y') }}</strong> | 
-            Culmina el: <strong>{{ \Carbon\Carbon::parse($consulta->fecha_fin_reposo)->format('d/m/Y') }}</strong>
+            Inicia el: <strong>{{ \Carbon\Carbon::parse($consulta->fecha_consulta)->format('d/m/Y') }}</strong> | 
+            Culmina el: <strong>{{ \Carbon\Carbon::parse($consulta->fecha_consulta)->addDay(intval($consulta->dias_reposo))->format('d/m/Y') }}</strong>
         </span>
         <span class="text-primary" style="font-size: 13px; display: block; margin-top: 5px;">
-            <strong>Fecha de reintegro laboral: {{ \Carbon\Carbon::parse($consulta->fecha_fin_reposo)->addDay()->format('d/m/Y') }}</strong>
+            <strong>Fecha de reintegro laboral: {{ \Carbon\Carbon::parse($consulta->fecha_consulta)->addDay(intval($consulta->dias_reposo))->format('d/m/Y') }}</strong>
         </span>
     </div>
 

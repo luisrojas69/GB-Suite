@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title-page', 'Detalles del Accidente # : '.$accidente->id )
 @section('styles')
 {{-- Estilos adicionales --}}
 <style>

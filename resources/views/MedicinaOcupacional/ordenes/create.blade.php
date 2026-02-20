@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Orden de Exámenes Médicos')
 @section('styles')
 <style>
     /* ========================================

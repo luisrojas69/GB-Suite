@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title-page', 'Detalle de Orden Médica')
+@section('title-page', 'Detalle de Orden Médica#: '.$orden->id)
 
 @section('styles')
 <style>
@@ -269,6 +269,22 @@
 
     .btn-view-consultation:hover {
         background: #36b9cc;
+        color: white;
+    }
+
+    .btn-view-patient {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid #4e73df;
+        color: #4e73df;
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+    .btn-view-patient:hover {
+        background: #4e73df;
         color: white;
     }
 
@@ -802,6 +818,11 @@
                                 <i class="fas fa-user-injured"></i>
                                 Información del Trabajador
                             </h6>
+                            <a href="{{ route('medicina.pacientes.show', $orden->paciente->id) }}"
+                               title="Ver detalles del paciente"  
+                               class="btn-view-patient">
+                                <i class="fas fa-external-link-alt mr-1"></i>Ver
+                            </a>
                         </div>
 
                         <div class="patient-profile">
@@ -843,7 +864,8 @@
                                 <i class="fas fa-stethoscope" style="color: #36b9cc;"></i>
                                 Origen: Consulta #{{ $orden->consulta_id }}
                             </h6>
-                            <a href="{{ route('medicina.consultas.show', $orden->consulta_id) }}" 
+                            <a href="{{ route('medicina.consultas.show', $orden->consulta_id) }}"
+                               title="Ver detalles de la Consulta"  
                                class="btn-view-consultation">
                                 <i class="fas fa-external-link-alt mr-1"></i>Ver
                             </a>
@@ -991,7 +1013,7 @@
 
                     <!-- 2. Resultados (si está completada) -->
                     @if($orden->status_orden == 'Completada')
-                        <a href="#" 
+                        <a href="{{ route('medicina.pdf.resultados', $orden->id) }}" 
                            target="_blank" 
                            class="print-action-btn">
                             <div class="print-action-content">
@@ -1044,7 +1066,7 @@
 
                     <!-- 5. Orden de Reposo (condicional) -->
                     @if(isset($orden->consulta->genera_reposo) && $orden->consulta->genera_reposo == 1)
-                        <a href="#" 
+                        <a href="{{ route('medicina.pdf.reposo', $orden->consulta->id) }}" 
                            target="_blank" 
                            class="print-action-btn print-action-featured" 
                            style="border-left-color: #e74a3b;">

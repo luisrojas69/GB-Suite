@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Detalles del Paciente: '.$paciente->cod_emp )
 @section('content')
 <div class="container-fluid">
     {{-- Header con info del paciente --}}
@@ -20,6 +20,13 @@
                                 <i class="fas fa-briefcase"></i> {{ $paciente->des_cargo }} | 
                                 <i class="fas fa-map-marker-alt"></i> {{ $paciente->des_depart }}
                             </div>
+                            @if($paciente->validado_medico == true)
+                                <span class="text-white">
+                                    <i class="far fa-calendar-alt mr-2"></i>
+                                    Datos verificados por ultima vez el: {{ $paciente->updated_at->format('d/m/Y h:i A') }}
+                                </span>
+                            @endif
+                                
                         </div>
                         <div class="col-auto">
                             @if($paciente->status = 'A')
@@ -99,7 +106,10 @@
             <div class="d-flex align-items-center">
                 <i class="fas fa-bell fa-2x mr-3"></i>
                 <div>
-                    <strong>¡Aviso!</strong> Los datos Biometricos y Medicos de este paciente fueron extraidos desde Profit Plus Nómina y No han sido modificados en este sistema. (Realice al menos un cambio para validar su revisión)
+                    <strong>¡Aviso!</strong> Los datos Biometricos y Medicos de este paciente fueron extraidos desde Profit Plus Nómina y No han sido modificados en este sistema. 
+                    <a class="btnEdit" href="javascript:void(0)" data-id="{{ $paciente->id }}">
+                        <i class="fas fa-exclamation-triangle text-warning mr-2"></i> (Realice al menos un cambio para validar su revisión)
+                    </a>
                 </div>
             </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -210,7 +220,7 @@
                             <div class="border-left border-info pl-3">
                                 <small class="text-muted text-uppercase d-block">Edad</small>
                                 <strong class="text-gray-800">
-                                    <i class="fas fa-birthday-cake text-purple"></i> 
+                                    <i class="fas fa-birthday-cake text-success"></i> 
                                     @php
                                         $edad = \Carbon\Carbon::parse($paciente->fecha_nac)->age;
                                     @endphp
@@ -221,7 +231,7 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-12">
+                        <div class="col-6">
                             <div class="border-left border-info pl-3">
                                 <small class="text-muted text-uppercase d-block">Fecha de Nacimiento</small>
                                 <strong class="text-gray-800">
@@ -230,10 +240,19 @@
                                 </strong>
                             </div>
                         </div>
+                        <div class="col-6">
+                            <div class="border-left border-info pl-3">
+                                <small class="text-muted text-uppercase d-block">Teléfono</small>
+                                <strong class="text-gray-800">
+                                    <i class="fas fa-phone text-info"></i> 
+                                    {{ $paciente->telefono ?? 'N/A'  }}
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-12">
+                        <div class="col-6">
                             <div class="border-left border-success pl-3">
                                 <small class="text-muted text-uppercase d-block">Fecha de Ingreso</small>
                                 <strong class="text-gray-800">
@@ -243,10 +262,43 @@
                                 </strong>
                             </div>
                         </div>
+                        <div class="col-6">
+                            <div class="border-left border-info pl-3">
+                                <small class="text-muted text-uppercase d-block">Correo</small>
+                                <strong class="text-gray-800">
+                                    <i class="fas fa-fax text-info"></i> 
+                                    {{ $paciente->correo_e ?? 'N/A'  }}
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="border-left border-success pl-3">
+                                <small class="text-muted text-uppercase d-block">En Caso de Emergencia</small>
+                                <strong class="text-gray-800">
+                                    <i class="fas fa-ambulance text-danger"></i> 
+                                    <strong>{{ $paciente->avisar_a ?? 'N/A' }} - {{ $paciente->telf_contact ?? 'N/A'}}</strong>
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border-left border-info pl-3">
+                                <small class="text-muted text-uppercase d-block">Edo. Civil</small>
+                                <strong class="text-gray-800">
+                                    @if($paciente->edo_civ == 'S')
+                                        <i class="fas fa-people-pulling text-primary"></i> Soltero
+                                    @else
+                                        <i class="fas fa-people-arrows text-danger"></i> Casado
+                                    @endif
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col-6">
                             <div class="border-left border-{{ $paciente->discapacitado ? 'warning' : 'secondary' }} pl-3">
                                 <small class="text-muted text-uppercase d-block">Discapacidad</small>
                                 @if($paciente->discapacitado)
@@ -261,6 +313,15 @@
                                         <i class="fas fa-times-circle"></i> No
                                     </strong>
                                 @endif
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border-left border-info pl-3">
+                                <small class="text-muted text-uppercase d-block">N°. Hijos</small>
+                                <strong class="text-gray-800">
+                                    <i class="fas fa-baby text-primary"></i>
+                                    <strong>{{ $paciente->cantidad_hijos ?? 'N/A' }}</strong>
+                                </strong>
                             </div>
                         </div>
                     </div>
@@ -551,132 +612,179 @@
         </div>
     </div>
 
-    {{-- Modal de Edición --}}
-    <div class="modal fade" id="modalPaciente" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-gradient-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-user-md"></i> Ficha Médica: <span id="nombrePacienteTitle"></span>
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="formPaciente">
-                    @csrf
-                    <input type="hidden" id="paciente_id" name="id">
-                    <div class="modal-body">
-                        <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="tab-bio-tab" data-toggle="pill" href="#tab-bio">
-                                    <i class="fas fa-heartbeat"></i> Biometría
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-med-tab" data-toggle="pill" href="#tab-med">
-                                    <i class="fas fa-pills"></i> Médicos
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-talla-tab" data-toggle="pill" href="#tab-talla">
-                                    <i class="fas fa-tshirt"></i> Tallas y EPP
-                                </a>
-                            </li>
-                        </ul>
+    {{-- Modal mejorado --}}
+<div class="modal fade" id="modalPaciente" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-md"></i> Ficha Médica: <span id="nombrePacienteTitle" class="font-weight-bold"></span>
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formPaciente">
+                @csrf
+                <input type="hidden" id="paciente_id" name="id">
+                <div class="modal-body">
+                    <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab-bio-tab" data-toggle="pill" href="#tab-bio">
+                                <i class="fas fa-heartbeat fa-lg"></i><br>
+                                <strong>Biometría</strong>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-med-tab" data-toggle="pill" href="#tab-med">
+                                <i class="fas fa-pills fa-lg"></i><br>
+                                <strong>Médicos</strong>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-talla-tab" data-toggle="pill" href="#tab-talla">
+                                <i class="fas fa-tshirt fa-lg"></i><br>
+                                <strong>Tallas y EPP</strong>
+                            </a>
+                        </li>
+                    </ul>
 
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="tab-bio">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-tint text-danger"></i> Tipo de Sangre</label>
-                                            <select class="form-control" name="tipo_sangre" id="tipo_sangre">
-                                                <option value="">Seleccione...</option>
-                                                <option value="O+">O+</option><option value="O-">O-</option>
-                                                <option value="A+">A+</option><option value="A-">A-</option>
-                                                <option value="B+">B+</option><option value="B-">B-</option>
-                                                <option value="AB+">AB+</option><option value="AB-">AB-</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-weight text-primary"></i> Peso (Kg)</label>
-                                            <input type="number" step="0.1" class="form-control" name="peso_inicial" id="peso_inicial">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-ruler-vertical text-info"></i> Estatura (Cm)</label>
-                                            <input type="number" class="form-control" name="estatura" id="estatura">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="es_zurdo" name="es_zurdo">
-                                        <label class="custom-control-label" for="es_zurdo">
-                                            <i class="fas fa-hand-paper text-warning"></i> ¿Es Zurdo?
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-bio">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-tint text-danger"></i> Tipo de Sangre
                                         </label>
+                                        <select class="form-control form-control-lg" old="tipo_sangre" name="tipo_sangre" id="tipo_sangre">
+                                            <option value="">Seleccione...</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-weight text-primary"></i> Peso (Kg)
+                                        </label>
+                                        <input type="number" step="0.1" class="form-control form-control-lg" name="peso_inicial" id="peso_inicial">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-ruler-vertical text-info"></i> Estatura (Cm)
+                                        </label>
+                                        <input type="number" class="form-control form-control-lg" name="estatura" id="estatura">
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="tab-pane fade" id="tab-med">
-                                <div class="form-group">
-                                    <label><i class="fas fa-allergies text-warning"></i> Alergias Conocidas</label>
-                                    <textarea class="form-control" name="alergias" id="alergias" rows="3" 
-                                              placeholder="Ej: Penicilina, polen, mariscos..."></textarea>
-                                    <small class="form-text text-muted">Especifique cualquier alergia conocida</small>
-                                </div>
-                                <div class="form-group">
-                                    <label><i class="fas fa-file-medical text-danger"></i> Enfermedades de Base / Patologías</label>
-                                    <textarea class="form-control" name="enfermedades_base" id="enfermedades_base" rows="3"
-                                              placeholder="Ej: Diabetes, hipertensión, asma..."></textarea>
-                                    <small class="form-text text-muted">Indique condiciones médicas crónicas o relevantes</small>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade" id="tab-talla">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-shirt text-primary"></i> Talla Camisa</label>
-                                            <input type="text" class="form-control" name="talla_camisa" id="talla_camisa" placeholder="Ej: M, L, XL">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-user-tie text-info"></i> Talla Pantalón</label>
-                                            <input type="text" class="form-control" name="talla_pantalon" id="talla_pantalon" placeholder="Ej: 32, 34">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-socks text-success"></i> Calzado</label>
-                                            <input type="text" class="form-control" name="talla_calzado" id="talla_calzado" placeholder="Ej: 42, 43">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="alert alert-info mt-3">
-                                    <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Estas tallas son necesarias para la entrega de EPP (Equipo de Protección Personal)
+                            <div class="alert alert-info mt-3">
+                                <div class="custom-control custom-switch custom-control-lg">
+                                    <input type="checkbox" class="custom-control-input" id="es_zurdo" name="es_zurdo">
+                                    <label class="custom-control-label font-weight-bold" for="es_zurdo">
+                                        <i class="fas fa-hand-paper text-warning"></i> ¿Es Zurdo/a?
+                                    </label>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="tab-pane fade" id="tab-med">
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-allergies text-warning"></i> Alergias Conocidas
+                                </label>
+                                <textarea class="form-control" name="alergias" id="alergias" rows="3" 
+                                          placeholder="Ej: Penicilina, polen, mariscos..."></textarea>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Especifique cualquier alergia conocida (medicamentos, alimentos, etc.)
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">
+                                    <i class="fas fa-file-medical text-danger"></i> Enfermedades de Base / Patologías
+                                </label>
+                                <textarea class="form-control" name="enfermedades_base" id="enfermedades_base" rows="3"
+                                          placeholder="Ej: Diabetes, hipertensión, asma..."></textarea>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Indique condiciones médicas crónicas o relevantes
+                                </small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <div class="custom-control custom-switch custom-control-lg mb-3">
+                                    <input type="checkbox" class="custom-control-input" id="discapacitado" name="discapacitado">
+                                    <label class="custom-control-label font-weight-bold" for="discapacitado">
+                                        <i class="fas fa-wheelchair text-info"></i> ¿Tiene alguna discapacidad o limitación funcional?
+                                    </label>
+                                </div>
+                                
+                                <div id="campo_tipo_discapacidad" style="display: none;">
+                                    <label class="font-weight-bold">
+                                        <i class="fas fa-clipboard-list text-warning"></i> Tipo de Discapacidad
+                                    </label>
+                                    <input type="text" class="form-control" name="tipo_discapac" id="tipo_discapac" 
+                                           placeholder="Ej: Visual, Auditiva, Motora, Intelectual...">
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle"></i> Especifique el tipo de discapacidad para ajustar el puesto de trabajo
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-talla">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-shirt text-primary"></i> Talla Camisa
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" name="talla_camisa" id="talla_camisa" placeholder="Ej: M, L, XL">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-user-tie text-info"></i> Talla Pantalón
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" name="talla_pantalon" id="talla_pantalon" placeholder="Ej: 32, 34">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">
+                                            <i class="fas fa-socks text-success"></i> Calzado
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" name="talla_calzado" id="talla_calzado" placeholder="Ej: 42, 43">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i> <strong>Nota:</strong> Estas tallas son necesarias para la entrega de EPP (Equipo de Protección Personal)
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="fas fa-times"></i> Cerrar
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Guardar Cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 </div>
 
 @endsection
@@ -685,9 +793,21 @@
 <script>
 $(document).ready(function() {
     // Abrir Modal y Cargar Datos
+    // Modal - Abrir y Cargar Datos
     $(document).on('click', '.btnEdit', function() {
         let id = $(this).data('id');
+        
+        Swal.fire({
+            title: 'Cargando...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
         $.get('/medicina/pacientes/'+id+'/edit', function(data) {
+            Swal.close();
+            
             $('#paciente_id').val(data.id);
             $('#nombrePacienteTitle').text(data.nombre_completo);
             $('#tipo_sangre').val(data.tipo_sangre);
@@ -699,10 +819,84 @@ $(document).ready(function() {
             $('#talla_pantalon').val(data.talla_pantalon);
             $('#talla_calzado').val(data.talla_calzado);
             $('#es_zurdo').prop('checked', data.es_zurdo == 1);
+            $('#discapacitado').prop('checked', data.discapacitado == 1);
+            $('#tipo_discapac').val(data.tipo_discapac);
+            
+            // Mostrar/ocultar campo de tipo de discapacidad
+            if(data.discapacitado == 1) {
+                $('#campo_tipo_discapacidad').slideDown();
+            } else {
+                $('#campo_tipo_discapacidad').slideUp();
+            }
             
             $('#modalPaciente').modal('show');
+        }).fail(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo cargar la información del paciente'
+            });
         });
     });
+
+
+    // Toggle campo de tipo de discapacidad
+    $('#discapacitado').change(function() {
+        if($(this).is(':checked')) {
+            $('#campo_tipo_discapacidad').slideDown();
+        } else {
+            $('#campo_tipo_discapacidad').slideUp();
+            $('#tipo_discapac').val('');
+        }
+    });
+
+
+        // Modal - Abrir y Cargar Datos
+    $(document).on('click', '.btnEdit', function() {
+        let id = $(this).data('id');
+        
+        Swal.fire({
+            title: 'Cargando...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        $.get('/medicina/pacientes/'+id+'/edit', function(data) {
+            Swal.close();
+            
+            $('#paciente_id').val(data.id);
+            $('#nombrePacienteTitle').text(data.nombre_completo);
+            $('#tipo_sangre').val(data.tipo_sangre);
+            $('#peso_inicial').val(data.peso_inicial);
+            $('#estatura').val(data.estatura);
+            $('#alergias').val(data.alergias);
+            $('#enfermedades_base').val(data.enfermedades_base);
+            $('#talla_camisa').val(data.talla_camisa);
+            $('#talla_pantalon').val(data.talla_pantalon);
+            $('#talla_calzado').val(data.talla_calzado);
+            $('#es_zurdo').prop('checked', data.es_zurdo == 1);
+            $('#discapacitado').prop('checked', data.discapacitado == 1);
+            $('#tipo_discapac').val(data.tipo_discapac);
+            
+            // Mostrar/ocultar campo de tipo de discapacidad
+            if(data.discapacitado == 1) {
+                $('#campo_tipo_discapacidad').slideDown();
+            } else {
+                $('#campo_tipo_discapacidad').slideUp();
+            }
+            
+            $('#modalPaciente').modal('show');
+        }).fail(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo cargar la información del paciente'
+            });
+        });
+    });
+
 
     // Guardar por AJAX
     $('#formPaciente').on('submit', function(e) {

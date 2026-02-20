@@ -11,12 +11,17 @@ class PermissionController extends Controller
 {
     public function index()
     {
-         Gate::authorize('gestionar_seguridad'); 
-        // Agrupamos para la vista principal
+         Gate::authorize('gestionar_seguridad');
+
         $permissions = Permission::all();
         $groupedPermissions = $permissions->groupBy(fn($p) => $p->module ?: 'GLOBAL');
+        $stats = [
+            'total_permisos' => Permission::count(),
+            'total_modulos' => $groupedPermissions->count(),
+            'recientes' => Permission::where('created_at', '>=', now()->subDays(7))->count(),
+        ];
         
-        return view('admin.permissions.index', compact('groupedPermissions'));
+        return view('admin.permissions.index', compact('groupedPermissions', 'stats'));
     }
 
     public function store(Request $request)

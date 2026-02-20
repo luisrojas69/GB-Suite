@@ -14,9 +14,9 @@ class UbicacionSeeder extends Seeder
     {
         $ubicaciones = [
             [
-                'nombre' => 'Oficina Administrativa Central',
+                'nombre' => 'Administración y Finanzas',
                 'codigo_sucursal' => 'ADM-01',
-                'descripcion' => 'Sede principal de administración y gerencia.'
+                'descripcion' => 'Gerencia, contabilidad, Tesorería y Sistemas.'
             ],
             [
                 'nombre' => 'Taller de Maquinaria Pesada',

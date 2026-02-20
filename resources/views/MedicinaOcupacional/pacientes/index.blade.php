@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Listado de Pacientes')
 @section('content')
 <div class="container-fluid">
     {{-- Mensajes de sesión mejorados --}}

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Gestión de Órdenes de Exámenes')
 @section('styles')
 <style>
     /* ========================================

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Detalles de la Orden # ' .str_pad($orden->id, 6, '0', STR_PAD_LEFT))
 @section('styles')
 <style>
     /* ========================================
@@ -676,7 +676,7 @@
         <div class="patient-consultation-header">
             <h6><i class="fas fa-clipboard-list mr-2"></i>Información de la Orden</h6>
             <span class="consultation-badge">
-                <i class="fas fa-stethoscope mr-1"></i>Consulta #{{ $orden->consulta->id }}
+                <i class="fas fa-stethoscope mr-1"></i>Consulta #{{ str_pad($orden->consulta->id, 6, '0', STR_PAD_LEFT)   }}  -  <a href="{{ route('medicina.consultas.show', $orden->consulta->id) }}" title="Ver Detalles de la Consulta"><i class="fas fa-eye mr-1 text-info"></i></a> 
             </span>
         </div>
         <div class="patient-consultation-body">
@@ -733,6 +733,27 @@
                                 <div class="info-value">{{ $orden->paciente->des_depart }}</div>
                             </div>
                         </div>
+
+                        <div class="info-item">
+                            <div class="info-icon" style="background: rgba(246, 194, 62, 0.1); color: #f6c23e;">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Telefono</div>
+                                <div class="info-value">{{ $orden->paciente->telefono ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon" style="background: rgba(78, 115, 223, 0.1); color: #4e73df;">
+                                <i class="fas fa-fax"></i>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Correo</div>
+                                <div class="info-value">{{ $orden->paciente->correo_e ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

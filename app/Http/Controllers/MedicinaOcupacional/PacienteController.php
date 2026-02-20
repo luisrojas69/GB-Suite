@@ -79,7 +79,7 @@ class PacienteController extends Controller
             'total_consultas' => $paciente->consultas()->count(),
             'dias_desde_accidente' => $paciente->accidentes()->latest('fecha_hora_accidente')->first() 
                 ? now()->diffInDays($paciente->accidentes()->latest('fecha_hora_accidente')->first()->fecha_hora_accidente) 
-                : 'N/A',
+                : '🥳 Sin Registros',
             'ultima_dotacion' => $paciente->dotaciones()->where('entregado_en_almacen', true)->latest()->first()
         ];
 

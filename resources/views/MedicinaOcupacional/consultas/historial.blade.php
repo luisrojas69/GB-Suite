@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Historial Médico Completo del Paciente: '.$paciente->cod_emp )
 @section('styles')
 <style>
     .timeline-item {
@@ -261,6 +261,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link shadow-sm" id="ordenes-tab" data-toggle="pill" href="#ordenes" role="tab">
+                        <i class="fas fa-file-medical fa-lg d-block mb-1"></i>
+                        <strong>Ordenes Médicas</strong>
+                        <span class="badge badge-info ml-2">{{ $paciente->ordenes->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link shadow-sm" id="accidentes-tab" data-toggle="pill" href="#accidentes" role="tab">
                         <i class="fas fa-user-injured fa-lg d-block mb-1"></i>
                         <strong>Accidentes/Incidentes</strong>
@@ -278,6 +285,7 @@
                     <a class="nav-link shadow-sm" id="archivos-tab" data-toggle="pill" href="#archivos" role="tab">
                         <i class="fas fa-file-medical fa-lg d-block mb-1"></i>
                         <strong>Expediente Digital</strong>
+                        <span class="badge badge-warning ml-2">{{ $archivos->count() }}</span>
                     </a>
                 </li>
             </ul>
@@ -343,6 +351,77 @@
                                class="btn btn-primary mt-2">
                                 <i class="fas fa-plus"></i> Registrar Primera Consulta
                             </a>
+                        </div>
+                    </div>
+                    @endforelse
+                </div>
+
+                {{-- TAB: Ordenes Médicas --}}
+                <div class="tab-pane fade" id="ordenes" role="tabpanel">
+                    @forelse($paciente->ordenes as $o)
+                    <div class="card shadow-sm mb-3 border-left-primary">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="icon-circle bg-primary text-white" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-microscope fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Fecha</small>
+                                            <strong class="text-primary">{{ $o->created_at->format('d/m/Y') }}</strong>
+                                            <div class="small text-muted">{{ $o->created_at->format('h:i A') }}</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Motivo</small>
+                                            <span class="badge badge-info">{{ $o->consulta->motivo_consulta }}</span>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Consulta Asoc:</small>
+                                            <strong><a href="{{ route('medicina.consultas.show',$o->consulta->id )}}" title="Ver detalles de la consulta">CONSULTA#: {{ $o->consulta->id }}</a></strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Interpretacion:</small>
+                                            @if($o->interpretacion == 'Normal')
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check-circle"></i> NORMAL
+                                                </span>
+                                            @else
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i> ALTERADO
+                                                </span>
+                                            @endif
+                                            
+
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user-md"></i> Dr. {{ $o->medico->name." ".$o->medico->last_name ?? 'N/A' }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <a href="{{ route('medicina.ordenes.show', $o->id) }}" 
+                                       class="btn btn-primary btn-sm shadow-sm">
+                                        <i class="fas fa-eye"></i> Ver Detalle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay ordenes registradas</h5>
+                            <p class="text-muted">El historial de ordenes médicas aparecerá aquí</p>
+                            <button id="btnCrearOrden" 
+                               class="btn btn-primary mt-2">
+                                <i class="fas fa-plus"></i> Registrar Primera Orden
+                            </button>
                         </div>
                     </div>
                     @endforelse
@@ -554,12 +633,6 @@
                                     </h6>
                                 </div>
                                 <div class="card-body">
-                                    @php
-                                        $archivos = DB::table('med_paciente_archivos')
-                                            ->where('paciente_id', $paciente->id)
-                                            ->orderBy('created_at', 'desc')
-                                            ->get();
-                                    @endphp
                                     @forelse($archivos as $archivo)
                                     <div class="card mb-2 border-left-info">
                                         <div class="card-body py-2">
@@ -870,6 +943,21 @@ $(document).ready(function() {
                     text: 'No se pudo guardar'
                 });
             }
+        });
+    });
+
+    $('#btnCrearOrden').on('click', function(){
+        // Notificación Toast pequeña
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+        Toast.fire({
+            icon: 'success',
+            title: 'Debe crear una consulta primero'
         });
     });
 

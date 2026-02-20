@@ -16,9 +16,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles')->get(); // Cargar los roles de cada usuario
-        return view('admin.users.index', compact('users'));
         Gate::authorize('gestionar_seguridad');
+        $users = User::with('roles')->get(); // Cargar los roles de cada usuario
+        $stats = [
+            'total' => User::count(),
+            'admins' => User::role('super_administrador')->count(), // Ajusta según el nombre de tu rol administrador
+            'sin_rol' => User::doesntHave('roles')->count(),
+            'roles_activos' => Role::count(),
+        ];
+        return view('admin.users.index', compact('users', 'stats'));
+        
     }
 
     /**
@@ -50,6 +57,6 @@ class UserController extends Controller
         $user->syncRoles($request->roles ?? []); 
 
         return redirect()->route('admin.users.index')->with('success', 
-            "Roles del usuario {$user->name} actualizados correctamente.");
+            "Roles del usuario {$user->email} actualizados correctamente.");
     }
 }

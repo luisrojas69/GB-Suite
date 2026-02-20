@@ -66,9 +66,9 @@
             </tr>
             <tr>
                 <td class="lbl">Departamento:</td>
-                <td class="val">{{ $orden->paciente->departamento ?? 'N/A' }}</td>
+                <td class="val">{{ $orden->paciente->des_depart ?? 'N/A' }}</td>
                 <td class="lbl">Cargo:</td>
-                <td class="val">{{ $orden->paciente->cargo ?? 'N/A' }}</td>
+                <td class="val">{{ $orden->paciente->des_cargo ?? 'N/A' }}</td>
             </tr>
         </table>
     </div>
@@ -97,12 +97,8 @@
     <table class="footer-table">
         <tr>
             <td class="qr-cell">
-                <div style="font-size: 10px; color: #555; margin-bottom: 5px;">Validación de Autenticidad:</div>
-                {{-- Aquí puedes inyectar el código QR generado por tu backend en Base64 --}}
-                {{-- <img src="data:image/png;base64, {!! base64_encode(QrCode::format('png')->size(80)->generate('GB-SUITE|ORD-'.$orden->id.'|'.$orden->paciente->ci)) !!} "> --}}
-                <div style="width: 80px; height: 80px; border: 1px solid #333; display: table-cell; vertical-align: middle; text-align: center; font-size: 9px; background: #eee;">
-                    [ QR Code ]<br>Validación
-                </div>
+                <div style="font-size: 10px; color: #555; margin-bottom: 5px;">Validación de Autenticidad:</div>  
+                {!! $qrCode !!}
             </td>
             <td class="signature-cell">
                 <div class="signature-line">

@@ -2,6 +2,7 @@
 @php
     $esEditable = $consulta->fecha_consulta->gt(now()->subDays(3));
 @endphp
+@section('title-page', 'Detalles del Consulta (Paciente): '.$consulta->paciente->cod_emp )
 @section('content')
 <div class="container-fluid">
     {{-- Header Principal --}}

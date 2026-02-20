@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('med_consultas', function (Blueprint $table) {
         $table->id();
         $table->foreignId('paciente_id')->constrained('med_pacientes');
-        $table->date('fecha_consulta');
+        $table->dateTime('fecha_consulta');
         $table->string('motivo_consulta'); // Ej: Accidente, Control, Enfermedad Común
         $table->boolean('requiere_examenes')->default(false);
         $table->enum('status_consulta', [

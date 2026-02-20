@@ -35,7 +35,8 @@ Route::prefix('medicina')->name('medicina.')->group(function () {
       Route::get('/ordenes/{id}', [OrdenExamenController::class, 'show'])->name('ordenes.show');
 
       // Ruta extra para imprimir (PDF)
-      Route::get('ordenes/{orden}/pdf', [OrdenExamenController::class, 'pdf'])->name('ordenes.pdf');
+      Route::get('/ordenes/{orden}/pdf', [OrdenExamenController::class, 'pdf'])->name('ordenes.pdf');
+      Route::get('/ordenes/resultados/{orden_id}', [OrdenExamenController::class, 'resultados'])->name('pdf.resultados');
 
 
       // --- RUTAS DE CONSULTAS ---

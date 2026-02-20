@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 class OrdenExamenController extends Controller
@@ -65,7 +66,8 @@ class OrdenExamenController extends Controller
             $consulta = $orden->consulta;
             if ($consulta) {
                 $consulta->update([
-                    'status_consulta' => 'Pendiente por exámenes' 
+                    'status_consulta' => 'Pendiente por exámenes', 
+                    'requiere_examenes' => true, 
                     // Podríamos aqui concatenar los hallazgos al plan de tratamiento (PREGUNTAR)
                 ]);
             }
@@ -191,5 +193,25 @@ class OrdenExamenController extends Controller
             //return response()->json($orden);
             return view('MedicinaOcupacional.ordenes.show', compact('orden', 'archivos'));
         }
+
+
+        // 1. Certificado de Aptitud Física
+        public function resultados($orden_id)
+        {
+            $orden = OrdenExamen::with(['paciente', 'medico'])->findOrFail($orden_id);
+            $qrCode = QrCode::size(150)->generate('GB-SUITE|ORDEN#-'.$orden->id.'|C.I:'.$orden->paciente->ci.'|PACIENTE:'.$orden->paciente->nombre_completo);
+
+            $pdf = PDF::loadView('MedicinaOcupacional.ordenes.pdfs.resultados', compact('orden', 'qrCode'))
+                        ->setPaper('letter')
+                        ->setOption('margin-top', '1.5cm')
+                        ->setOption('margin-right', '1.5cm')
+                        ->setOption('margin-bottom', '2cm')
+                        ->setOption('margin-left', '1.5cm')
+                        ->setOption('print-media-type', true)
+                        ->setOption('zoom', 0.90);
+            
+            return $pdf->inline('Resultados_Examenes_'.$orden->paciente->ci.'.pdf');
+        }
+
 
 }

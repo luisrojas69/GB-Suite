@@ -366,9 +366,18 @@ class ConsultaController extends Controller
                 'accidentes' => function($q) {
                     $q->orderBy('fecha_hora_accidente', 'desc');
                 }
+                ,
+                'ordenes' => function($q) {
+                    $q->orderBy('created_at', 'desc');
+                }
             ])->findOrFail($paciente_id);
 
-            return view('MedicinaOcupacional.consultas.historial', compact('paciente'));
+            $archivos = DB::table('med_paciente_archivos')
+                                            ->where('paciente_id', $paciente_id)
+                                            ->orderBy('created_at', 'desc')
+                                            ->get();
+
+            return view('MedicinaOcupacional.consultas.historial', compact('paciente','archivos'));
         }
 
         public function subirArchivo(Request $request)

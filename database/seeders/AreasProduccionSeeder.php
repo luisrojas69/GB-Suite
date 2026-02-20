@@ -23,7 +23,7 @@ class AreasProduccionSeeder extends Seeder
 
         $sectorAlto = Sector::create([
             'codigo_sector' => '08',
-            'nombre' => 'Sector Alto de la Granja',
+            'nombre' => 'Sector Tamarindo',
             'descripcion' => 'Área más elevada, ideal para cultivos que requieren buen drenaje.',
         ]);
 

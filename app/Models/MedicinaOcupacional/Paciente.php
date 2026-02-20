@@ -36,6 +36,11 @@ class Paciente extends Model
         return $this->hasMany(Accidente::class);
     }
 
+    public function ordenes()
+    {
+        return $this->hasMany(OrdenExamen::class);
+    }
+
     public function assignments()
     {
         return $this->morphMany(\App\Models\Sistemas\Inventario\Assignment::class, 'assignable');

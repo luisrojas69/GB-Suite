@@ -44,7 +44,7 @@
     }
 </style>
 @endsection
-
+@section('title-page', 'Control de Consultas Médicas')
 @section('content')
 <div class="container-fluid">
     {{-- Mensajes de sesión mejorados --}}
