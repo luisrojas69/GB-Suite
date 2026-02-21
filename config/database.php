@@ -132,9 +132,9 @@ return [
             'driver' => 'sqlsrv',
             'timeout' => 300, // Añade o modifica a 300 segundos (5 minutos)
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST_PROFIT', '192.168.1.13'),
+            'host' => env('DB_HOST_PROFIT'),
             'port' => env('DB_PORT'),
-            'database' => 'GB_N_E',
+            'database' => env('DB_DATABASE_N'),
             'username' => env('DB_USERNAME'),
             'password' => env('DB_PASSWORD'),
             'charset' => env('DB_CHARSET', 'utf8'),

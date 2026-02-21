@@ -56,11 +56,13 @@
                             <div class="dropdown-header bg-gradient-primary text-white">
                                 <i class="fas fa-tools"></i> Herramientas del Sistema
                             </div>
+                            @can('medicina.pacientes.sincronizar')
                             <a class="dropdown-item" href="#" id="btnSync">
                                 <i class="fas fa-sync-alt text-primary mr-2"></i>
                                 <strong>Sincronizar con Profit</strong>
                                 <small class="d-block text-muted">Actualizar datos de nómina</small>
                             </a>
+                            @endcan
                             <div class="dropdown-divider"></div>
                             <div class="dropdown-header bg-gradient-success text-white">
                                 <i class="fas fa-file-export"></i> Exportaciones

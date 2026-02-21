@@ -19,8 +19,8 @@ class UserController extends Controller
         Gate::authorize('gestionar_seguridad');
         $users = User::with('roles')->get(); // Cargar los roles de cada usuario
         $stats = [
-            'total' => User::count(),
-            'admins' => User::role('super_administrador')->count(), // Ajusta según el nombre de tu rol administrador
+           'total' => User::count(),
+           'admins' => User::role('super_admin')->count(), // Ajusta según el nombre de tu rol administrador
             'sin_rol' => User::doesntHave('roles')->count(),
             'roles_activos' => Role::count(),
         ];

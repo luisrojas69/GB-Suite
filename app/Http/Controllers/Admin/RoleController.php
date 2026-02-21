@@ -20,7 +20,12 @@ class RoleController extends Controller
     {
         Gate::authorize('gestionar_seguridad');
         $roles = Role::all();
-        return view('admin.roles.index', compact('roles'));
+        $stats = [
+            'total_roles' => $roles->count(),
+            //'usuarios_asignados' => User::has('roles')->count(),
+            'promedio_permisos' => Permission::count(), 
+        ];
+        return view('admin.roles.index', compact('roles', 'stats'));
     }
 
     /**

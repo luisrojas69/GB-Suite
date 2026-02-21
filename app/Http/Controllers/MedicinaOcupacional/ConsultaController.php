@@ -12,6 +12,7 @@ use DB;
 use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Exports\MedicinaOcupacional\Consultas\ConsultasExport;
+use Illuminate\Support\Facades\Gate;
 
 
 class ConsultaController extends Controller
@@ -356,6 +357,7 @@ class ConsultaController extends Controller
 
         public function historial($paciente_id)
         {
+            Gate::authorize('medicina.pacientes.ver');
             $paciente = Paciente::with([
                 'consultas' => function($q) {
                     $q->orderBy('fecha_consulta', 'desc');

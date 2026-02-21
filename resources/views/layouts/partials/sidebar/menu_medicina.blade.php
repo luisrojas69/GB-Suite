@@ -1,9 +1,9 @@
-@can('acceder_modulo_medicina')
+@can('medicina.reportes.descargar')
         <div class="sidebar-heading">
             {{ __('Seguridad y Salud Laboral') }}
         </div>
 
-        @can('dashboard_medicina')
+        @can('medicina.dashboard')
             <li class="nav-item {{ Nav::isRoute('medicina.dashboard') }}">
                 <a class="nav-link" href="{{ route('medicina.dashboard') }}">
                     <i class="fas fa-tachometer-alt"></i>
@@ -12,7 +12,7 @@
             </li>
         @endcan
 
-        @can('gestionar_pacientes')
+        @can('medicina.pacientes.gestionar')
             <li class="nav-item {{ Nav::isRoute('medicina.pacientes.*') }}">
                 <a class="nav-link" href="{{ route('medicina.pacientes.index') }}">
                     <i class="fas fa-users-cog"></i>
@@ -21,50 +21,8 @@
             </li>
         @endcan
 
-        @can('gestionar_consultas')
-            <li class="nav-item {{ Nav::isRoute('medicina.consultas.*') }}">
-                <a class="nav-link" href="{{ route('medicina.consultas.index') }}">
-                    <i class="fas fa-notes-medical"></i>
-                    <span>{{ __('Consultas y Atención') }}</span>
-                </a>
-            </li>
-        @endcan
-       
-        @can('gestionar_consultas')
-            @php
-                // Calculamos las alertas directamente para el Sidebar
-                $hoy_badge = now()->format('Y-m-d');
-                
-                $countReposo = App\Models\MedicinaOcupacional\Consulta::where('genera_reposo', 1)->where('reincorporado', 0)
-                    ->whereRaw("CAST(DATEADD(day, dias_reposo,fecha_consulta) AS DATE) <= ?", [$hoy_badge])
-                    ->count();
-                    
-                $countVacas = App\Models\MedicinaOcupacional\Paciente::where('de_vacaciones', 1)
-                 ->whereDate('fecha_retorno_vacaciones', '<=', $hoy_badge)->count();
-                
-                $totalAlertasBadge = $countReposo + $countVacas;
-            @endphp
 
-            <li class="nav-item {{ Nav::isRoute('medicina.alertas.*') }}">
-                <a class="nav-link" href="{{ route('medicina.alertas.index') }}">
-                    <i class="fas fa-clock"></i>
-                    <span>{{ __('Panel de Retornos') }}</span>
-                    @if($totalAlertasBadge > 0)
-                        <span class="badge badge-danger badge-counter">{{ $totalAlertasBadge }}</span>
-                    @endif
-                </a>
-            </li>
-
-
-            <li class="nav-item {{ Nav::isRoute('medicina.ordenes.*') }}">
-                <a class="nav-link" href="{{ route('medicina.ordenes.index') }}">
-                    <i class="fas fa-list-alt"></i>
-                    <span>{{ __('Órdenes de Exámenes') }}</span>
-                </a>
-            </li>
-
-       @endcan
-        @can('gestionar_accidentes')
+        @can('medicina.accidentes.gestionar')
             <li class="nav-item {{ Nav::isRoute('medicina.accidentes.*') }}">
                 <a class="nav-link" href="{{ route('medicina.accidentes.index') }}">
                     <i class="fas fa-ambulance"></i>
@@ -73,7 +31,7 @@
             </li>
         @endcan
 
-        @can('gestionar_dotaciones')
+        @can('medicina.dotaciones.gestionar')
             <li class="nav-item {{ Nav::isRoute('medicina.dotaciones.*') }}">
                 <a class="nav-link" href="{{ route('medicina.dotaciones.index') }}">
                     <i class="fas fa-tshirt"></i>
@@ -98,12 +56,9 @@
                 aria-labelledby="headingReportes" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Integración Profit:</h6>
-                    @can('descargar_reporte_profit')
                         <a class="collapse-item {{ Nav::isRoute('medicina.reportes.profit') }}" href="{{ route('medicina.reportes.profit') }}">
                             <i class="fas fa-file-export mr-1"></i> {{ __('Cierre Diario Profit') }}
-                        </a>
-                    @endcan
-                    
+                        </a>                    
                     <h6 class="collapse-header">Estadísticas Salud:</h6>
                     <a class="collapse-item" target="_blank" href="{{ route('medicina.reportes.morbilidad') }}">Morbilidad Mensual</a>
                     <a class="collapse-item" target="_blank" href="{{ route('medicina.reportes.accidentalidad') }}">Accidentalidad Mensual</a>

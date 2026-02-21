@@ -15,22 +15,13 @@ class PacienteController extends Controller
 {
     public function index()
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.ver');
         return view('MedicinaOcupacional.pacientes.index');
-    }
-
-    public function getListadoOld(Request $request)
-    {
-        //Antiguamente lo haciamos asi.. cuando la vista index no tenia cards.
-        Gate::authorize('gestionar_pacientes');
-        // Retornar datos para DataTables vía AJAX
-        $pacientes = Paciente::all();
-        return response()->json(['data' => $pacientes]);
     }
 
     public function getListado(Request $request)
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.ver');
 
         // 1. Obtener la data para la tabla
         //$pacientes = Paciente::oldest('status')->get();
@@ -67,7 +58,7 @@ class PacienteController extends Controller
 
     public function show($id)
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.ver');
         $paciente = Paciente::with([
             'consultas' => fn($q) => $q->latest()->limit(5),
             'accidentes' => fn($q) => $q->latest()->limit(5),
@@ -88,7 +79,7 @@ class PacienteController extends Controller
 
     public function syncProfit()
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.sincronizar');
         try {
             Artisan::call('medicina:sync-pacientes');
             return response()->json([
@@ -107,14 +98,14 @@ class PacienteController extends Controller
 
     public function edit($id)
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.editar');
         $paciente = Paciente::findOrFail($id);
         return response()->json($paciente);
     }
 
     public function update(Request $request, $id)
     {
-        Gate::authorize('gestionar_pacientes');
+        Gate::authorize('medicina.pacientes.editar');
         $paciente = Paciente::findOrFail($id);
         
         $data = $request->all();
@@ -134,28 +125,16 @@ class PacienteController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function updateOld(Request $request, $id)
-    {
-        Gate::authorize('gestionar_pacientes');
-        $paciente = Paciente::findOrFail($id);
-        
-        // Convertir el checkbox a booleano
-        $data = $request->all();
-        $data['es_zurdo'] = $request->has('es_zurdo') ? 1 : 0;
-        $data['discapacitado'] = $request->has('discapacitado') ? 1 : 0;
-
-        $paciente->update($data);
-
-        return response()->json(['status' => 'success']);
-    }
 
     public function exportarExcel()
-    {
+    {   
+        Gate::authorize('medicina.pacientes.reportes');
         return Excel::download(new PacientesExport, 'listado_pacientes_'.date('d-m-Y').'.xlsx');
     }
 
     public function exportarTallas()
-    {
+    {   
+        Gate::authorize('medicina.pacientes.reportes');
         return Excel::download(new TallasExport, 'reporte_tallas_epp_'.date('d-m-Y').'.xlsx');
     }
 

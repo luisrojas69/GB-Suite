@@ -53,7 +53,7 @@ class HomeController extends Controller
 
 
         // 1. Prioridad: Dashboard de Medicina y Seguridad Laboral
-        if ($user->can('acceder_modulo_medicina')) {
+        if ($user->can('medicina.dashboard')) {
             return $this->dashboardMedicina();
         }
 
