@@ -11,7 +11,7 @@ class PermissionController extends Controller
 {
     public function index()
     {
-         Gate::authorize('gestionar_seguridad');
+         Gate::authorize('seguridad.permisos.ver');
 
         $permissions = Permission::all();
         $groupedPermissions = $permissions->groupBy(fn($p) => $p->module ?: 'GLOBAL');
@@ -26,7 +26,7 @@ class PermissionController extends Controller
 
     public function store(Request $request)
     {
-         Gate::authorize('gestionar_seguridad'); 
+         Gate::authorize('seguridad.permisos.crear'); 
         $request->validate([
             'name' => 'required|unique:permissions,name',
             'module' => 'required|string'
@@ -43,13 +43,13 @@ class PermissionController extends Controller
 
     public function edit(Permission $permission)
     {
-         Gate::authorize('gestionar_seguridad'); 
+         Gate::authorize('seguridad.permisos.editar'); 
         return response()->json($permission);
     }
 
     public function update(Request $request, Permission $permission)
     {
-         Gate::authorize('gestionar_seguridad'); 
+         Gate::authorize('seguridad.permisos.'); 
         $request->validate([
             'name' => 'required|unique:permissions,name,' . $permission->id,
             'module' => 'required|string'
@@ -65,7 +65,7 @@ class PermissionController extends Controller
 
     public function destroy(Permission $permission)
     {
-         Gate::authorize('gestionar_seguridad'); 
+         Gate::authorize('seguridad.permisos.eliminar'); 
         $permission->delete();
         return redirect()->back()->with('success', 'Permiso eliminado.');
     }

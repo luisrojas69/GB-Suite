@@ -3,15 +3,15 @@
 
 @section('content')
 <div class="container-fluid">
-    
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">➕ Crear Nuevo Lote</h1>
-        <a href="{{ route('produccion.areas.lotes.index') }}" class="btn btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Regresar al Listado
-        </a>
+        @can('produccion.areas.ver')
+            <a href="{{ route('produccion.areas.lotes.index') }}" class="btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Regresar al Listado
+            </a>
+        @endcan
     </div>
-
-    @can('crear_sectores')
+    @can('produccion.areas.crear')
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Información del Lote</h6>

@@ -551,9 +551,11 @@
                     </div>
                 </div>
                 <div>
-                    <button class="btn btn-create-permission" data-toggle="modal" data-target="#modalPermiso">
-                        <i class="fas fa-plus mr-2"></i>Crear Permiso
-                    </button>
+                    @can('seguridad.permisos.crear')
+                        <button class="btn btn-create-permission" data-toggle="modal" data-target="#modalPermiso">
+                            <i class="fas fa-plus mr-2"></i>Crear Permiso
+                        </button>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -646,24 +648,28 @@
                                         <span class="permission-name">{{ $p->name }}</span>
                                     </div>
                                     <div class="permission-actions">
-                                        <button class="btn-permission-action btn-edit-permission" 
-                                                data-id="{{ $p->id }}" 
-                                                data-name="{{ $p->name }}" 
-                                                data-module="{{ $p->module }}"
-                                                title="Editar permiso">
-                                            <i class="fas fa-pen fa-xs"></i>
-                                        </button>
-                                        <form action="{{ route('admin.permissions.destroy', $p) }}" 
-                                              method="POST" 
-                                              class="form-delete-perm m-0">
-                                            @csrf 
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn-permission-action btn-delete-permission" 
-                                                    title="Eliminar permiso">
-                                                <i class="fas fa-trash fa-xs"></i>
+                                        @can('seguridad.permisos.editar')    
+                                            <button class="btn-permission-action btn-edit-permission" 
+                                                    data-id="{{ $p->id }}" 
+                                                    data-name="{{ $p->name }}" 
+                                                    data-module="{{ $p->module }}"
+                                                    title="Editar permiso">
+                                                <i class="fas fa-pen fa-xs"></i>
                                             </button>
-                                        </form>
+                                        @endcan
+                                        @can('seguridad.permisos.eliminar') 
+                                            <form action="{{ route('admin.permissions.destroy', $p) }}" 
+                                                  method="POST" 
+                                                  class="form-delete-perm m-0">
+                                                @csrf 
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                        class="btn-permission-action btn-delete-permission" 
+                                                        title="Eliminar permiso">
+                                                    <i class="fas fa-trash fa-xs"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
                                     </div>
                                 </li>
                             @endforeach
@@ -682,9 +688,11 @@
                         Comienza creando el primer permiso para tu sistema.<br>
                         Los permisos definen las acciones que pueden realizar los usuarios.
                     </p>
-                    <button class="btn btn-create-permission" data-toggle="modal" data-target="#modalPermiso">
-                        <i class="fas fa-plus mr-2"></i>Crear Primer Permiso
-                    </button>
+                    @can('seguridad.permisos.crear') 
+                        <button class="btn btn-create-permission" data-toggle="modal" data-target="#modalPermiso">
+                            <i class="fas fa-plus mr-2"></i>Crear Primer Permiso
+                        </button>
+                    @endcan
                 </div>
             </div>
         @endforelse
@@ -756,11 +764,13 @@
                         data-dismiss="modal">
                     <i class="fas fa-times mr-2"></i>Cancelar
                 </button>
-                <button type="submit" 
-                        class="btn btn-modal-action btn-modal-submit" 
-                        id="btnSave">
-                    <i class="fas fa-save mr-2"></i>Guardar Permiso
-                </button>
+                @can('seguridad.permisos.crear') 
+                    <button type="submit" 
+                            class="btn btn-modal-action btn-modal-submit" 
+                            id="btnSave">
+                        <i class="fas fa-save mr-2"></i>Guardar Permiso
+                    </button>
+                @endcan
             </div>
         </form>
     </div>

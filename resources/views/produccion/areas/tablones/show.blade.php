@@ -23,18 +23,21 @@
             <small class="text-muted">({{ $tablon->codigo_completo }})</small>
         </h1>
         <div class="btn-group shadow-sm">
-            <a href="{{ route('produccion.areas.tablones.edit', $tablon->id) }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-edit"></i> Editar Tabl&oacute;n
-            </a>
-            
-            <a href="{{ route('produccion.areas.tablones.index') }}" class="btn btn-sm btn-secondary">
-                <i class="fas fa-list fa-sm text-white-50"></i> Lista de Tablones
-            </a>
+            @can('produccion.areas.editar')
+                <a href="{{ route('produccion.areas.tablones.edit', $tablon->id) }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Editar Tabl&oacute;n
+                </a>
+            @endcan
+            @can('produccion.areas.ver')
+                <a href="{{ route('produccion.areas.tablones.index') }}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-list fa-sm text-white-50"></i> Lista de Tablones
+                </a>
+            @endcan
         </div>
         
     </div>
 
-    @can('ver_sectores')
+
         <div class="row">
             {{-- Columna de Información --}}
             <div class="col-xl-7 col-lg-6">
@@ -42,6 +45,7 @@
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Información General</h6>
                     </div>
+
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4 border-right">
@@ -154,17 +158,13 @@
                 </div>
             </div>
 
-{{--             <div class="card shadow col-lg-12 border-left-info">
+            <div class="card shadow col-lg-12 border-left-info">
                 <div class="card-body">
                     <p class="mb-0 text-info">Este tablón es la unidad base. Aquí se registrarán los movimientos de **Molienda/Cosecha**, lo que activará el control de **Soca** y el cálculo de **Rendimiento**.</p>
                 </div>
-            </div> --}}
-
-
-        </div>
-
-        
-    @endcan
+            </div>
+        </div>    
+ 
 </div>
 
 

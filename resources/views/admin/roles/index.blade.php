@@ -216,9 +216,11 @@
                     </div>
                 </div>
                 <div>
-                    <button class="btn btn-create-role" data-toggle="modal" data-target="#modalRol">
-                        <i class="fas fa-plus mr-2"></i>Crear Nuevo Rol
-                    </button>
+                    @can('seguridad.roles.crear')     
+                        <button class="btn btn-create-role" data-toggle="modal" data-target="#modalRol">
+                            <i class="fas fa-plus mr-2"></i>Crear Nuevo Rol
+                        </button>
+                    @endcan    
                 </div>
             </div>
         </div>
@@ -318,27 +320,33 @@
                     {{-- Footer (Acciones) --}}
                     <div class="role-footer">
                         {{-- Idealmente esta ruta lleva a una vista donde se asignan los permisos con checkboxes --}}
-                        <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn-role-config text-decoration-none">
-                            <i class="fas fa-sliders-h mr-1"></i> Configurar Permisos
-                        </a>
-                        
+                        @can('seguridad.roles.editar')  
+                            <a href="{{ route('admin.roles.edit', $role->id) }}" class="btn-role-config text-decoration-none">
+                                <i class="fas fa-sliders-h mr-1"></i> Configurar Permisos
+                            </a>
+                        @endcan
                         <div class="d-flex gap-2">
-                            <button class="btn-role-delete btn-edit-name" data-id="{{ $role->id }}" data-name="{{ $role->name }}" title="Editar Nombre">
-                                <i class="fas fa-pen"></i>
-                            </button>
                             
-                            @if(!$isSuperAdmin)
-                                <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" class="form-delete-role m-0 d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn-role-delete" title="Eliminar Rol">
-                                        <i class="fas fa-trash"></i>
+                            
+                                @if(!$isSuperAdmin)
+                                    @can('seguridad.roles.editar')  
+                                        <button class="btn-role-delete btn-edit-name" data-id="{{ $role->id }}" data-name="{{ $role->name }}" title="Editar Nombre">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                    @endcan
+                                    @can('seguridad.roles.eliminar')  
+                                    <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST" class="form-delete-role m-0 d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn-role-delete" title="Eliminar Rol">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    @endcan
+                                @else
+                                    <button type="button" class="btn-role-delete" disabled title="Rol de Sistema (Protegido)">
+                                        <i class="fas fa-lock opacity-50"></i>
                                     </button>
-                                </form>
-                            @else
-                                <button type="button" class="btn-role-delete" disabled title="Rol de Sistema (Protegido)">
-                                    <i class="fas fa-lock opacity-50"></i>
-                                </button>
-                            @endif
+                                @endif                     
                         </div>
                     </div>
                 </div>
@@ -353,9 +361,11 @@
                     <p class="empty-state-description">
                         Crea perfiles como "Médico", "Recursos Humanos" o "Gerente" para comenzar a agrupar los permisos.
                     </p>
-                    <button class="btn-create-role bg-purple text-white" data-toggle="modal" data-target="#modalRol" style="background:var(--purple-primary);">
-                        <i class="fas fa-plus mr-2"></i>Crear Primer Rol
-                    </button>
+                    @can('seguridad.roles.crear')
+                        <button class="btn-create-role bg-purple text-white" data-toggle="modal" data-target="#modalRol" style="background:var(--purple-primary);">
+                            <i class="fas fa-plus mr-2"></i>Crear Primer Rol
+                        </button>
+                    @endcan
                 </div>
             </div>
         @endforelse
@@ -364,6 +374,7 @@
 
 <div class="modal fade" id="modalRol" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
+        @can('seguridad.roles.cdrear')
         <form id="formRol" action="{{ route('admin.roles.store') }}" method="POST" class="modal-content modal-custom">
             @csrf
             <div id="methodField"></div>
@@ -394,6 +405,31 @@
                 </button>
             </div>
         </form>
+        @else
+            <div class="modal-content modal-custom">
+                <div id="methodField"></div>
+                
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title modal-title-custom">
+                        <i class="fas fa-user-tag mr-2"></i> Acceso Restringindo
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                
+                <div class="modal-body modal-body-custom">
+                    <div class="form-group-custom mb-0">
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle text-primary"></i> No tienes permiso para realizar esta accion.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-modal-action btn-modal-cancel" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        @endcan
+
     </div>
 </div>
 @endsection

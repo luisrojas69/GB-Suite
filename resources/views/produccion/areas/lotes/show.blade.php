@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    @can('ver_sectores')
+    @can('produccion.areas.ver')
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Información General del Lote</h6>
@@ -35,7 +35,7 @@
                 <p>{{ $lote->descripcion ?? 'N/A' }}</p>
 
                 <div class="mt-4">
-                    @can('editar_sectores')
+                    @can('produccion.areas.editar')
                         <a href="{{ route('produccion.areas.lotes.edit', $lote->id) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Editar Lote</a>
                     @endcan
                 </div>

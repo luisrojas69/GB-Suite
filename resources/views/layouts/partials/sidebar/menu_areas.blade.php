@@ -1,4 +1,4 @@
-    @can('gestionar_areas')
+    @can('areas.menu')
         <div class="sidebar-heading">
             {{ __('Áreas de Producción') }}
         </div>
@@ -15,15 +15,13 @@
                 aria-labelledby="headingAreas" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Jerarquía de Campo:</h6>
-                    @can('ver_sectores')
+                    @can('produccion.areas.ver')
                         <a class="collapse-item {{ Nav::isRoute('produccion.areas.sectores.index') }}" 
                             href="{{ route('produccion.areas.sectores.index') }}">Sectores</a>
-                    @endcan
-                    @can('ver_sectores')
+
                         <a class="collapse-item {{ Nav::isRoute('produccion.areas.lotes.index') }}" 
                             href="{{ route('produccion.areas.lotes.index') }}">Lotes</a>
-                    @endcan
-                    @can('ver_sectores')
+
                         <a class="collapse-item {{ Nav::isRoute('produccion.areas.tablones.index') }}" 
                             href="{{ route('produccion.areas.tablones.index') }}">Tablones</a>
                     @endcan

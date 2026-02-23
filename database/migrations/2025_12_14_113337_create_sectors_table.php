@@ -19,6 +19,7 @@ return new class extends Migration
             
             // Campo espacial para el límite del Sector
             $table->geometry('geometria')->nullable(); 
+            $table->decimal('hectareas_geometria', 10, 2)->nullable();
             
             $table->timestamps();
         });

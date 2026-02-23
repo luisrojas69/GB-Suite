@@ -1,4 +1,4 @@
-@can('gestionar_pluviometria')
+@can('pluviometria.menu')
     <div class="sidebar-heading">
         {{ __('Registro de Lluvias') }}
     </div>
@@ -13,11 +13,11 @@
             {{ Nav::isRoute('produccion.pluviometria.dashboard') ? 'show' : '' }}
             aria-labelledby="headingAreas" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                @can('gestionar_pluviometria')
+                @can('pluviometria.dashboard')
                     <a class="collapse-item {{ Nav::isRoute('produccion.pluviometria.dashboard') }}" 
                         href="{{ route('produccion.pluviometria.dashboard') }}"><i class="fas fa-tachometer-alt fa-sm text-gray-300"></i> <span>Dashboard</span></a>
                 @endcan
-                @can('gestionar_pluviometria')
+                @can('produccion.pluviometria.ver')
                     <a class="collapse-item {{ Nav::isRoute('produccion.pluviometria.index') }}" 
                         href="{{ route('produccion.pluviometria.index') }}"><i class="fas fa-table fa-sm text-gray-300"></i> Matriz de Pluviometria</a>
                 @endcan

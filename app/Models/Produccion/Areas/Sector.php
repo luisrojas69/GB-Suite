@@ -14,7 +14,7 @@ class Sector extends Model
     use HasSpatial;
 
     protected $table = 'sectores';
-    protected $fillable = ['codigo_sector', 'nombre', 'descripcion', 'geometria'];
+    protected $fillable = ['codigo_sector', 'nombre', 'descripcion', 'geometria', 'hectareas_geometria'];
 
     protected $casts = [
         'geometria' => Polygon::class, // Convierte el binario a objeto Polygon

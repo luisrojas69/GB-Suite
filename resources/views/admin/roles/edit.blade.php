@@ -135,9 +135,11 @@
                     </div>
                 </div>
                 <div>
-                    <a href="{{ route('admin.roles.index') }}" class="btn btn-light rounded-pill font-weight-bold shadow-sm px-4">
-                        <i class="fas fa-arrow-left mr-2"></i>Volver al Listado
-                    </a>
+                    @can('seguridad.roles. ver')
+                        <a href="{{ route('admin.roles.index') }}" class="btn btn-light rounded-pill font-weight-bold shadow-sm px-4">
+                            <i class="fas fa-arrow-left mr-2"></i>Volver al Listado
+                        </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -147,114 +149,131 @@
         @csrf @method('PUT')
 
         <div class="row">
-            <div class="col-xl-4 col-lg-5 mb-4">
-                <div class="card-custom sticky-top" style="top: 20px;">
-                    <div class="card-header-custom">
-                        <h6 class="card-title-custom"><i class="fas fa-info-circle"></i> Datos del Perfil</h6>
-                    </div>
-                    <div class="card-body p-4 bg-white">
-                        
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold text-gray-700 small text-uppercase">Nombre del Rol</label>
-                            <input type="text" name="name" class="form-control form-control-custom text-lowercase" 
-                                   value="{{ old('name', $role->name) }}" 
-                                   {{ in_array(strtolower($role->name), ['super_admin']) ? 'readonly' : 'required' }}>
-                            @if(in_array(strtolower($role->name), ['super_admin']))
-                                <small class="text-danger mt-2 d-block"><i class="fas fa-lock mr-1"></i> El nombre de este rol de sistema no puede ser modificado.</small>
-                            @else
-                                <small class="text-muted mt-2 d-block">Utilice formato snake_case (ej: medico_ocupacional).</small>
-                            @endif
+            @can('seguridad.roles.editar')
+                <div class="col-xl-4 col-lg-5 mb-4">
+                    <div class="card-custom sticky-top" style="top: 20px;">
+                        <div class="card-header-custom">
+                            <h6 class="card-title-custom"><i class="fas fa-info-circle"></i> Datos del Perfil</h6>
                         </div>
+                        <div class="card-body p-4 bg-white">
+                            
+                            <div class="form-group mb-4">
+                                <label class="font-weight-bold text-gray-700 small text-uppercase">Nombre del Rol</label>
+                                <input type="text" name="name" class="form-control form-control-custom text-lowercase" 
+                                       value="{{ old('name', $role->name) }}" 
+                                       {{ in_array(strtolower($role->name), ['super_admin']) ? 'readonly' : 'required' }}>
+                                @if(in_array(strtolower($role->name), ['super_admin']))
+                                    <small class="text-danger mt-2 d-block"><i class="fas fa-lock mr-1"></i> El nombre de este rol de sistema no puede ser modificado.</small>
+                                @else
+                                    <small class="text-muted mt-2 d-block">Utilice formato snake_case (ej: medico_ocupacional).</small>
+                                @endif
+                            </div>
 
-                        <div class="p-3 bg-light rounded-lg border mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="font-weight-bold text-gray-700 small">Usuarios Asignados:</span>
-                                <span class="badge badge-primary">{{ $role->users()->count() ?? 0 }}</span>
+                            <div class="p-3 bg-light rounded-lg border mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="font-weight-bold text-gray-700 small">Usuarios Asignados:</span>
+                                    <span class="badge badge-primary">{{ $role->users()->count() ?? 0 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="font-weight-bold text-gray-700 small">Permisos Actuales:</span>
+                                    <span class="badge badge-success" id="counterSelected">{{ count($rolePermissions) }}</span>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="font-weight-bold text-gray-700 small">Permisos Actuales:</span>
-                                <span class="badge badge-success" id="counterSelected">{{ count($rolePermissions) }}</span>
-                            </div>
+
+                            <button type="submit" class="btn-submit-master">
+                                <i class="fas fa-save mr-2"></i> Guardar Configuración
+                            </button>
                         </div>
-
-                        <button type="submit" class="btn-submit-master">
-                            <i class="fas fa-save mr-2"></i> Guardar Configuración
-                        </button>
                     </div>
                 </div>
-            </div>
+                
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card-custom">
+                        <div class="card-header-custom flex-wrap gap-3">
+                            <h6 class="card-title-custom"><i class="fas fa-key"></i> Matriz de Permisos</h6>
+                            
+                            <div class="search-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="filterPerms" class="form-control form-control-custom" placeholder="Buscar permiso (ej: crear)...">
+                            </div>
+                        </div>
 
-            <div class="col-xl-8 col-lg-7">
-                <div class="card-custom">
-                    <div class="card-header-custom flex-wrap gap-3">
-                        <h6 class="card-title-custom"><i class="fas fa-key"></i> Matriz de Permisos</h6>
-                        
-                        <div class="search-wrapper">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="filterPerms" class="form-control form-control-custom" placeholder="Buscar permiso (ej: crear)...">
+                        <div class="card-body p-4 bg-light">
+                            @php
+                                // Agrupamos por el campo 'module', si no existe o está vacío, va a 'OTROS'
+                                $groupedPermissions = $permissions->groupBy(fn($p) => $p->module ?: 'OTROS');
+                            @endphp
+
+                            @foreach ($groupedPermissions as $module => $modulePermissions)
+                                @php
+                                    // Identificador único limpio para el JS
+                                    $modId = Str::slug($module); 
+                                @endphp
+                                
+                                <div class="module-container" id="module_{{ $modId }}">
+                                    <div class="module-header">
+                                        <h6 class="module-name">
+                                            <i class="fas fa-folder text-warning mr-2"></i>{{ $module }}
+                                            <span class="badge badge-light text-muted border ml-2">{{ $modulePermissions->count() }}</span>
+                                        </h6>
+                                        
+                                        <button type="button" class="btn-toggle-all" data-target=".chk-{{ $modId }}">
+                                            <i class="fas fa-check-double mr-1"></i> Seleccionar Todo
+                                        </button>
+                                    </div>
+
+                                    <div class="row">
+                                        @foreach ($modulePermissions as $permission)
+                                            @php
+                                                $isChecked = in_array($permission->name, $rolePermissions);
+                                            @endphp
+                                            <div class="col-md-6 perm-card">
+                                                <label class="perm-switch-wrapper {{ $isChecked ? 'is-active' : '' }}" for="perm_{{ $permission->id }}">
+                                                    <div class="perm-info">
+                                                        <i class="fas fa-shield-alt perm-icon"></i>
+                                                        <span class="perm-label">{{ str_replace('_', ' ', $permission->name) }}</span>
+                                                    </div>
+                                                    <div class="custom-control custom-switch">
+                                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" 
+                                                               id="perm_{{ $permission->id }}" 
+                                                               class="custom-control-input perm-checkbox chk-{{ $modId }}"
+                                                               {{ $isChecked ? 'checked' : '' }}>
+                                                        <label class="custom-control-label" for="perm_{{ $permission->id }}"></label>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+
+                            <div id="noResultsMsg" class="text-center py-5 d-none">
+                                <i class="fas fa-search-minus fa-3x text-gray-300 mb-3"></i>
+                                <h5 class="text-gray-500 font-weight-bold">No se encontraron permisos</h5>
+                                <p class="text-muted">Intenta usar otras palabras clave.</p>
+                            </div>
+
                         </div>
                     </div>
+                </div>   
+            </div>
+        </form>
+    @else
+        <div class="col-xl-12 col-lg-7">
+            <div class="card-custom">
+                <div class="card-header-custom flex-wrap gap-3">
+                    <h6 class="card-title-custom"><i class="fas fa-key"></i> Acceso Restringido</h6>
+                </div>
 
-                    <div class="card-body p-4 bg-light">
-                        @php
-                            // Agrupamos por el campo 'module', si no existe o está vacío, va a 'OTROS'
-                            $groupedPermissions = $permissions->groupBy(fn($p) => $p->module ?: 'OTROS');
-                        @endphp
-
-                        @foreach ($groupedPermissions as $module => $modulePermissions)
-                            @php
-                                // Identificador único limpio para el JS
-                                $modId = Str::slug($module); 
-                            @endphp
-                            
-                            <div class="module-container" id="module_{{ $modId }}">
-                                <div class="module-header">
-                                    <h6 class="module-name">
-                                        <i class="fas fa-folder text-warning mr-2"></i>{{ $module }}
-                                        <span class="badge badge-light text-muted border ml-2">{{ $modulePermissions->count() }}</span>
-                                    </h6>
-                                    
-                                    <button type="button" class="btn-toggle-all" data-target=".chk-{{ $modId }}">
-                                        <i class="fas fa-check-double mr-1"></i> Seleccionar Todo
-                                    </button>
-                                </div>
-
-                                <div class="row">
-                                    @foreach ($modulePermissions as $permission)
-                                        @php
-                                            $isChecked = in_array($permission->name, $rolePermissions);
-                                        @endphp
-                                        <div class="col-md-6 perm-card">
-                                            <label class="perm-switch-wrapper {{ $isChecked ? 'is-active' : '' }}" for="perm_{{ $permission->id }}">
-                                                <div class="perm-info">
-                                                    <i class="fas fa-shield-alt perm-icon"></i>
-                                                    <span class="perm-label">{{ str_replace('_', ' ', $permission->name) }}</span>
-                                                </div>
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" 
-                                                           id="perm_{{ $permission->id }}" 
-                                                           class="custom-control-input perm-checkbox chk-{{ $modId }}"
-                                                           {{ $isChecked ? 'checked' : '' }}>
-                                                    <label class="custom-control-label" for="perm_{{ $permission->id }}"></label>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endforeach
-
-                        <div id="noResultsMsg" class="text-center py-5 d-none">
-                            <i class="fas fa-search-minus fa-3x text-gray-300 mb-3"></i>
-                            <h5 class="text-gray-500 font-weight-bold">No se encontraron permisos</h5>
-                            <p class="text-muted">Intenta usar otras palabras clave.</p>
-                        </div>
-
+                <div class="card-body">
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-lock fa-3x text-gray-200"></i>
+                        <p class="text-muted mt-2">Acceso no autorizado para realizar esta accion.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
+        @endcan
 </div>
 @endsection
 

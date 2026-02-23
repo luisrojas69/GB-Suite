@@ -18,7 +18,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.ver');
         $roles = Role::all();
         $stats = [
             'total_roles' => $roles->count(),
@@ -33,7 +33,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.crear');
         $permissions = Permission::all();
         return view('admin.roles.create', compact('permissions'));
     }
@@ -43,7 +43,7 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.crear');
         $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')],
             'permissions' => ['nullable', 'array'],
@@ -63,7 +63,7 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.editar');
         $permissions = Permission::all();
         // Obtener los nombres de los permisos que tiene este rol
         $rolePermissions = $role->permissions->pluck('name')->toArray(); 
@@ -76,7 +76,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.editar');
         $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')->ignore($role->id)],
             'permissions' => ['nullable', 'array'],
@@ -95,7 +95,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.roles.eliminar');
         $role->delete();
         return redirect()->route('admin.roles.index')->with('success', 'Rol eliminado.');
     }

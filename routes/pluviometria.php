@@ -16,6 +16,7 @@ Route::middleware(['auth'])->prefix('produccion')->name('produccion.')->group(fu
         Route::get('/exportar', [PluviometriaController::class, 'exportar'])->name('exportar');
 
         Route::get('/dashboard', [PluviometriaController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboardOLD', [PluviometriaController::class, 'dashboardOLD'])->name('dashboardOLD');
         
     });
 

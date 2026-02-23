@@ -17,7 +17,8 @@ class LoteController extends Controller
     {
         // Carga la relación 'sector' para evitar consultas N+1 en la vista.
         $lotes = Lote::with('sector')->orderBy('codigo_completo')->get();
-        return view('produccion.areas.lotes.index', compact('lotes'));
+        $sectores = Sector::orderBy('nombre')->pluck('nombre', 'id');
+        return view('produccion.areas.lotes.index', compact('lotes','sectores'));
     }
 
     /**
@@ -58,8 +59,7 @@ class LoteController extends Controller
         // en el evento 'creating' del Modelo Lote (Paso 2).
         Lote::create($request->all());
 
-        return redirect()->route('produccion.areas.lotes.index')
-                         ->with('success', '✅ Lote creado y código completo generado exitosamente.');
+       return response()->json(['success' => true, 'message' => 'Lote registrado con éxito.']);
     }
     
     /**
@@ -133,8 +133,7 @@ class LoteController extends Controller
         }
 
 
-        return redirect()->route('produccion.areas.lotes.index')
-                         ->with('success', $mensaje);
+        return response()->json(['success' => true, 'message' => 'Lote editado con éxito.']);
     }
 
     /**

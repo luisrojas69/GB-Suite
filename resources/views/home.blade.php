@@ -219,6 +219,6 @@
     </div>
 
      @else
-        @include('errors.403')
+        @include('about')
      @endif
 @endsection

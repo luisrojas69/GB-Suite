@@ -27,6 +27,9 @@
     {{-- MEDICINA   --}}
     @include('layouts.partials.sidebar.menu_medicina')
 
+     {{-- MEDICINA   --}}
+    @include('layouts.partials.sidebar.menu_areas')
+
     {{-- CONFIGURACIONES Y PERFIL --}}
     @include('layouts.partials.sidebar.menu_administrador')
 

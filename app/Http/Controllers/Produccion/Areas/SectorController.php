@@ -46,7 +46,8 @@ class SectorController extends Controller
                                     'regex:/^[a-zA-Z0-9\s]+$/' // Añadimos \s para permitir espacios si lo deseas
                                 ],
             'nombre' => 'required|string|max:100',
-            'geometria' => 'required', 
+            'geometria' => 'required',
+            'hectareas_geometria' => 'nullable|numeric|min:0.01|max:99999.99', 
         ]);
 
         $sector = new Sector($request->except('geometria'));
@@ -67,6 +68,7 @@ class SectorController extends Controller
         $request->validate([
             'codigo_sector' => ['required', 'string', 'max:10', Rule::unique('sectores', 'codigo_sector')->ignore($id)],
             'nombre' => 'required|string|max:100',
+            'hectareas_geometria' => 'nullable|numeric|min:0.01|max:99999.99', 
         ]);
 
         $sector->fill($request->except('geometria'));

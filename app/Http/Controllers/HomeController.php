@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Carbon\Carbon;
 
+//DashboardPluviometria
+use App\Models\Produccion\Pluviometria\RegistroPluviometrico;
+
 class HomeController extends Controller
 {
 
@@ -51,19 +54,40 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
-
+        // 1. Prioridad: Dashboard de Medicina y Seguridad Laboral
+        if ($user->can('pluviometria.dashboard')) {
+            return $this->dashboardPluviometria();
+        }
         // 1. Prioridad: Dashboard de Medicina y Seguridad Laboral
         if ($user->can('medicina.dashboard')) {
             return $this->dashboardMedicina();
         }
 
         // 2. Prioridad: Dashboard de Taller / Maquinaria
-        if ($user->can('ver_dashboard_comedor')) {
+        if ($user->can('comedor.dashboard')) {
             return $this->DashboardComedor();
         }
 
+        // 3. Prioridad: Dashboard de Seguridad Laboral
+        if ($user->can('pozos.dashboard')) {
+            return $this->dashboardPozos();
+        }
+
+        // 3. Prioridad: Dashboard de Seguridad Laboral
+        if ($user->can('taller.dashboard')) {
+            return $this->dashboardMedicina();
+        }
+
+        $users = User::count();
+        $pacientes = Paciente::count();
+        $widget = [
+            'users' => $users,
+            'pacientes' => $pacientes,
+            //...
+        ];
+
         // 3. Dashboard por defecto (General o RRHH)
-        return view('home');
+        return view('home', compact('widget'));
     }
 
     public function DashboardMedicina() {
@@ -187,6 +211,102 @@ class HomeController extends Controller
 
         return view('RRHH.Comedor.dashboard.index', compact('stats', 'mealDistribution', 'lastSevenDays', 'userTypeDist', 'deptDistribution'));
 
+    }
+
+     public function dashboardPluviometria()
+    {
+        Gate::authorize('pluviometria.dashboard');
+        \Carbon\Carbon::setLocale('es');
+        
+        // 1. Manejo del Tiempo (Navegación)
+        $hoy = now()->format('Y-m-d');
+        $mes = now()->month;
+        $anio = now()->year;
+        
+        $fechaConsulta = \Carbon\Carbon::create($anio, $mes, 1);
+        $hoy = now();
+        $anioActual = $fechaConsulta->year;
+        $anioAnterior = $anioActual - 1;
+
+        // 2. Cálculo de KPIs Superiores
+        $acumuladoMes = RegistroPluviometrico::whereMonth('fecha', $mes)
+                                             ->whereYear('fecha', $anioActual)
+                                             ->sum('cantidad_mm');
+                                             
+        $maxRegistro = RegistroPluviometrico::with('sector')
+                                            ->whereMonth('fecha', $mes)
+                                            ->whereYear('fecha', $anioActual)
+                                            ->orderByDesc('cantidad_mm')
+                                            ->first();
+                                            
+        $maximaLluvia = $maxRegistro ? $maxRegistro->cantidad_mm : 0;
+        $nombreSectorMax = $maxRegistro ? $maxRegistro->sector->nombre : 'Sin registros';
+
+        $diasConLluvia = RegistroPluviometrico::whereMonth('fecha', $mes)
+                                              ->whereYear('fecha', $anioActual)
+                                              ->where('cantidad_mm', '>', 0.5)
+                                              ->distinct('fecha')
+                                              ->count();
+
+        // Días secos: Si es el mes actual, restamos los días hasta hoy. Si es mes pasado, los días del mes.
+        $diasEvaluados = ($mes == $hoy->month && $anioActual == $hoy->year) ? $hoy->day : $fechaConsulta->daysInMonth;
+        $diasSecos = $diasEvaluados - $diasConLluvia;
+
+        // Promedio por evento de lluvia
+        $promedioLluvia = $diasConLluvia > 0 ? ($acumuladoMes / $diasConLluvia) : 0;
+
+        // 3. Datos para Gráfico de Tendencia
+        $diasMesLabels = [];
+        $totalesDia = [];
+        $registrosMes = RegistroPluviometrico::whereMonth('fecha', $mes)
+                                             ->whereYear('fecha', $anioActual)
+                                             ->orderBy('fecha')
+                                             ->get()
+                                             ->groupBy('fecha');
+
+        foreach($registrosMes as $fecha => $regs) {
+            $diasMesLabels[] = \Carbon\Carbon::parse($fecha)->format('d/m');
+            $totalesDia[] = $regs->sum('cantidad_mm');
+        }
+
+
+
+        // 4. Datos para Gráfico por Sector
+        $sectoresNombres = [];
+        $sectoresValores = [];
+        $porSector = RegistroPluviometrico::with('sector')
+                                          ->whereMonth('fecha', $mes)
+                                          ->whereYear('fecha', $anioActual)
+                                          ->get()
+                                          ->groupBy('id_sector');
+
+        foreach($porSector as $id => $regs) {
+            $sectoresNombres[] = $regs->first()->sector->nombre;
+            $sectoresValores[] = $regs->sum('cantidad_mm');
+        }
+
+        // 5. Comparativo Mensual (Año Actual vs Anterior)
+        $mesesLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        $datosAnioActual = array_fill(0, 12, 0);
+        $datosAnioAnterior = array_fill(0, 12, 0);
+
+        $regActual = RegistroPluviometrico::whereYear('fecha', $anioActual)->get();
+        foreach($regActual as $r) {
+            $mesIndex = \Carbon\Carbon::parse($r->fecha)->month - 1;
+            $datosAnioActual[$mesIndex] += $r->cantidad_mm;
+        }
+
+        $regAnterior = RegistroPluviometrico::whereYear('fecha', $anioAnterior)->get();
+        foreach($regAnterior as $r) {
+            $mesIndex = \Carbon\Carbon::parse($r->fecha)->month - 1;
+            $datosAnioAnterior[$mesIndex] += $r->cantidad_mm;
+        }
+
+        return view('produccion.pluviometria.dashboard', compact(
+            'fechaConsulta', 'acumuladoMes', 'maximaLluvia', 'nombreSectorMax', 'diasConLluvia', 'diasSecos', 'promedioLluvia',
+            'diasMesLabels', 'totalesDia', 'sectoresNombres', 'sectoresValores',
+            'mesesLabels', 'datosAnioActual', 'datosAnioAnterior', 'anioActual', 'anioAnterior'
+        ));
     }
 
 }

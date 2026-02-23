@@ -16,7 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.usuarios.ver');
         $users = User::with('roles')->get(); // Cargar los roles de cada usuario
         $stats = [
            'total' => User::count(),
@@ -33,7 +33,7 @@ class UserController extends Controller
      */
     public function editRoles(User $user)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.usuarios.editar');
         // Obtener todos los roles disponibles en el sistema
         $roles = Role::all();
         
@@ -48,7 +48,7 @@ class UserController extends Controller
      */
     public function updateRoles(Request $request, User $user)
     {
-        Gate::authorize('gestionar_seguridad');
+        Gate::authorize('seguridad.usuarios.editar');
         $request->validate([
             'roles' => ['nullable', 'array'], // Esperamos un array de nombres de roles
         ]);

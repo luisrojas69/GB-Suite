@@ -32,7 +32,7 @@ class AnimalController extends Controller
      */
     public function index()
     {
-        Gate::authorize('ver_animales');
+        Gate::authorize('produccion.animales.ver');
         $animals = Animal::with(['specie', 'category', 'owner', 'location'])
                          ->where('is_active', true) // Solo mostrar activos por defecto
                          ->orderBy('iron_id')
@@ -46,7 +46,7 @@ class AnimalController extends Controller
      */
     public function create()
     {
-        Gate::authorize('crear_animal');
+        Gate::authorize('produccion.animales.crear');
         $masterData = $this->getMasterData();
         return view('produccion.animales.animals.create', $masterData);
     }
@@ -66,7 +66,7 @@ class AnimalController extends Controller
     public function show(Animal $animal)
     {
         // 1. PROTECCIÓN DE ACCESO: Solo si tiene permiso para ver detalles
-        Gate::authorize('ver_animales'); 
+        Gate::authorize('produccion.animales.ver');
         
         // 2. CARGA DE RELACIONES: Cargar relaciones necesarias para la vista
         $animal->load([
@@ -96,7 +96,7 @@ class AnimalController extends Controller
      */
     public function edit(Animal $animal)
     {
-        Gate::authorize('editar_animal');
+        Gate::authorize('produccion.animales.editar');
         $masterData = $this->getMasterData();
         return view('produccion.animales.animals.edit', compact('animal') + $masterData);
     }
@@ -106,6 +106,7 @@ class AnimalController extends Controller
      */
     public function update(Request $request, Animal $animal)
     {
+        Gate::authorize('produccion.animales.editar');
         $request->validate([
             // La regla unique debe ignorar el ID del animal que se está actualizando
             'iron_id' => [
@@ -137,7 +138,7 @@ class AnimalController extends Controller
      */
     public function destroy(Animal $animal)
     {
-        Gate::authorize('eliminar_animal');
+        Gate::authorize('produccion.animales.eliminar');
         try {
             // El 'onDelete('cascade')' en las migraciones manejará la eliminación de pesajes y eventos.
             $animal->delete(); 

@@ -6,7 +6,7 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-seedling text-success"></i> Tablones de Siembra</h1>
-        @can('crear_sectores')
+        @can('produccion.areas.crear')
         <a href="{{ route('produccion.areas.tablones.create') }}" class="btn btn-success btn-icon-split shadow-sm">
             <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
             <span class="text">Registrar Tablón</span>
@@ -30,7 +30,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                @can('ver_sectores')
+                @can('produccion.areas.ver')
                 <table class="table table-hover align-middle" id="dataTable" width="100%" cellspacing="0">
                     <thead class="bg-gray-100 text-secondary">
                         <tr>
@@ -56,9 +56,11 @@
                                 @endif
                             </td>
                             <td class="align-middle">
+                                @can('produccion.areas.ver')
                                 <a href="{{ route('produccion.areas.tablones.show', $tablon->id) }}" class="font-weight-bold text-primary text-decoration-none">
                                     {{ $tablon->codigo_completo }}
                                 </a>
+                                @endcan
                                 <br><small class="text-muted">{{ $tablon->nombre }}</small>
                             </td>
 
@@ -111,19 +113,19 @@
 
                             <td class="align-middle text-center">
                                 <div class="btn-group shadow-sm" role="group">
-                                    @can('ver_sectores')
+                                    @can('produccion.areas.ver')
                                     <a href="{{ route('produccion.areas.tablones.show', $tablon->id) }}" class="btn btn-white btn-sm border" title="Ver Detalle">
                                         <i class="fas fa-eye text-info"></i>
                                     </a>
                                     @endcan
 
-                                    @can('editar_sectores')
+                                    @can('produccion.areas.editar')
                                     <a href="{{ route('produccion.areas.tablones.edit', $tablon->id) }}" class="btn btn-white btn-sm border" title="Editar">
                                         <i class="fas fa-edit text-primary"></i>
                                     </a>
                                     @endcan
 
-                                    @can('eliminar_sectores')
+                                    @can('produccion.areas.eliminar')
                                     <button type="button" class="btn btn-white btn-sm border delete-tablon" 
                                             data-id="{{ $tablon->id }}" 
                                             data-nombre="{{ $tablon->nombre }}" 
