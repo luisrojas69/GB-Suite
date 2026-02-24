@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('variedad_id')->nullable()->constrained('variedades')->onDelete('set null')->comment('Última variedad de caña sembrada.');
             
             $table->string('codigo_tablon_interno', 5); // Ej: 01, AB
+            //$table->string('codigo_central', 5)->nullable(); // Por desarrollar - Esto es por si el central maneja un codigo diferente
             $table->string('codigo_completo', 15)->unique(); // Ej: 010201, 0802AB
             $table->string('nombre', 100);
 

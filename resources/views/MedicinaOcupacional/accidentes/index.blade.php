@@ -133,6 +133,56 @@
         font-weight: 500;
     }
 
+    .page-header-master {
+        color: white;
+        padding: 25px 30px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(26, 89, 46, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header-master::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+        .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+    }
+
+    .header-title h1 {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+    }
+
+    .header-subtitle {
+        font-size: 13px;
+        opacity: 0.95;
+    }
+
+
+</style>
+
 </style>
 @endsection
 
@@ -167,24 +217,25 @@
     @endif
 
     {{-- Header Principal --}}
-    <div class="card shadow-lg border-0 mb-4">
-        <div class="card-body bg-gradient-danger text-white py-4">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <div class="stat-icon bg-white text-danger">
+
+    <div class="page-header-master bg-gradient-danger">
+        <div class="header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <div class="header-icon mr-3">
                         <i class="fas fa-user-injured"></i>
                     </div>
+                    <div class="header-title">
+                        <h1 class="h2 mb-1 font-weight-bold text-white">
+                            <i class="fas fa-ambulance"></i> Control de Accidentes Laborales
+                        </h1>
+                        <p class="mb-0 text-white-75">
+                            <i class="fas fa-calendar"></i> {{ \Carbon\Carbon::now()->isoFormat('dddd, D [de] MMMM [de] YYYY') }} | 
+                            <i class="fas fa-hospital"></i> Servicio Médico Ocupacional
+                        </p>
+                    </div>
                 </div>
-                <div class="col">
-                    <h1 class="h2 mb-1 font-weight-bold text-white">
-                        <i class="fas fa-ambulance"></i> Control de Accidentes Laborales
-                    </h1>
-                    <p class="mb-0 text-white-75">
-                        <i class="fas fa-calendar"></i> {{ \Carbon\Carbon::now()->isoFormat('dddd, D [de] MMMM [de] YYYY') }} | 
-                        <i class="fas fa-hospital"></i> Servicio Médico Ocupacional
-                    </p>
-                </div>
-                <div class="col-auto">
+                <div>
                     <a href="{{ route('medicina.pacientes.index') }}" class="btn btn-light btn-lg shadow">
                         <i class="fas fa-user-plus"></i> Nuevo Accidente
                     </a>

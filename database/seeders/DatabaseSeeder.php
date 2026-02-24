@@ -194,7 +194,7 @@ class DatabaseSeeder extends Seeder
 
        $this->call(RolesAndPermissionsSeeder::class);
         //$this->call(RolesAndPermissionsTallerSeeder::class);
-        //$this->call(ProduccionSeeder::class);
+        $this->call(ProduccionSeeder::class);
         //$this->call(AreasProduccionSeeder::class);
         $this->call(MealTypeSeeder::class);
         $this->call(MedCie10Seeder::class);

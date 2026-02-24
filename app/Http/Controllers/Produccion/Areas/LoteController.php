@@ -69,7 +69,8 @@ class LoteController extends Controller
     {
         // Precargamos Sector y Tablones para la vista de detalle
         $lote->load('sector', 'tablones'); 
-        return view('produccion.areas.lotes.show', compact('lote'));
+        $sectores = Sector::orderBy('nombre')->pluck('nombre', 'id');
+        return view('produccion.areas.lotes.show', compact('lote', 'sectores'));
     }
 
     /**

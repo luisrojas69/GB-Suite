@@ -103,4 +103,30 @@ class VariedadController extends Controller
             return response()->json(['success' => false, 'message' => 'No se puede eliminar la variedad porque está asociada a uno o más Tablones. Debe actualizar o eliminar primero las referencias.']);
         }
     }
+
+    public function storeAjax(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:100|unique:variedades,nombre',
+            'codigo' => 'nullable|string|max:10|unique:variedades,codigo',
+            'meta_pol_cana' => 'nullable|numeric'
+        ]);
+
+        try {
+            $variedad = Variedad::create($request->all());
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $variedad->id,
+                    'nombre' => $variedad->nombre
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar en base de datos.'
+            ], 500);
+        }
+    }
 }

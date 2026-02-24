@@ -66,6 +66,10 @@ Route::middleware(['auth'])->group(function () {
     // CARGA DEL MÓDULO DE PLUVIOMETRIA
     require __DIR__.'/labores.php';
 
+    // CARGA DEL MÓDULO DE ARRIMES
+    require __DIR__.'/arrimes.php';
+
+
 
 
     // Rutas de Perfil/Configuración (ejemplo)

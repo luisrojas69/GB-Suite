@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title-page', 'Gestion y Control de Consultas Médicas')
 @section('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 <style>
@@ -42,6 +42,77 @@
         0%, 100% { opacity: 1; }
         50% { opacity: 0.7; }
     }
+
+    /* ========================================
+       HEADER PRINCIPAL
+    ======================================== */
+    .page-header-master {
+        background: linear-gradient(135deg, #1a592e 0%, #2d7a4a 100%);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(26, 89, 46, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header-master::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+    }
+
+    .header-title h1 {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+    }
+
+    .header-subtitle {
+        font-size: 13px;
+        opacity: 0.95;
+    }
+
+    .btn-nueva-orden {
+        background: white;
+        color: #1a592e;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .btn-nueva-orden:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        color: #1a592e;
+    }
+
 </style>
 @endsection
 @section('title-page', 'Control de Consultas Médicas')
@@ -76,7 +147,7 @@
     @endif
 
     {{-- Header Principal --}}
-    <div class="card shadow-lg border-0 mb-4">
+{{--     <div class="card shadow-lg border-0 mb-4">
         <div class="card-body bg-gradient-primary text-white py-4">
             <div class="row align-items-center">
                 <div class="col-auto">
@@ -94,6 +165,30 @@
                     </p>
                 </div>
                 <div class="col-auto">
+                    <a href="{{ route('medicina.pacientes.index') }}" class="btn btn-light btn-lg shadow">
+                        <i class="fas fa-user-plus"></i> Nueva Consulta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div> --}}
+
+    <div class="page-header-master">
+        <div class="header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <div class="header-icon mr-3">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="header-title">
+                        <h1><i class="fas fa-file-medical"></i> Gestión y Control de Consultas Médicas</h1>
+                        <p class="header-subtitle mb-0">
+                           <i class="fas fa-calendar"></i> {{ \Carbon\Carbon::now()->isoFormat('dddd, D [de] MMMM [de] YYYY') }} | 
+                        <i class="fas fa-hospital"></i> Servicio Médico Ocupacional
+                        </p>
+                    </div>
+                </div>
+                <div>
                     <a href="{{ route('medicina.pacientes.index') }}" class="btn btn-light btn-lg shadow">
                         <i class="fas fa-user-plus"></i> Nueva Consulta
                     </a>

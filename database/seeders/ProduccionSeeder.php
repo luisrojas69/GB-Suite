@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\Produccion\Agro\Zafra;
+use App\Models\Produccion\Agro\Central;
 use App\Models\Produccion\Agro\Variedad;
 use App\Models\Produccion\Agro\Contratista; // Ajusta el namespace si es diferente
 use App\Models\Produccion\Agro\Destino;     // Ajusta el namespace si es diferente
@@ -59,6 +60,21 @@ class ProduccionSeeder extends Seeder
         ]);
         
         $this->command->info('Zafras creadas.');
+
+        // --- 5. Centrales (Ejemplo: La Pastora)
+        Central::create([
+            'nombre' => 'Central La Pastora',
+            'rif' => 'J-12345679-0',
+            'ubicacion' => 'Sector La Pastora',
+            'activo' => true,
+        ]);
+        Central::create([
+            'nombre' => 'Central Carora',
+            'rif' => 'J-12345676-0',
+            'ubicacion' => 'Sector Carora Panamericana',
+            'activo' => false,
+        ]);
+        $this->command->info('Centrales Creados.');
 
         // Reactivar la verificación de claves foráneas
        // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
