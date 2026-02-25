@@ -2,6 +2,7 @@
 @section('title-page', 'Mapeo de Rol de Molienda')
 
 @section('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
     :root {
         --agro-dark: #1b4332;
@@ -215,6 +216,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         // Inicializar Select2
@@ -258,4 +260,68 @@
             
             // IMPORTANTE: Asegúrate de tener esta ruta configurada en tu web.php
             $.ajax({
-                url: "{{ route('varied
+                url: "{{ route('variedades.storeAjax') }}", 
+                type: "POST",
+                data: formData,
+                success: function(response) {
+                    if(response.success) {
+                        // 1. Obtener los datos de la nueva variedad
+                        let nuevaVarId = response.data.id;
+                        let nuevaVarNombre = response.data.nombre;
+                        
+                        // 2. Crear la nueva etiqueta <option>
+                        let newOption = new Option(nuevaVarNombre, nuevaVarId, true, true);
+                        
+                        // 3. Añadir la opción a TODOS los selects de variedades de la tabla
+                        $('.select-variedad').append(new Option(nuevaVarNombre, nuevaVarId, false, false));
+                        
+                        // 4. Seleccionar la opción en el Select específico que invocó el modal
+                        let targetSelectId = $('#target_select_id').val();
+                        $('#' + targetSelectId).append(newOption).trigger('change');
+                        
+                        // Cerrar modal y limpiar
+                        $('#modalNuevaVariedad').modal('hide');
+                        $('#form-ajax-variedad')[0].reset();
+                        
+                        toastr.success('Variedad creada y asignada exitosamente.');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = "Ocurrió un error al guardar.";
+                    if(xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function() {
+                    btnSubmit.prop('disabled', false).html('Guardar Variedad');
+                }
+            });
+        });
+    });
+
+    // Función SweetAlert antes de enviar el formulario principal
+    function confirmarProcesamiento() {
+        // Validar HTML5 nativo primero (campos required)
+        var form = document.getElementById('form-purgatorio');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Guardar Plan de Zafra?',
+            text: "Se registrarán todas las asignaciones correctas.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2d6a4f',
+            confirmButtonText: '<i class="fas fa-save mr-1"></i> Confirmar',
+            cancelButtonText: 'Revisar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+</script>
+@endpush

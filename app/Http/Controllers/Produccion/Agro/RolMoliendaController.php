@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Produccion\Agro;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Produccion\Agro\PlanZafraDetalle;
+use App\Models\Produccion\Agro\RolMolienda;
 use App\Models\Produccion\Areas\Tablon;
 use App\Models\Produccion\Areas\Sector;
 use App\Models\Produccion\Agro\Variedad;
@@ -24,7 +24,7 @@ class RolMoliendaController extends Controller
             return redirect()->back()->with('error', 'No hay una zafra activa.');
         }
 
-        $planes = PlanZafraDetalle::where('zafra_id', $zafraActiva->id)
+        $planes = RolMolienda::where('zafra_id', $zafraActiva->id)
                     ->with(['tablon.lote.sector', 'variedad'])
                     ->get();
 
@@ -64,7 +64,7 @@ class RolMoliendaController extends Controller
         
         // Cargamos todas las variedades y tablones para los dropdowns de corrección en la vista
         $todasLasVariedades = Variedad::orderBy('nombre')->get();
-        $todosLosTablones = Tablon::with('lote.sector')->get();
+        $todosLosTablones = Tablon::with('lote.sector', 'variedad')->orderBy('codigo_completo')->get();
 
         foreach ($csvData as $index => $row) {
             if(count($headers) !== count($row)) continue; // Evita filas en blanco o mal formadas
@@ -93,7 +93,7 @@ class RolMoliendaController extends Controller
             // 5. Verificación de si ya existe un plan para este tablón en esta zafra
             $planExistente = null;
             if ($tablon) {
-                $planExistente = PlanZafraDetalle::where('zafra_id', $zafraActiva->id)
+                $planExistente = RolMolienda::where('zafra_id', $zafraActiva->id)
                                     ->where('tablon_id', $tablon->id)->first();
             }
 
@@ -178,7 +178,7 @@ class RolMoliendaController extends Controller
             }
 
             // updateOrCreate para evitar duplicidad de planificación del mismo tablón en la misma zafra
-            PlanZafraDetalle::updateOrCreate(
+            RolMolienda::updateOrCreate(
                 [
                     'zafra_id' => $request->zafra_id,
                     'tablon_id' => $tablonId
@@ -203,5 +203,61 @@ class RolMoliendaController extends Controller
 
         return redirect()->route('rol_molienda.index')
             ->with('success', "Rol de Molienda procesado: $insertados tablones planificados y $actualizados actualizados.");
+    }
+
+    public function dashboard(Request $request)
+    {
+        \Carbon\Carbon::setLocale('es');
+        
+        // 1. Navegación Temporal
+        $anio = $request->input('anio', date('Y'));
+        $mes = $request->input('mes', date('m'));
+        $fechaConsulta = \Carbon\Carbon::create($anio, $mes, 1);
+        
+        // 2. KPIs de Cumplimiento (Real vs Proyectado)
+        // Asumimos que tienes una tabla 'molienda_ejecutada' o similar para lo REAL
+        $proyectadoMes = RolMolienda::whereMonth('fecha_corte_proyectada', $mes)
+                            ->whereYear('fecha_corte_proyectada', $anio)
+                            ->sum('toneladas_estimadas');
+                            
+        //$ejecutadoMes = MoliendaEjecutada::whereMonth('fecha_molienda', $mes)
+          //                  ->whereYear('fecha_molienda', $anio)
+            //                ->sum('toneladas_reales');
+
+        $ejecutadoMes = 2;
+
+        $cumplimientoTons = $proyectadoMes > 0 ? ($ejecutadoMes / $proyectadoMes) * 100 : 0;
+
+        // 3. Análisis de Rendimiento (Pol y Eficiencia)
+        $rendimientoPlan = RolMolienda::whereMonth('fecha_corte_proyectada', $mes)
+                            ->whereYear('fecha_corte_proyectada', $anio)
+                            ->avg('rendimiento_esperado') ?? 0;
+
+        // 4. Datos para Gráfico de Tendencia Diaria (Molienda Acumulada)
+        $diasMesLabels = [];
+        $dataProyectada = [];
+        $dataReal = [];
+        $acumuladoProyectado = 0;
+        $acumuladoReal = 0;
+
+        for ($d = 1; $d <= $fechaConsulta->daysInMonth; $d++) {
+            $fechaLoop = \Carbon\Carbon::create($anio, $mes, $d)->format('Y-m-d');
+            $diasMesLabels[] = $d;
+            
+            $diaProy = RolMolienda::where('fecha_corte_proyectada', $fechaLoop)->sum('toneladas_estimadas');
+           // $diaReal = MoliendaEjecutada::where('fecha_molienda', $fechaLoop)->sum('toneladas_reales');
+            $diaReal = 1;
+            
+            $acumuladoProyectado += $diaProy;
+            $acumuladoReal += $diaReal;
+            
+            $dataProyectada[] = $acumuladoProyectado;
+            $dataReal[] = ($fechaLoop <= now()->format('Y-m-d')) ? $acumuladoReal : null;
+        }
+
+        return view('produccion.agro.rol_molienda.dashboard', compact(
+            'fechaConsulta', 'proyectadoMes', 'ejecutadoMes', 'cumplimientoTons', 
+            'rendimientoPlan', 'diasMesLabels', 'dataProyectada', 'dataReal'
+        ));
     }
 }
