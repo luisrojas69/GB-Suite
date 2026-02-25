@@ -9,7 +9,7 @@ use App\Models\Produccion\Agro\Zafra; // Agregada la relación Zafra
 
 class RolMolienda extends Model
 {
-    protected $table = 'plan_zafra_detalles';
+    protected $table = 'rol_molienda';
 
     // Agregamos 'toneladas_estimadas' al fillable
     protected $fillable = [

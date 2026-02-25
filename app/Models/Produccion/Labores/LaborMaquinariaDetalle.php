@@ -18,6 +18,6 @@ class LaborMaquinariaDetalle extends Model
     public function operador() { return $this->belongsTo(Paciente::class, 'operador_id'); }
     public function registro()
     {
-        return $this->belongsTo(\App\Models\Produccion\Labores\RegistroLabor::class, 'registro_labor_id');
+        return $this->belongsTo(RegistroLabor::class, 'registro_labor_id');
     }
 }

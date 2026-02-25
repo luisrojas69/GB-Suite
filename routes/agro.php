@@ -6,6 +6,7 @@ use App\Http\Controllers\Produccion\Agro\VariedadController;
 use App\Http\Controllers\Produccion\Agro\ZafraController;
 use App\Http\Controllers\Produccion\Agro\MoliendaController;
 use App\Http\Controllers\Produccion\Agro\RolMoliendaController;
+use App\Http\Controllers\Produccion\Agro\ReporteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,10 +37,15 @@ Route::prefix('produccion/agro')->group(function () {
 
     // Dashboard / Listado Principal
     Route::get('/rol_molienda/historial', [RolMoliendaController::class, 'index'])->name('rol_molienda.index');
+    Route::get('/rol_molienda/reportes', [ReporteController::class, 'index'])->name('rol_molienda.reportes.index');
+    Route::get('/rol_molienda/reportes/exportar/{nombreReporte}', [ReporteController::class, 'exportar'])->name('rol_molienda.exportar');
 
     // Flujo de Importación y Purgatorio
     Route::get('/rol_molienda/importar', [RolMoliendaController::class, 'importar'])->name('rol_molienda.importar');
     Route::post('/rol_molienda/preview', [RolMoliendaController::class, 'preview'])->name('rol_molienda.preview');
     Route::post('/rol_molienda/process', [RolMoliendaController::class, 'process'])->name('rol_molienda.process');
+    Route::post('/rol_molienda/process', [RolMoliendaController::class, 'process'])->name('rol_molienda.process');
     Route::get('/rol_molienda/dashboard', [RolMoliendaController::class, 'dashboard'])->name('rol_molienda.dashboard');
+    Route::get('/rol_molienda/finalizar', [RolMoliendaController::class, 'finalizar'])->name('rol_molienda.finalizar');
+    
 });

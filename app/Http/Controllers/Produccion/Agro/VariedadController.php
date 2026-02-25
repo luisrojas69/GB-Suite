@@ -106,12 +106,6 @@ class VariedadController extends Controller
 
     public function storeAjax(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:100|unique:variedades,nombre',
-            'codigo' => 'nullable|string|max:10|unique:variedades,codigo',
-            'meta_pol_cana' => 'nullable|numeric'
-        ]);
-
         try {
             $variedad = Variedad::create($request->all());
 

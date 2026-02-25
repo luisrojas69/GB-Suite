@@ -310,6 +310,40 @@
                                             <i class="fas fa-edit fa-sm fa-fw mr-2 text-gray-400"></i> Actualizar Datos
                                         </a>
                                         @endcan
+
+                                        <button class="dropdown-item" data-toggle="modal" data-target="#modalFinalizar{{ $t->id }}">
+                                            <i class="fas fa-check-circle"></i> Finalizar
+                                        </button> 
+                                        <div class="modal fade" id="modalFinalizar{{ $t->id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form action="{{ route('rol_molienda.finalizar') }}" method="POST">
+                                                    @csrf
+                                                    {{-- <input type="hidden" name="zafra_id" value="{{ $zafra_id }}"> --}}
+                                                    <input type="hidden" name="tablon_id" value="{{ $t->id }}">
+                                                    
+                                                    <div class="modal-header bg-success text-white">
+                                                        <h5 class="modal-title">Finalizar Cosecha: {{ $t->codigo }}</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Al finalizar, el tablón se marcará como <strong>Cosechado</strong> y se auditarán todos los boletos registrados.</p>
+                                                        
+                                                        <div class="form-group">
+                                                            <label>Hectáreas Reales Cosechadas:</label>
+                                                            <input type="number" step="0.01" name="area_cosechada_real" 
+                                                                   value="{{ $t->area_planificada }}" class="form-control" required>
+                                                            <small class="text-muted">Ajuste el área si hubo variaciones en campo.</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-success shadow">Confirmar y Cerrar Tablón</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>                                       
+
                                         
                                         <div class="dropdown-divider"></div>
                                         <a class="dropdown-item" href="#">
@@ -340,7 +374,7 @@
     $(document).ready(function() {
         // Inicializar DataTables
         $('#dataTableTablones').DataTable({
-            "language": { "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json" },
+            "language": { "url": "/js/lang/Spanish.json" },
             "pageLength": 15,
             "order": [[ 4, "desc" ]] // Ordenar por edad por defecto
         });

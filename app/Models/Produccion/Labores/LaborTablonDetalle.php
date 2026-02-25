@@ -3,6 +3,7 @@
 namespace App\Models\Produccion\Labores;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Produccion\Areas\Tablon;
 
 class LaborTablonDetalle extends Model
 {
@@ -12,4 +13,8 @@ class LaborTablonDetalle extends Model
     ];
 
     public function tablon() { return $this->belongsTo(Tablon::class); }
+    public function registro()
+    {
+        return $this->belongsTo(RegistroLabor::class, 'registro_labor_id');
+    }
 }

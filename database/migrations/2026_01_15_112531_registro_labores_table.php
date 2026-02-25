@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('registro_labores', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('zafra_id');
             $table->foreignId('labor_id')->constrained('cat_labores_criticas');
             $table->date('fecha_ejecucion');
             $table->enum('tipo_ejecutor', ['Propio', 'Contratista'])->default('Propio');
+            $table->foreignId('contratista_id');
             $table->string('contratista_nombre')->nullable();
             $table->text('observaciones')->nullable();
+            $table->foreignId('usuario_id')->nullable();
             $table->timestamps();
         });
     }

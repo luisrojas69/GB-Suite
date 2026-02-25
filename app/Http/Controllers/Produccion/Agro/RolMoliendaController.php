@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Produccion\Agro;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Produccion\Agro\RolMolienda;
+use App\Models\Produccion\Arrimes\MoliendaEjecutada;
 use App\Models\Produccion\Areas\Tablon;
 use App\Models\Produccion\Areas\Sector;
 use App\Models\Produccion\Agro\Variedad;
@@ -56,6 +57,7 @@ class RolMoliendaController extends Controller
         ]);
 
         $file = $request->file('archivo_csv');
+
         $csvData = array_map('str_getcsv', file($file->getRealPath()));
         $headers = array_shift($csvData);
 
@@ -73,6 +75,7 @@ class RolMoliendaController extends Controller
             // 1. Limpieza de datos clave
             $nombreSectorCsv = trim($data['Sector'] ?? $data['Hacienda']);
             $codigoTablonCsv = trim($data['Tablon']);
+
             $nombreVariedadCsv = trim($data['Variedad']);
 
             // 2. Búsqueda de Sector (Por nombre, asumiendo que el Excel dice "Palo a Pique")
@@ -154,6 +157,7 @@ class RolMoliendaController extends Controller
      */
     public function process(Request $request)
     {
+        dd($request);
         if (!$request->has('data')) {
             return redirect()->route('rol_molienda.importar')->with('error', 'No hay datos para procesar.');
         }
@@ -209,31 +213,27 @@ class RolMoliendaController extends Controller
     {
         \Carbon\Carbon::setLocale('es');
         
-        // 1. Navegación Temporal
         $anio = $request->input('anio', date('Y'));
         $mes = $request->input('mes', date('m'));
         $fechaConsulta = \Carbon\Carbon::create($anio, $mes, 1);
         
-        // 2. KPIs de Cumplimiento (Real vs Proyectado)
-        // Asumimos que tienes una tabla 'molienda_ejecutada' o similar para lo REAL
+        // 1. Totales Mensuales
         $proyectadoMes = RolMolienda::whereMonth('fecha_corte_proyectada', $mes)
                             ->whereYear('fecha_corte_proyectada', $anio)
                             ->sum('toneladas_estimadas');
                             
-        //$ejecutadoMes = MoliendaEjecutada::whereMonth('fecha_molienda', $mes)
-          //                  ->whereYear('fecha_molienda', $anio)
-            //                ->sum('toneladas_reales');
-
-        $ejecutadoMes = 2;
+        $ejecutadoMes = MoliendaEjecutada::whereMonth('fecha_fin_cosecha', $mes)
+                            ->whereYear('fecha_fin_cosecha', $anio)
+                            ->sum('toneladas_reales');
 
         $cumplimientoTons = $proyectadoMes > 0 ? ($ejecutadoMes / $proyectadoMes) * 100 : 0;
 
-        // 3. Análisis de Rendimiento (Pol y Eficiencia)
+        // 2. Rendimiento (Promedio esperado vs el real obtenido)
         $rendimientoPlan = RolMolienda::whereMonth('fecha_corte_proyectada', $mes)
                             ->whereYear('fecha_corte_proyectada', $anio)
                             ->avg('rendimiento_esperado') ?? 0;
 
-        // 4. Datos para Gráfico de Tendencia Diaria (Molienda Acumulada)
+        // 3. Gráfico de Tendencia (Acumulado diario)
         $diasMesLabels = [];
         $dataProyectada = [];
         $dataReal = [];
@@ -244,20 +244,58 @@ class RolMoliendaController extends Controller
             $fechaLoop = \Carbon\Carbon::create($anio, $mes, $d)->format('Y-m-d');
             $diasMesLabels[] = $d;
             
+            // Sumamos lo que estaba planeado para ese día exacto
             $diaProy = RolMolienda::where('fecha_corte_proyectada', $fechaLoop)->sum('toneladas_estimadas');
-           // $diaReal = MoliendaEjecutada::where('fecha_molienda', $fechaLoop)->sum('toneladas_reales');
-            $diaReal = 1;
+            
+            // Sumamos los tablones que terminaron su cosecha ese día exacto
+            $diaReal = MoliendaEjecutada::where('fecha_fin_cosecha', $fechaLoop)->sum('toneladas_reales');
             
             $acumuladoProyectado += $diaProy;
             $acumuladoReal += $diaReal;
             
             $dataProyectada[] = $acumuladoProyectado;
-            $dataReal[] = ($fechaLoop <= now()->format('Y-m-d')) ? $acumuladoReal : null;
+            
+            // Solo graficamos el real hasta el día de hoy
+            if ($fechaLoop <= now()->format('Y-m-d')) {
+                $dataReal[] = $acumuladoReal;
+            } else {
+                $dataReal[] = null;
+            }
         }
 
         return view('produccion.agro.rol_molienda.dashboard', compact(
             'fechaConsulta', 'proyectadoMes', 'ejecutadoMes', 'cumplimientoTons', 
             'rendimientoPlan', 'diasMesLabels', 'dataProyectada', 'dataReal'
         ));
+    }
+    public function finalizarTablon(Request $request)
+    {
+        $request->validate([
+            'zafra_id' => 'required',
+            'tablon_id' => 'required',
+            'area_cosechada_real' => 'required|numeric|min:0',
+        ]);
+
+        // 1. Buscamos el registro consolidado
+        $ejecucion = MoliendaEjecutada::where('zafra_id', $request->zafra_id)
+            ->where('tablon_id', $request->tablon_id)
+            ->firstOrFail();
+
+        // 2. Auditoría Final: Volvemos a sumar todos los boletos por seguridad
+        $totales = BoletoArrime::where('tablon_id', $request->tablon_id)
+            ->where('zafra_id', $request->zafra_id)
+            ->selectRaw('SUM(toneladas_netas) as total_tons, AVG(rendimiento_real) as avg_rend')
+            ->first();
+
+        // 3. Cerramos el tablón
+        $ejecucion->update([
+            'toneladas_reales' => $totales->total_tons ?? 0,
+            'rendimiento_real_avg' => $totales->avg_rend ?? 0,
+            'area_cosechada_real' => $request->area_cosechada_real,
+            'estado_cosecha' => 'Finalizado', // <--- Aquí se congela
+            'fecha_fin_cosecha' => now(),
+        ]);
+
+        return back()->with('success', 'El tablón ha sido finalizado y auditado con éxito.');
     }
 }

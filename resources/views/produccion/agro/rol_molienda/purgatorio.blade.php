@@ -83,6 +83,7 @@
                 
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="dataTablePurgatorio">
+
                         <thead>
                             <tr>
                                 <th class="text-center">St</th>
@@ -96,6 +97,7 @@
                         </thead>
                         <tbody>
                             @foreach($purgatorio as $index => $item)
+                            <input type="hidden" name="data[{{ $index }}][variedad_nombre]" value="{{ $item['variedad_nombre'] }}">
                             <tr class="row-{{ $item['status_color'] }}">
                                 <td class="text-center">
                                     <span class="badge-status bg-{{ $item['status_color'] == 'verde' ? 'success' : ($item['status_color'] == 'amarillo' ? 'warning' : 'danger') }}"></span>
@@ -219,12 +221,19 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
         // Inicializar Select2
         $('.select2-agro').select2({ theme: 'bootstrap4' });
 
         // Inicializar DataTables
         $('#dataTablePurgatorio').DataTable({
-            "language": { "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json" },
+            "language": { "url": "/js/lang/Spanish.json" },
             "pageLength": 50,
             "dom": '<"p-3 d-flex justify-content-between"fB>rtip',
         });
@@ -240,7 +249,7 @@
         $('.btn-add-variedad').on('click', function() {
             let targetSelect = $(this).data('select-id');
             let nombreSugerido = $(this).data('nombre-sugerido');
-            
+
             // Llenar el formulario del modal
             $('#target_select_id').val(targetSelect);
             $('#ajax_var_nombre').val(nombreSugerido);
@@ -258,7 +267,6 @@
 
             let formData = $(this).serialize();
             
-            // IMPORTANTE: Asegúrate de tener esta ruta configurada en tu web.php
             $.ajax({
                 url: "{{ route('variedades.storeAjax') }}", 
                 type: "POST",
@@ -282,16 +290,23 @@
                         // Cerrar modal y limpiar
                         $('#modalNuevaVariedad').modal('hide');
                         $('#form-ajax-variedad')[0].reset();
-                        
-                        toastr.success('Variedad creada y asignada exitosamente.');
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Variedad creada y asignada exitosamente.'
+                        });
                     }
                 },
                 error: function(xhr) {
+                    console.log(xhr.responseJSON);
+                    btnSubmit.prop('disabled', false).html('Guardar Variedad');
                     let errorMessage = "Ocurrió un error al guardar.";
                     if(xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
-                    toastr.error(errorMessage);
+                    Toast.fire({
+                            icon: 'error',
+                            title: errorMessage
+                        });
                 },
                 complete: function() {
                     btnSubmit.prop('disabled', false).html('Guardar Variedad');

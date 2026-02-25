@@ -133,61 +133,61 @@ class ArrimeImportController extends Controller
      */
 
     public function process(Request $request)
-{
+    {
 
-    // Validamos que vengan datos
-    if (!$request->has('data')) {
-        return redirect()->route('arrimes.importar')->with('error', 'No hay datos para procesar.');
-    }
-
-    $insertados = 0;
-    $actualizados = 0;
-    $dataReporte = $request->input('data');
-    $tablonesAsignados = $request->input('tablon_id', []);
-    $tablonesCorregidos = $request->input('correccion_tablon', []);
-
-    foreach ($dataReporte as $index => $item) {
-        // Determinamos el ID del tablón: 
-        // 1. Si el usuario corrigió manualmente, usamos ese.
-        // 2. Si no, usamos el que el sistema detectó (si existe).
-        $tablonId = $tablonesCorregidos[$index] ?? ($tablonesAsignados[$index] ?? null);
-
-        // Si el registro es rojo y no se corrigió, lo saltamos
-        if ($item['status_color'] == 'rojo' && empty($tablonesCorregidos[$index])) {
-            continue;
+        // Validamos que vengan datos
+        if (!$request->has('data')) {
+            return redirect()->route('arrimes.importar')->with('error', 'No hay datos para procesar.');
         }
 
-        // Guardado con updateOrCreate para evitar duplicados por número de boleto
-        BoletoArrime::updateOrCreate(
-            ['boleto' => $item['boleto']], // Llave única
-            [
-                'remesa' => $item['remesa'],
-                    'cod_sector' => $item['cod_hacienda_original'],
-                    'zafra_id' => $request->zafra_id, // Viene del formulario
-                    'tablon_id' => $item['tablon_id'],
-                    'central_id' => 1, // ID fijo temporal (Pastora) o dinámico desde la vista
-                    'dia_zafra' => $item['dia_zafra'],
-                    'activo_jaiba_id' => $item['activo_jaiba_id'],
-                    'id_chofer' => $item['id_chofer'],
-                    'toneladas_netas' => $item['toneladas_netas'],
-                    'rendimiento_real' => $item['rendimiento_real'],
-                    'trash_porcentaje' => $item['trash_porcentaje'],
-                    'fecha_quema' => $item['fecha_quema'],
-                    'fecha_arrime' => $item['fecha_arrime'],
-                    // Si el boleto ya existía, pasará a Liquidado. Si es nuevo, Procesado.
-                    'estado' => $item['status_color'] == 'amarillo' ? 'Liquidado' : 'Procesado',
-            ]
-        );
+        $insertados = 0;
+        $actualizados = 0;
+        $dataReporte = $request->input('data');
+        $tablonesAsignados = $request->input('tablon_id', []);
+        $tablonesCorregidos = $request->input('correccion_tablon', []);
 
-        if ($item['status_color'] == 'amarillo') {
-            $actualizados++;
-        } else {
-            $insertados++;
+        foreach ($dataReporte as $index => $item) {
+            // Determinamos el ID del tablón: 
+            // 1. Si el usuario corrigió manualmente, usamos ese.
+            // 2. Si no, usamos el que el sistema detectó (si existe).
+            $tablonId = $tablonesCorregidos[$index] ?? ($tablonesAsignados[$index] ?? null);
+
+            // Si el registro es rojo y no se corrigió, lo saltamos
+            if ($item['status_color'] == 'rojo' && empty($tablonesCorregidos[$index])) {
+                continue;
+            }
+
+            // Guardado con updateOrCreate para evitar duplicados por número de boleto
+            BoletoArrime::updateOrCreate(
+                ['boleto' => $item['boleto']], // Llave única
+                [
+                    'remesa' => $item['remesa'],
+                        'cod_sector' => $item['cod_hacienda_original'],
+                        'zafra_id' => $request->zafra_id, // Viene del formulario
+                        'tablon_id' => $item['tablon_id'],
+                        'central_id' => 1, // ID fijo temporal (Pastora) o dinámico desde la vista
+                        'dia_zafra' => $item['dia_zafra'],
+                        'activo_jaiba_id' => $item['activo_jaiba_id'],
+                        'id_chofer' => $item['id_chofer'],
+                        'toneladas_netas' => $item['toneladas_netas'],
+                        'rendimiento_real' => $item['rendimiento_real'],
+                        'trash_porcentaje' => $item['trash_porcentaje'],
+                        'fecha_quema' => $item['fecha_quema'],
+                        'fecha_arrime' => $item['fecha_arrime'],
+                        // Si el boleto ya existía, pasará a Liquidado. Si es nuevo, Procesado.
+                        'estado' => $item['status_color'] == 'amarillo' ? 'Liquidado' : 'Procesado',
+                ]
+            );
+
+            if ($item['status_color'] == 'amarillo') {
+                $actualizados++;
+            } else {
+                $insertados++;
+            }
         }
-    }
 
-    return redirect()->route('produccion.arrimes.index')->with('success', "¡Éxito! Se crearon $insertados registros y se actualizaron $actualizados.");
-}
+        return redirect()->route('produccion.arrimes.index')->with('success', "¡Éxito! Se crearon $insertados registros y se actualizaron $actualizados.");
+    }
 
 
 
