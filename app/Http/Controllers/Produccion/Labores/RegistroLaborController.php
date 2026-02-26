@@ -8,6 +8,7 @@ use App\Models\Produccion\Labores\RegistroLabor;
 use App\Models\Logistica\Taller\Activo;
 use App\Models\Produccion\Areas\Tablon;
 use App\Models\Produccion\Areas\Sector;
+use App\Models\Produccion\Agro\Zafra;
 use App\Models\Produccion\Labores\LaborCritica;
 use App\Models\MedicinaOcupacional\Paciente;
 use MatanYadaev\EloquentSpatial\Objects\Polygon;
@@ -53,6 +54,7 @@ class RegistroLaborController extends Controller
 
     public function create()
     {
+        $zafraActiva = Zafra::where('estado', 'Activa')->first();
         // 1. Traemos sectores con el select de su propia geometría + relaciones
         $sectores = Sector::addSelect(['*', DB::raw('geometria.STAsText() as geometria_wkt')])
             ->with(['lotes.tablones' => function($q) {
@@ -103,7 +105,7 @@ class RegistroLaborController extends Controller
             ->select('id', 'nombre', 'lectura_actual', 'codigo') 
             ->get();
 
-        return view('produccion.labores.create', compact('sectores', 'labores', 'operadores', 'activos'));
+        return view('produccion.labores.create', compact('sectores', 'labores', 'operadores', 'activos','zafraActiva'));
     }
 
    public function store(Request $request)
@@ -113,6 +115,7 @@ class RegistroLaborController extends Controller
         // 1. Validación dinámica
         $rules = [
             'labor_id' => 'required|exists:cat_labores_criticas,id',
+            'zafra_id' => 'required|exists:zafras,id',
             'fecha' => 'required|date',
             'tablon_ids' => 'required|array|min:1',
             'observaciones' => 'nullable|string',
@@ -134,6 +137,8 @@ class RegistroLaborController extends Controller
                 // 2. Crear la Cabecera
                 $registro = RegistroLabor::create([
                     'labor_id'           => $request->labor_id,
+                    'contratista_id'     => $request->zafra_id,
+                    'zafra_id'           => $request->zafra_id,
                     'fecha_ejecucion'    => $request->fecha,
                     'tipo_ejecutor'      => ($request->origen_personal == 'outsourcing') ? 'Contratista' : 'Propio',
                     'contratista_nombre' => $request->contratista_nombre,

@@ -109,7 +109,7 @@
 
         <div class="side-panel">
             <form action="{{ route('produccion.labores.store') }}" method="POST" id="formLabor">
-
+                <input type="hidden" name="zafra_id" value="{{ $zafraActiva->id }}">
              @csrf
                 <div class="panel-section">
                     <div class="section-title"><span>1. Definir Labor</span> <i class="fas fa-tools"></i></div>

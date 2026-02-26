@@ -11,6 +11,7 @@ use App\Models\Produccion\Areas\Sector;
 use App\Models\Produccion\Agro\Variedad;
 use App\Models\Produccion\Agro\Zafra;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RolMoliendaController extends Controller
 {
@@ -157,7 +158,6 @@ class RolMoliendaController extends Controller
      */
     public function process(Request $request)
     {
-        dd($request);
         if (!$request->has('data')) {
             return redirect()->route('rol_molienda.importar')->with('error', 'No hay datos para procesar.');
         }
@@ -216,6 +216,7 @@ class RolMoliendaController extends Controller
         $anio = $request->input('anio', date('Y'));
         $mes = $request->input('mes', date('m'));
         $fechaConsulta = \Carbon\Carbon::create($anio, $mes, 1);
+        $zafraId = $request->input('zafra_id', 2);
         
         // 1. Totales Mensuales
         $proyectadoMes = RolMolienda::whereMonth('fecha_corte_proyectada', $mes)
@@ -263,9 +264,87 @@ class RolMoliendaController extends Controller
             }
         }
 
+        // ------------------------------------------------------------------
+        // GRÁFICO 1: Rendimiento por Variedad (TCH = Toneladas / Hectáreas)
+        // ------------------------------------------------------------------
+        $variedadesData = DB::table('molienda_ejecutada as me')
+            ->join('rol_molienda as rm', function($join) {
+                $join->on('me.tablon_id', '=', 'rm.tablon_id')
+                     ->on('me.zafra_id', '=', 'rm.zafra_id');
+            })
+            ->join('variedades as v', 'rm.variedad_id', '=', 'v.id')
+            ->where('me.zafra_id', 2)
+           // ->where('me.estado_cosecha', 'Finalizado') // Solo usamos los terminados para que el TCH sea real
+            ->select(
+                'v.nombre as variedad', 
+                DB::raw('SUM(me.toneladas_reales) as total_tons'),
+                DB::raw('SUM(me.area_cosechada_real) as total_area')
+            )
+            ->groupBy('v.nombre')
+            ->get();
+
+        $labelsVariedades = [];
+        $dataVariedades = [];
+        foreach($variedadesData as $row) {
+            $labelsVariedades[] = $row->variedad;
+            // Prevenir división por cero
+            $tch = $row->total_area > 0 ? ($row->total_tons / $row->total_area) : 0;
+            $dataVariedades[] = round($tch, 2);
+        }
+
+        // ------------------------------------------------------------------
+        // GRÁFICO 2: Ejecución de Labores (In-House vs Outsourcing)
+        // ------------------------------------------------------------------
+        $laboresExec = DB::table('registro_labores')
+            ->where('zafra_id', $zafraId)
+            ->select('tipo_ejecutor', DB::raw('count(*) as total'))
+            ->groupBy('tipo_ejecutor')
+            ->pluck('total', 'tipo_ejecutor')
+            ->toArray();
+            
+        $dataContratistas = [
+            $laboresExec['Propio'] ?? 0,
+            $laboresExec['Contratista'] ?? 0
+        ];
+
+        // ------------------------------------------------------------------
+        // GRÁFICO 3: Toneladas Cosechadas por Sector
+        // ------------------------------------------------------------------
+        $sectoresData = DB::table('molienda_ejecutada as me')
+            ->join('tablones as t', 'me.tablon_id', '=', 't.id')
+            ->join('lotes as l', 't.lote_id', '=', 'l.id')
+            ->join('sectores as s', 'l.sector_id', '=', 's.id')
+            ->where('me.zafra_id', $zafraId)
+            ->select('s.nombre as sector', DB::raw('SUM(me.toneladas_reales) as totales'))
+            ->groupBy('s.nombre')
+            ->orderByDesc('totales') // Ordenamos de mayor a menor
+            ->get();
+            
+        $labelsSectores = $sectoresData->pluck('sector')->toArray();
+        $dataSectores = $sectoresData->pluck('totales')->map(fn($val) => round($val, 2))->toArray();
+
+        // ------------------------------------------------------------------
+        // GRÁFICO 4: Horómetros por Labor
+        // ------------------------------------------------------------------
+        $horasData = DB::table('labor_maquinaria_detalle as lmd')
+            ->join('registro_labores as rl', 'lmd.registro_labor_id', '=', 'rl.id')
+            ->join('cat_labores_criticas as clc', 'rl.labor_id', '=', 'clc.id')
+            ->where('rl.zafra_id', $zafraId)
+            ->select('clc.nombre as labor', DB::raw('SUM(lmd.horometro_final - lmd.horometro_inicial) as horas_totales'))
+            ->groupBy('clc.nombre')
+            ->orderByDesc('horas_totales')
+            ->get();
+            
+        $labelsHoras = $horasData->pluck('labor')->toArray();
+        $dataHoras = $horasData->pluck('horas_totales')->map(fn($val) => round($val, 2))->toArray();
+
         return view('produccion.agro.rol_molienda.dashboard', compact(
             'fechaConsulta', 'proyectadoMes', 'ejecutadoMes', 'cumplimientoTons', 
-            'rendimientoPlan', 'diasMesLabels', 'dataProyectada', 'dataReal'
+            'rendimientoPlan', 'diasMesLabels', 'dataProyectada', 'dataReal',
+            'labelsVariedades', 'dataVariedades',
+            'dataContratistas',
+            'labelsSectores', 'dataSectores',
+            'labelsHoras', 'dataHoras'
         ));
     }
     public function finalizarTablon(Request $request)

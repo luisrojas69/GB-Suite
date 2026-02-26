@@ -97,7 +97,6 @@
                         </thead>
                         <tbody>
                             @foreach($purgatorio as $index => $item)
-                            <input type="hidden" name="data[{{ $index }}][variedad_nombre]" value="{{ $item['variedad_nombre'] }}">
                             <tr class="row-{{ $item['status_color'] }}">
                                 <td class="text-center">
                                     <span class="badge-status bg-{{ $item['status_color'] == 'verde' ? 'success' : ($item['status_color'] == 'amarillo' ? 'warning' : 'danger') }}"></span>
@@ -111,7 +110,8 @@
                                 
                                 <td>
                                     @if(empty($item['tablon_id']))
-                                        <select name="correccion_tablon[{{ $index }}]" class="form-control form-control-sm select2-agro select-tablon" required>
+
+                                        <select name="correccion_tablon[{{ $index }}]" class="form-control form-control-sm select2-agro" required>
                                             <option value="">⚠️ Buscar Tablón...</option>
                                             @foreach($todosLosTablones as $t)
                                                 <option value="{{ $t->id }}">{{ $t->lote->sector->nombre }} - {{ $t->codigo_tablon_interno }} ({{ $t->nombre }})</option>
@@ -121,7 +121,7 @@
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-check-circle text-success mr-2"></i>
                                             <span class="text-dark font-weight-bold small">{{ $item['tablon_nombre_completo'] }}</span>
-                                            <input type="hidden" name="tablon_id[{{ $index }}]" value="{{ $item['tablon_id'] }}">
+                                            <input type="hidden" name="data[{{ $index }}][tablon_id]" value="{{ $item['tablon_id'] }}">
                                         </div>
                                     @endif
                                 </td>
@@ -147,9 +147,17 @@
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-leaf text-success mr-2"></i>
                                             <span class="text-dark font-weight-bold small">{{ $item['variedad_nombre'] }}</span>
-                                            <input type="hidden" name="variedad_id[{{ $index }}]" value="{{ $item['variedad_id'] }}">
+                                            <<input type="hidden" name="data[{{ $index }}][variedad_id]" value="{{ $item['variedad_id'] }}">
                                         </div>
                                     @endif
+                                    <input type="hidden" name="data[{{ $index }}][variedad_nombre]" value="{{ $item['variedad_nombre'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][clase_ciclo]" value="{{ $item['clase_ciclo'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][area_estimada_has]" value="{{ $item['area_estimada_has'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][ton_ha_estimadas]" value="{{ $item['ton_ha_estimadas'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][toneladas_estimadas]" value="{{ $item['toneladas_estimadas'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][rendimiento_esperado]" value="{{ $item['rendimiento_esperado'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][fecha_corte_proyectada]" value="{{ $item['fecha_corte_proyectada'] }}">
+                                    <input type="hidden" name="data[{{ $index }}][status_color]" value="{{ $item['status_color'] }}">
                                 </td>
 
                                 <td>
@@ -163,14 +171,6 @@
                                     </small>
                                 </td>
                             </tr>
-                            
-                            <input type="hidden" name="data[{{ $index }}][clase_ciclo]" value="{{ $item['clase_ciclo'] }}">
-                            <input type="hidden" name="data[{{ $index }}][area_estimada_has]" value="{{ $item['area_estimada_has'] }}">
-                            <input type="hidden" name="data[{{ $index }}][ton_ha_estimadas]" value="{{ $item['ton_ha_estimadas'] }}">
-                            <input type="hidden" name="data[{{ $index }}][toneladas_estimadas]" value="{{ $item['toneladas_estimadas'] }}">
-                            <input type="hidden" name="data[{{ $index }}][rendimiento_esperado]" value="{{ $item['rendimiento_esperado'] }}">
-                            <input type="hidden" name="data[{{ $index }}][fecha_corte_proyectada]" value="{{ $item['fecha_corte_proyectada'] }}">
-                            <input type="hidden" name="data[{{ $index }}][status_color]" value="{{ $item['status_color'] }}">
                             @endforeach
                         </tbody>
                     </table>

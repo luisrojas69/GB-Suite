@@ -134,7 +134,6 @@ class ArrimeImportController extends Controller
 
     public function process(Request $request)
     {
-
         // Validamos que vengan datos
         if (!$request->has('data')) {
             return redirect()->route('arrimes.importar')->with('error', 'No hay datos para procesar.');

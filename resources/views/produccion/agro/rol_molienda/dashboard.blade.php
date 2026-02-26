@@ -125,6 +125,63 @@
             </div>
         </div>
     </div>
+
+    <div class="row mt-4">
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: var(--agro-primary);">Rendimiento Promedio por Variedad (TCH)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="chartVariedades"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: var(--agro-primary);">Ejecución de Labores (Propio vs Outsourcing)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="chartContratistas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: var(--agro-primary);">Toneladas Cosechadas por Sector</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="chartSectores"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: var(--agro-primary);">Horómetros Consumidos por Labor</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="chartHorometros"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -172,5 +229,77 @@
             }
         }
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const colorPrimary = '#2d6a4f';
+    const colorAccent = '#52b788';
+    const colorWarning = '#f6c23e';
+    const colorDanger = '#e74a3b';
+    const colorInfo = '#36b9cc';
+
+    // 1. Gráfico de Variedades
+    new Chart(document.getElementById('chartVariedades'), {
+        type: 'bar',
+        data: {
+            labels: @json($labelsVariedades), // <--- Magia de Blade aquí
+            datasets: [{
+                label: 'TCH (Ton/Ha)',
+                data: @json($dataVariedades),
+                backgroundColor: colorPrimary,
+                borderRadius: 4
+            }]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // 2. Gráfico Propio vs Contratistas
+    new Chart(document.getElementById('chartContratistas'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Personal Propio (In-House)', 'Contratistas (Outsourcing)'],
+            datasets: [{
+                data: @json($dataContratistas),
+                backgroundColor: [colorPrimary, colorWarning],
+                hoverOffset: 4
+            }]
+        },
+        options: { maintainAspectRatio: false, cutout: '70%' }
+    });
+
+    // 3. Gráfico de Sectores
+    new Chart(document.getElementById('chartSectores'), {
+        type: 'pie',
+        data: {
+            labels: @json($labelsSectores),
+            datasets: [{
+                data: @json($dataSectores),
+                // Usamos una paleta generada dinámicamente o repetimos los colores institucionales
+                backgroundColor: [colorPrimary, colorAccent, colorWarning, colorDanger, colorInfo, '#858796'],
+                borderWidth: 1
+            }]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+    });
+
+    // 4. Gráfico de Horómetros
+    new Chart(document.getElementById('chartHorometros'), {
+        type: 'bar',
+        data: {
+            labels: @json($labelsHoras),
+            datasets: [{
+                label: 'Horas Máquina',
+                data: @json($dataHoras),
+                backgroundColor: colorAccent,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Barra horizontal
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+});
 </script>
 @endsection
