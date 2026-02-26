@@ -14,4 +14,6 @@ Route::group(['prefix' => 'produccion/operaciones', 'as' => 'produccion.'], func
 
     // Ruta adicional para obtener datos de activo vía AJAX (Opcional pero recomendada)
     Route::get('api/activo/{id}', [RegistroLaborController::class, 'getActivoData']);
+    Route::get('labores/exportar/excel', [RegistroLaborController::class, 'exportarExcel'])->name('labores.export.excel');
+    Route::get('labores/panel/dashboard', [RegistroLaborController::class, 'dashboard'])->name('labores.dashboard');
 });

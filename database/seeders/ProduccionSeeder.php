@@ -37,6 +37,18 @@ class ProduccionSeeder extends Seeder
         //Variedad::truncate();
         Variedad::create(['nombre' => 'CP 72-2086', 'codigo' => '0103', 'descripcion' => 'Caña de alto rendimiento y resistencia.']);
         Variedad::create(['nombre' => 'PR 69-2503', 'codigo' => '0104', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'V 98120', 'codigo' => '0105', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'C 26670', 'codigo' => '0106', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'CC 8592', 'codigo' => '0107', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV 1050', 'codigo' => '0108', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'RB 74454', 'codigo' => '0109', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'RB 855453', 'codigo' => '0110', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'RSP 724928', 'codigo' => '0111', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'V 9862', 'codigo' => '0112', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'V 99236', 'codigo' => '0113', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV08 1050', 'codigo' => '0114', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV08 1379', 'codigo' => '0115', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'DIVERSAS', 'codigo' => '0116', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
         
         $this->command->info('Variedades creadas.');
 

@@ -1,6 +1,7 @@
 @extends('layouts.app')
-
+@section('title-page', 'Historial de Labores Agrícolas')
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <style>
     /* Efectos de Elevación y Glassmorphism */
     .card { border: none; border-radius: 12px; transition: transform 0.2s; }
@@ -41,6 +42,39 @@
         background: rgba(78, 115, 223, 0.1);
         color: #4e73df;
     }
+
+        :root {
+        --agro-dark: #1b4332;
+        --agro-primary: #2d6a4f;
+        --agro-accent: #52b788;
+    }
+
+    .page-header-agro {
+        background: linear-gradient(135deg, var(--agro-dark) 0%, var(--agro-primary) 100%);
+        color: white; 
+        padding: 20px 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(27, 67, 50, 0.15);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge-propio { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+    .badge-outsourcing { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffecb3; }
+    
+    .table-agro th {
+        background-color: #f8f9fc;
+        color: var(--agro-dark);
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--agro-primary) !important;
+    }
+    
+    .table-agro td { vertical-align: middle; font-size: 0.85rem; color: #4a5568; }
 </style>
 @endpush
 
@@ -53,17 +87,17 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 <div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="page-header-agro">
         <div>
-            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Bitácora de Labores</h1>
-            <p class="text-muted small mb-0">Seguimiento de tareas críticas y rendimientos.</p>
+            <h3 class="font-weight-bold mb-1"><i class="fas fa-tractor mr-2"></i> Registro de Labores</h3>
+            <p class="mb-0 opacity-75 small">Consulta y exportación del historial de trabajos en campo.</p>
         </div>
-        <div>
-            <button class="btn btn-white border shadow-sm btn-sm mr-2">
-                <i class="fas fa-download mr-1"></i> Reporte
+        <div class="d-flex gap-2">
+            <button class="btn btn-light text-success font-weight-bold shadow-sm mr-2" data-toggle="modal" data-target="#modalFiltrosExport">
+                <i class="fas fa-file-excel mr-1"></i> Exportar
             </button>
-            <a href="{{ route('produccion.labores.create') }}" class="btn btn-primary btn-sm shadow-sm px-3">
-                <i class="fas fa-plus-circle mr-1"></i> Nueva Labor
+            <a href="{{ route('produccion.labores.create') }}" class="btn btn-success shadow-sm border-white">
+                <i class="fas fa-plus-circle mr-1"></i> Nueva Jornada
             </a>
         </div>
     </div>
@@ -119,6 +153,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr class="text-muted">
+                        <th class="pl-4">ID</th>
                         <th class="px-4 py-3" style="width: 15%">Fecha</th>
                         <th style="width: 25%">Labor / Tipo</th>
                         <th style="width: 25%">Ubicación</th>
@@ -130,14 +165,16 @@
                 <tbody class="text-sm">
                     @forelse($registros as $reg)
                     <tr>
+                        <td class="pl-4 font-weight-bold">#{{ str_pad($reg->id, 5, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-4">
                             <span class="font-weight-bold text-dark">{{ \Carbon\Carbon::parse($reg->fecha_ejecucion)->format('d M, Y') }}</span>
                             <div class="x-small text-muted">{{ \Carbon\Carbon::parse($reg->fecha_ejecucion)->diffForHumans() }}</div>
                         </td>
                         <td>
                             <div class="font-weight-bold text-gray-800">{{ $reg->labor->nombre }}</div>
-                            @if($reg->labor->requiere_maquinaria)
+                            @if($reg->maquinarias->count() > 0)
                                 <span class="badge badge-soft-primary x-small"><i class="fas fa-tractor mr-1"></i> MECANIZADA</span>
+                                <span class="badge badge-info x-small"><i class="fas fa-tractor mr-1"></i> {{ $reg->maquinarias->count() }} Equipo(s)</span>
                             @else
                                 <span class="badge badge-soft-success x-small"><i class="fas fa-walking mr-1"></i> MANUAL</span>
                             @endif
@@ -173,15 +210,14 @@
                                     <span>Personal Propio</span>
                                 </div>
                             @else
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-info rounded-circle mr-2" style="width: 8px; height: 8px;"></div>
-                                    <span class="text-truncate" style="max-width: 120px;">{{ $reg->contratista_nombre }}</span>
-                                </div>
+                                 <span class="badge badge-outsourcing px-2 py-1"><i class="fas fa-handshake mr-1"></i> Contratista</span><br>
+                                <small class="text-muted">{{ Str::limit($reg->contratista->nombre ?? $reg->contratista_nombre, 15) }}</small>
                             @endif
                         </td>
                         <td class="text-center">
                             {{-- Sumamos hectáreas desde el pivote --}}
-                            <h6 class="mb-0 font-weight-bold">{{ number_format($reg->tablones->sum('pivot.hectareas_logradas'), 2) }}</h6>
+                            <strong>{{ $reg->tablones->count() }}</strong> <small>Tablon(es)</small><br>
+                            <strong>{{ number_format($reg->tablones->sum('pivot.hectareas_logradas'), 2) }}</strong>
                             <small class="text-muted">Has</small>
                         </td>
                         <td class="text-right px-4">
@@ -198,6 +234,7 @@
                     </tr>
                     @empty
                     <tr>
+                        <i class="fas fa-clipboard-list fa-3x mb-3 opacity-25"></i><br>
                         <td colspan="6" class="text-center py-5 text-muted">No se encontraron registros de labores.</td>
                     </tr>
                     @endforelse
@@ -209,11 +246,65 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalFiltrosExport" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-filter mr-2"></i> Filtros de Exportación</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('produccion.labores.export.excel') }}" method="GET">
+                <div class="modal-body p-4 bg-light">
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="small font-weight-bold text-dark">Desde</label>
+                            <input type="date" name="fecha_desde" class="form-control" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="small font-weight-bold text-dark">Hasta</label>
+                            <input type="date" name="fecha_hasta" class="form-control" value="{{ now()->format('Y-m-d') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="small font-weight-bold text-dark">Tipo de Labor</label>
+                        <select name="labor_id" class="form-control select2-modal w-100">
+                            <option value="">-- Todas las Labores --</option>
+                            @foreach($catLabores as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label class="small font-weight-bold text-dark">Sector / Hacienda</label>
+                        <select name="sector_id" class="form-control select2-modal w-100">
+                            <option value="">-- Todos los Sectores --</option>
+                            @foreach($sectores as $sector)
+                                <option value="{{ $sector->id }}">{{ $sector->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success shadow-sm"><i class="fas fa-download mr-1"></i> Generar Excel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     const ctx = document.getElementById('chartSectores').getContext('2d');
     
@@ -272,5 +363,21 @@
     });
 </script>
 @endif
+<script>
+    $(document).ready(function() {
+        // Inicializar DataTables para la vista Index
+        $('#tablaLabores').DataTable({
+            "language": { "url": "/js/lang/Spanish.json" },
+            "pageLength": 25,
+            "ordering": false, // Desactivamos el orden nativo si ya lo traemos ordenado de DB
+            "dom": '<"p-3 d-flex justify-content-between align-items-center"f>rtip' // Buscador bonito
+        });
 
+        // Inicializar Select2 DENTRO del Modal (El truco es el dropdownParent)
+        $('.select2-modal').select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $('#modalFiltrosExport')
+        });
+    });
+</script>
 @endpush

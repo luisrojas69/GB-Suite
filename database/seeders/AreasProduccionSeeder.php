@@ -3,9 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Produccion\Areas\Sector; // Usando el nuevo namespace
-use App\Models\Produccion\Areas\Lote;   // Usando el nuevo namespace
-use App\Models\Produccion\Areas\Tablon; // Usando el nuevo namespace
+use App\Models\Produccion\Areas\Sector;
+use App\Models\Produccion\Areas\Lote;
+use App\Models\Produccion\Areas\Tablon;
+use Illuminate\Support\Str;
 
 class AreasProduccionSeeder extends Seeder
 {
@@ -14,80 +15,61 @@ class AreasProduccionSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Crear Sectores
-        $sectorCharco = Sector::create([
-            'codigo_sector' => '01',
-            'nombre' => 'Sector Charco',
-            'descripcion' => 'Área cercana al río, propensa a humedad.',
-        ]);
+        // Definición de Sectores
+        $sectoresData = [
+            ['01', 'Charco'],
+            ['02', 'Piedras Negras'],
+            ['03', 'Becerrera'],
+            ['04', 'Paraíso'],
+            ['05', 'Caimana'],
+            ['06', 'Palo a Pique'],
+            ['07', 'Purgatorio'],
+            ['08', 'La Bandera'],
+        ];
 
-        $sectorAlto = Sector::create([
-            'codigo_sector' => '08',
-            'nombre' => 'Sector Tamarindo',
-            'descripcion' => 'Área más elevada, ideal para cultivos que requieren buen drenaje.',
-        ]);
+        $suelos = ['Arcilloso', 'Franco-Arenoso', 'Franco-Arcilloso', 'Limoso'];
+        $variedades = [1, 2, 3]; // IDs de variedades de caña
 
-        $this->command->info('✅ Sectores creados (01, 08).');
-        
-        // 2. Crear Lotes (Dependen de Sector)
-        
-        // Lotes para Sector 01 (Sector Charco)
-        $lote0101 = Lote::create([
-            'sector_id' => $sectorCharco->id,
-            'codigo_lote_interno' => '01',
-            'nombre' => 'Lote Húmedo 01',
-        ]);
-        
-        $lote0102 = Lote::create([
-            'sector_id' => $sectorCharco->id,
-            'codigo_lote_interno' => '02',
-            'nombre' => 'Lote Central 02',
-        ]);
-        
-        // Lotes para Sector 08 (Sector Alto)
-        $lote0802 = Lote::create([
-            'sector_id' => $sectorAlto->id,
-            'codigo_lote_interno' => '02',
-            'nombre' => 'Lote de Montaña 02',
-        ]);
+        foreach ($sectoresData as $data) {
+            // 1. Crear Sector
+            $sector = Sector::create([
+                'codigo_sector' => $data[0],
+                'nombre'        => $data[1],
+                'descripcion'   => "Sector ubicado en la zona " . ($data[0] < 5 ? 'Norte' : 'Sur'),
+            ]);
 
-        $this->command->info('✅ Lotes creados. Los códigos autogenerados son: ' . $lote0101->codigo_completo . ', ' . $lote0102->codigo_completo . ', ' . $lote0802->codigo_completo . '.');
-        
-        // 3. Crear Tablones (Dependen de Lote)
-        
-        // Tablones para Lote 0102 (Lote Central)
-        Tablon::create([
-            'lote_id' => $lote0102->id,
-            'codigo_tablon_interno' => '01',
-            'codigo_completo' => $lote0102->id,
-            'nombre' => 'Tablón 01',
-            'hectareas_documento' => 2.75,
-            'variedad_id' => '1',
-            'tipo_suelo' => 'Arcilloso',
-        ]);
-        
-        // Tablones con código interno de letras para Lote 0802 (Lote de Montaña)
-        $tablon0802AB = Tablon::create([
-            'lote_id' => $lote0802->id,
-            'codigo_tablon_interno' => 'AB',
-            'codigo_completo' => $lote0102->id,
-            'nombre' => 'Tablón Alto AB',
-            'hectareas_documento' => 1.50,
-            'variedad_id' => '2',
-            'tipo_suelo' => 'Franco-Arenoso',
-        ]);
+            $this->command->info("🏗️ Creando Sector: {$sector->nombre}");
 
-        $tablon080203 = Tablon::create([
-            'lote_id' => $lote0802->id,
-            'codigo_tablon_interno' => '03',
-            'codigo_completo' => $lote0102->id,
-            'nombre' => 'Tablón de Prueba 03',
-            'hectareas_documento' => 0.50,
-            'variedad_id' => '1',
-            'tipo_suelo' => 'Pedregoso',
-            'estado' => 'Preparacion',
-        ]);
-        
-        $this->command->info('✅ Tablones creados. Los códigos autogenerados son: ' . $tablon0802AB->codigo_completo . ', ' . $tablon080203->codigo_completo . '.');
+            // 2. Crear 2 Lotes por cada Sector
+            for ($l = 1; $l <= 2; $l++) {
+                $loteCodigo = str_pad($l, 2, '0', STR_PAD_LEFT);
+                $lote = Lote::create([
+                    'sector_id'           => $sector->id,
+                    'codigo_lote_interno' => $loteCodigo,
+                    'nombre'              => "Lote {$sector->nombre} {$loteCodigo}",
+                ]);
+
+                // 3. Crear 15 Tablones por Lote (Total 30 por Sector)
+                for ($t = 1; $t <= 15; $t++) {
+                    // Formato de código de 3 dígitos: 001, 002...
+                    $tablonCodigo = str_pad($t, 3, '0', STR_PAD_LEFT);
+                    
+                    Tablon::create([
+                        'lote_id'               => $lote->id,
+                        'codigo_tablon_interno' => $tablonCodigo,
+                        'nombre'                => "Tablón {$tablonCodigo}",
+                        'hectareas_documento'   => fake()->randomFloat(2, 5, 25), // Entre 5 y 25 Ha
+                        'variedad_id'           => fake()->randomElement($variedades),
+                        'tipo_suelo'            => fake()->randomElement($suelos),
+                        'estado'                => fake()->randomElement(['Crecimiento', 'Maduro', 'Preparacion']),
+                        'descripcion'           => "Tablón de control productivo en {$lote->nombre}",
+                        'meta_ton_ha'           => fake()->numberBetween(80, 120),
+                        'fecha_inicio_ciclo'    => now()->subMonths(fake()->numberBetween(1, 10)),
+                    ]);
+                }
+            }
+        }
+
+        $this->command->info('✅ Estructura de producción creada con éxito.');
     }
 }

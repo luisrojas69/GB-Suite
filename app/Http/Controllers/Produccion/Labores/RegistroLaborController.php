@@ -11,14 +11,20 @@ use App\Models\Produccion\Areas\Sector;
 use App\Models\Produccion\Agro\Zafra;
 use App\Models\Produccion\Labores\LaborCritica;
 use App\Models\MedicinaOcupacional\Paciente;
+use App\Models\Produccion\Agro\Contratista;
 use MatanYadaev\EloquentSpatial\Objects\Polygon;
 use Illuminate\Support\Facades\DB;
+use App\Exports\Produccion\Labores\JornadasExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class RegistroLaborController extends Controller
 {
 
     public function index(Request $request)
     {
+        $labores = RegistroLabor::all();
+        $catLabores = LaborCritica::all();
         // Query principal cargando la jerarquía: Registro -> Tablones (pivote) -> Lote -> Sector
         $query = RegistroLabor::with(['labor', 'tablones.lote.sector'])
             ->when($request->sector_id, function($q) use ($request) {
@@ -49,11 +55,13 @@ class RegistroLaborController extends Controller
         $registros = $query->orderBy('fecha_ejecucion', 'desc')->paginate(15);
         $sectores = Sector::all(['id', 'nombre']);
 
-        return view('produccion.labores.index', compact('registros', 'sectores', 'kpiHectareas', 'datosGrafico'));
+        return view('produccion.labores.index', compact('registros', 'sectores', 'kpiHectareas', 'datosGrafico', 'labores', 'catLabores'));
     }
 
     public function create()
-    {
+    {   
+        $contratistas = Contratista::all();
+        
         $zafraActiva = Zafra::where('estado', 'Activa')->first();
         // 1. Traemos sectores con el select de su propia geometría + relaciones
         $sectores = Sector::addSelect(['*', DB::raw('geometria.STAsText() as geometria_wkt')])
@@ -105,10 +113,131 @@ class RegistroLaborController extends Controller
             ->select('id', 'nombre', 'lectura_actual', 'codigo') 
             ->get();
 
-        return view('produccion.labores.create', compact('sectores', 'labores', 'operadores', 'activos','zafraActiva'));
+        return view('produccion.labores.create', compact('sectores', 'labores', 'operadores', 'activos','zafraActiva', 'contratistas'));
     }
 
-   public function store(Request $request)
+
+    public function store(Request $request)
+    {
+        // 1. Validación Dinámica Base
+        $rules = [
+            'labor_id'      => 'required|exists:cat_labores_criticas,id',
+            'zafra_id'      => 'required|exists:zafras,id',
+            'fecha'         => 'required|date',
+            'tablon_ids'    => 'required|array|min:1',
+            'observaciones' => 'nullable|string',
+            'tipo_recurso'  => 'required|in:maquinaria,manual',
+        ];
+
+        // Reglas Dinámicas según el recurso seleccionado
+        if ($request->tipo_recurso === 'manual') {
+            $rules['origen_personal'] = 'required|in:interno,outsourcing';
+            $rules['contratista_id']  = 'nullable|required_if:origen_personal,outsourcing|exists:contratistas,id';
+        }
+
+        if ($request->tipo_recurso === 'maquinaria') {
+            $rules['maquinarias']               = 'required|array|min:1';
+            $rules['maquinarias.*.id']          = 'required|exists:activos,id';
+            $rules['maquinarias.*.operador_id'] = 'required';
+            $rules['maquinarias.*.h_ini']       = 'required|numeric|min:0';
+            $rules['maquinarias.*.h_fin']       = 'required|numeric|gte:maquinarias.*.h_ini';
+        }
+
+        $request->validate($rules);
+
+        try {
+            \DB::beginTransaction();
+            
+            // 2. Crear la Cabecera del Registro
+            $registro = \App\Models\Produccion\Labores\RegistroLabor::create([
+                'labor_id'        => $request->labor_id,
+                'zafra_id'        => $request->zafra_id,
+                'fecha_ejecucion' => $request->fecha,
+                'tipo_ejecutor'   => ($request->origen_personal === 'outsourcing') ? 'Contratista' : 'Propio',
+                'contratista_id'  => ($request->origen_personal === 'outsourcing') ? $request->contratista_id : null,
+                'observaciones'   => $request->observaciones,
+                'usuario_id'      => auth()->id(),
+            ]);
+
+            // 3. Registrar Maquinarias (Si aplica)
+            if ($request->tipo_recurso === 'maquinaria' && $request->has('maquinarias')) {
+                foreach ($request->maquinarias as $maqData) {
+                    $activo = \App\Models\Logistica\Taller\Activo::findOrFail($maqData['id']);
+                    $lecturaAnteriorDB = $activo->lectura_actual ?? 0;
+                    
+                    // Asegurarnos de que el desfase nunca sea negativo de forma nativa
+                    $desfase = max(0, $maqData['h_ini'] - $lecturaAnteriorDB);
+
+                    // Detalle de maquinaria
+                    $registro->maquinaria_detalles()->create([
+                        'activo_id'         => $maqData['id'],
+                        'operador_id'       => $maqData['operador_id'],
+                        'horometro_inicial' => $maqData['h_ini'],
+                        'horometro_final'   => $maqData['h_fin'],
+                        'horas_desfase_uso' => $desfase,
+                    ]);
+
+                    // Trazabilidad
+                    \DB::table('lectura_activos')->insert([
+                        'activo_id'      => $maqData['id'],
+                        'fecha_lectura'  => $request->fecha,
+                        'valor_lectura'  => $maqData['h_fin'],
+                        'unidad_medida'  => $activo->unidad_medida ?? 'HRS',
+                        'registrador_id' => auth()->id(),
+                        'observaciones'  => "Labor de campo: " . $registro->labor_catalogo->nombre . " (Reg #{$registro->id})",
+                        'created_at'     => now(),
+                        'updated_at'     => now(),
+                    ]);
+
+                    // Actualizar Activo
+                    $activo->update(['lectura_actual' => $maqData['h_fin']]);
+                }
+            }
+
+            // 4. Registrar Tablones y Lógica de Negocio Agronómica
+            $laborCritica = \App\Models\Produccion\Labores\LaborCritica::findOrFail($request->labor_id);
+            
+            // OPTIMIZACIÓN: Traer todos los tablones en 1 sola consulta (Evita problema N+1)
+            $tablones = \App\Models\Produccion\Areas\Tablon::whereIn('id', $request->tablon_ids)->get();
+            $datosPivot = [];
+
+            foreach ($tablones as $tablon) {
+                // Preparamos el array para insertar en bloque al pivot table
+                $datosPivot[$tablon->id] = [
+                    'hectareas_logradas' => $tablon->hectareas_documento,
+                    'created_at'         => now(),
+                    'updated_at'         => now()
+                ];
+
+                // Ciclos
+                if ($laborCritica->reinicia_ciclo) {
+                    $tablon->estado = 'Preparacion';
+                    $tablon->fecha_inicio_ciclo = $request->fecha;
+                    if ($laborCritica->nombre === 'Cosecha') {
+                        $tablon->numero_soca += 1;
+                    }
+                    $tablon->save();
+                } elseif ($tablon->estado === 'Preparacion') {
+                    $tablon->estado = 'Crecimiento';
+                    $tablon->save();
+                }
+            }
+
+            // OPTIMIZACIÓN: Relacionar todos los tablones en 1 sola query en lugar de dentro del foreach
+            $registro->tablones()->attach($datosPivot);
+
+            \DB::commit();
+
+            return redirect()->route('produccion.labores.index')
+                             ->with('success', '✅ Jornada agrícola registrada exitosamente.');
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->with('error', 'Error al guardar: ' . $e->getMessage())->withInput();
+        }
+    }
+
+   public function storeOLDOLD(Request $request)
     {
         //dd($request);
 
@@ -287,6 +416,63 @@ class RegistroLaborController extends Controller
         });
 
         return view('produccion.labores.show', compact('registro'));
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        // Recibimos los filtros del modal
+        $filtros = [
+            'desde'     => $request->input('fecha_desde'),
+            'hasta'     => $request->input('fecha_hasta'),
+            'labor_id'  => $request->input('labor_id'),
+            'sector_id' => $request->input('sector_id'),
+        ];
+
+        $nombreArchivo = 'Labores_Ejecutadas_' . now()->format('Ymd_Hi') . '.xlsx';
+
+        return Excel::download(new JornadasExport($filtros), $nombreArchivo);
+    }
+
+
+    public function dashboard()
+    {
+        // 1. KPIs Principales (Mes actual)
+        $mesActual = now()->month;
+        $totalHectareas = \DB::table('labor_tablon_detalle')->whereMonth('created_at', $mesActual)->sum('hectareas_logradas');
+        $totalJornadas = \App\Models\Produccion\Labores\RegistroLabor::whereMonth('fecha_ejecucion', $mesActual)->count();
+        $maquinariasActivas = \DB::table('labor_maquinaria_detalle')->distinct('activo_id')->count();
+
+        // 2. Data para Gráfico de Torta: Hectáreas por Tipo de Labor
+        $laboresPorTipo = \App\Models\Produccion\Labores\RegistroLabor::join('labor_tablon_detalle', 'registro_labores.id', '=', 'labor_tablon_detalle.registro_labor_id')
+            ->join('cat_labores_criticas', 'registro_labores.labor_id', '=', 'cat_labores_criticas.id')
+            ->select('cat_labores_criticas.nombre', \DB::raw('SUM(labor_tablon_detalle.hectareas_logradas) as total'))
+            ->groupBy('cat_labores_criticas.nombre')
+            ->get();
+
+        // 3. Data para Gráfico de Líneas: Avance de Hectáreas últimos 15 días
+        $avanceDiario = \App\Models\Produccion\Labores\RegistroLabor::join('labor_tablon_detalle', 'registro_labores.id', '=', 'labor_tablon_detalle.registro_labor_id')
+            ->select(
+                \DB::raw('CAST(fecha_ejecucion AS DATE) as fecha'), 
+                \DB::raw('SUM(hectareas_logradas) as total')
+            )
+            ->where('fecha_ejecucion', '>=', now()->subDays(15))
+            ->groupBy(\DB::raw('CAST(fecha_ejecucion AS DATE)'))
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        // 4. Top 5 Maquinarias más productivas (por horas trabajadas)
+        $usoMaquinaria = \DB::table('labor_maquinaria_detalle')
+            ->join('activos', 'labor_maquinaria_detalle.activo_id', '=', 'activos.id')
+            ->select('activos.codigo', \DB::raw('SUM(horometro_final - horometro_inicial) as horas'))
+            ->groupBy('activos.codigo')
+            ->orderBy('horas', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('produccion.labores.dashboard', compact(
+            'totalHectareas', 'totalJornadas', 'maquinariasActivas', 
+            'laboresPorTipo', 'avanceDiario', 'usoMaquinaria'
+        ));
     }
 
 }
