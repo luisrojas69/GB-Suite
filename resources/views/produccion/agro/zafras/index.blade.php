@@ -8,7 +8,7 @@
         <h1 class="h3 mb-0 text-gray-800">📅 Gestión de Zafras (Campañas)</h1>
         
         @can('crear_zafras') {{-- Asumimos un permiso 'crear_zafras' --}}
-        <a href="{{ route('produccion.agro.zafras.create') }}" class="d-none d-sm-inline-block btn btn-success shadow-sm">
+        <a href="{{ route('zafras.create') }}" class="d-none d-sm-inline-block btn btn-success shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Nueva Zafra
         </a>
         @endcan
@@ -30,7 +30,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                @can('ver_zafras') {{-- Asumimos un permiso 'ver_zafras' --}}
+
                 <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
@@ -45,7 +45,7 @@
                     <tbody>
                         @foreach ($zafras as $zafra)
                         <tr>
-                            <td><a href="{{ route('produccion.agro.zafras.show', $zafra->id) }}">{{ $zafra->nombre }}</a></td>
+                            <td><a href="{{ route('zafras.show', $zafra->id) }}">{{ $zafra->nombre }}</a></td>
                             <td>{{ $zafra->anio_inicio }} - {{ $zafra->anio_fin }}</td>
                             <td>
                                 **Inicio:** {{ $zafra->fecha_inicio ? \Carbon\Carbon::parse($zafra->fecha_inicio)->format('d/m/Y') : 'N/A' }}<br>
@@ -65,27 +65,24 @@
                             {{-- Conteo de moliendas (uso lazy en la vista) --}}
                             <td>{{ $zafra->moliendas()->count() }}</td> 
                             <td>
-                                @can('ver_zafras')
-                                <a href="{{ route('produccion.agro.zafras.show', $zafra->id) }}" class="btn btn-info btn-sm" title="Ver Detalle"><i class="fas fa-eye"></i></a>
-                                @endcan
 
-                                @can('editar_zafras')
-                                <a href="{{ route('produccion.agro.zafras.edit', $zafra->id) }}" class="btn btn-primary btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
-                                @endcan
+                                <a href="{{ route('zafras.show', $zafra->id) }}" class="btn btn-info btn-sm" title="Ver Detalle"><i class="fas fa-eye"></i></a>
+                     
 
-                                @can('eliminar_zafras')
+                               
+                                <a href="{{ route('zafras.edit', $zafra->id) }}" class="btn btn-primary btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
+                              
+
+                               
                                 <button type="button" class="btn btn-danger btn-sm delete-zafra" data-id="{{ $zafra->id }}" data-nombre="{{ $zafra->nombre }}" title="Eliminar">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                                @endcan
+
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-                @else
-                    <p class="alert alert-warning">No tiene permiso para ver este listado de zafras.</p>
-                @endcan
             </div>
         </div>
     </div>

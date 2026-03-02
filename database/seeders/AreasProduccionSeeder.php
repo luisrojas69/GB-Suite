@@ -20,11 +20,13 @@ class AreasProduccionSeeder extends Seeder
             ['01', 'Charco'],
             ['02', 'Piedras Negras'],
             ['03', 'Becerrera'],
-            ['04', 'Paraíso'],
+            ['04', 'Paraiso'],
             ['05', 'Caimana'],
             ['06', 'Palo a Pique'],
-            ['07', 'Purgatorio'],
+            ['07', 'Pulgatorio'],
             ['08', 'La Bandera'],
+            ['09', 'Tamarindo'],
+            ['10', 'Caterpillar'],
         ];
 
         $suelos = ['Arcilloso', 'Franco-Arenoso', 'Franco-Arcilloso', 'Limoso'];
@@ -50,7 +52,7 @@ class AreasProduccionSeeder extends Seeder
                 ]);
 
                 // 3. Crear 15 Tablones por Lote (Total 30 por Sector)
-                for ($t = 1; $t <= 15; $t++) {
+                for ($t = 1; $t <= 70; $t++) {
                     // Formato de código de 3 dígitos: 001, 002...
                     $tablonCodigo = str_pad($t, 3, '0', STR_PAD_LEFT);
                     
@@ -58,7 +60,7 @@ class AreasProduccionSeeder extends Seeder
                         'lote_id'               => $lote->id,
                         'codigo_tablon_interno' => $tablonCodigo,
                         'nombre'                => "Tablón {$tablonCodigo}",
-                        'hectareas_documento'   => fake()->randomFloat(2, 5, 25), // Entre 5 y 25 Ha
+                        'hectareas_documento'   => fake()->randomFloat(2, 1.5, 4), // Entre 1.5 y 4 Ha
                         'variedad_id'           => fake()->randomElement($variedades),
                         'tipo_suelo'            => fake()->randomElement($suelos),
                         'estado'                => fake()->randomElement(['Crecimiento', 'Maduro', 'Preparacion']),

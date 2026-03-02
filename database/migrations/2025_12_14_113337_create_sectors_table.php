@@ -18,7 +18,8 @@ return new class extends Migration
             $table->text('descripcion')->nullable();
             
             // Campo espacial para el límite del Sector
-            $table->geometry('geometria')->nullable(); 
+            $table->geometry('geometria')->nullable();
+            $table->decimal('tarifa_flete', 12, 2)->default(0); 
             $table->decimal('hectareas_geometria', 10, 2)->nullable();
             
             $table->timestamps();

@@ -38,6 +38,9 @@ Route::prefix('produccion/agro')->group(function () {
     // Dashboard / Listado Principal
     Route::get('/rol_molienda/historial', [RolMoliendaController::class, 'index'])->name('rol_molienda.index');
     Route::get('/rol_molienda/reportes', [ReporteController::class, 'index'])->name('rol_molienda.reportes.index');
+
+    Route::get('/rol_molienda/reportes/preLiquidacion', [ReporteController::class, 'preLiquidacion'])->name('reportes.fletes.pre-liquidacion');
+
     Route::get('/rol_molienda/reportes/exportar/{nombreReporte}', [ReporteController::class, 'exportar'])->name('rol_molienda.exportar');
 
     // Flujo de Importación y Purgatorio

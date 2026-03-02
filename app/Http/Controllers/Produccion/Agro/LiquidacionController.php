@@ -17,7 +17,6 @@ class LiquidacionController extends Controller
     public function index()
     {
         // Se aplica el permiso de visualización
-        $this->authorize('ver_liquidaciones');
 
         // Carga la relación 'molienda'
         $liquidaciones = Liquidacion::with('molienda')->orderBy('fecha_cierre', 'desc')->get();
@@ -29,7 +28,6 @@ class LiquidacionController extends Controller
      */
     public function create()
     {
-        $this->authorize('generar_liquidaciones');
 
         // Obtener las Moliendas que aún NO tienen una liquidación asociada.
         // Se asume que el Molienda::class está correctamente definido.

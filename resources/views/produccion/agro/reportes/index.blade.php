@@ -2,6 +2,7 @@
 @section('title-page', 'Centro de Reportes Agro Premium')
 
 @section('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <style>
     /* ========================================\
        VARIABLES GLOBALES - TEMA AGRO PREMIUM
@@ -211,6 +212,47 @@
             </div>
         </div>
 
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Finanzas / Transporte</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">Pre-Liquidación de Fletes</div>
+                            <p class="text-muted small mt-2">Cálculo de deuda por contratista y sector basado en toneladas reales.</p>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-invoice-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <hr>
+                    <form action="{{ route('reportes.fletes.pre-liquidacion') }}" method="GET">
+                        @csrf
+                          
+                        <div class="form-group mb-2">
+                            <select name="contratista_id" class="form-control form-control-sm select2-agro">
+                                <option value="">Todos los Contratistas</option>
+                                @foreach($contratistas as $c)
+                                    <option value="{{ $c->id }}">{{ $c->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="card-report-footer">
+                            <button type="button" class="btn btn-report btn-pdf" onclick="descargarReporte('preliquidacion_fletes', 'vista')">
+                                <i class="fas fa-file-pdf mr-1"></i> Ver
+                            </button>
+                            <button type="button" class="btn btn-report btn-pdf" onclick="descargarReporte('preliquidacion_fletes', 'pdf')">
+                                <i class="fas fa-file-pdf mr-1"></i> PDF
+                            </button>
+                            <button type="button" class="btn btn-report btn-excel" onclick="descargarReporte('preliquidacion_fletes', 'excel')">
+                                <i class="fas fa-file-excel mr-1"></i> Excel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -225,16 +267,29 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
+
+// Notificación Toast pequeña
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+
     $(document).ready(function() {
         // Inicializar Select2 si lo estás usando
-        $('.select2-agro').select2({ theme: 'bootstrap4' });
+        $('.select2-agro').select2({ theme: 'bootstrap-5' });
     });
 
     function limpiarFiltros() {
         $('#filtro_sector').val('todos').trigger('change');
-        // Mantener las fechas lógicas o limpiar del todo
-        toastr.info('Filtros restaurados a sus valores por defecto');
+        Toast.fire({
+            icon: 'success',
+            title: 'Filtros restaurados a sus valores por defecto'
+        });
     }
 
     function descargarReporte(nombreReporte, tipo) {
@@ -243,6 +298,7 @@
         let sector = $('#filtro_sector').val();
         let desde = $('#filtro_desde').val();
         let hasta = $('#filtro_hasta').val();
+        let contratista = $('#filtro_contratista').val();
 
         // Validación simple de fechas
         if(desde && hasta && desde > hasta) {
@@ -256,6 +312,7 @@
         $('#input_sector').val(sector);
         $('#input_desde').val(desde);
         $('#input_hasta').val(hasta);
+        $('#input_contratista').val(contratista);
 
         // 3. Construir la URL base según el reporte seleccionado
         // Ejemplo: /reportes/exportar/horas_maquina
@@ -264,6 +321,12 @@
         // 4. Configurar el action del formulario oculto y enviarlo
         let form = $('#form-descarga-reporte');
         form.attr('action', baseUrl);
+        // Si el tipo es 'vista', cambiamos el target para que no descargue sino que abra o muestre
+        if(tipo === 'vista') {
+            form.attr('target', '_self');
+        } else {
+            form.attr('target', '_blank');
+        }
         form.submit();
         
         // Alerta visual

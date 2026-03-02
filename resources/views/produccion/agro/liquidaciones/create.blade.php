@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    @can('generar_liquidaciones')
+
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Datos de Calidad y Valoración (Boleta Central)</h6>
@@ -119,9 +119,6 @@
 
             </div>
         </div>
-    @else
-        <p class="alert alert-danger">Usted no tiene permisos para generar Liquidaciones.</p>
-    @endcan
 
 </div>
 @endsection

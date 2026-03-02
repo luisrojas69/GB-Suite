@@ -11,7 +11,7 @@ use App\Http\Controllers\Produccion\Agro\TarifaController;
  */
 Route::prefix('liquidacion')
     ->name('liquidacion.')
-    ->middleware(['auth', 'can:acceder_menu_liquidacion']) 
+    //->middleware(['auth', 'can:acceder_menu_liquidacion']) 
     ->group(function () {
 
     // 1. Recurso Principal: Liquidaciones
@@ -32,8 +32,7 @@ Route::prefix('liquidacion')
     // Nombres de ruta: liquidacion.tarifas.index, liquidacion.tarifas.create, etc.
     Route::resource('tarifas', TarifaController::class)
         ->parameters(['tarifas' => 'tarifa'])
-        ->names('tarifas') 
-        ->middleware('can:gestionar_tarifas');
+        ->names('tarifas');
         
     // 3. Ruta Adicional para Descargar Reporte/PDF de una liquidación
     Route::get('liquidaciones/{liquidacion}/pdf', [LiquidacionController::class, 'downloadPdf'])

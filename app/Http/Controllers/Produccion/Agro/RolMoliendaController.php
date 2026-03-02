@@ -63,7 +63,7 @@ class RolMoliendaController extends Controller
         $headers = array_shift($csvData);
 
         $purgatorio = [];
-        $zafraActiva = Zafra::where('estado', 'Activa')->first();
+        $zafraActiva = Zafra::where('id', '1')->first();
         
         // Cargamos todas las variedades y tablones para los dropdowns de corrección en la vista
         $todasLasVariedades = Variedad::orderBy('nombre')->get();

@@ -48,7 +48,11 @@ class ProduccionSeeder extends Seeder
         Variedad::create(['nombre' => 'V 99236', 'codigo' => '0113', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
         Variedad::create(['nombre' => 'FV08 1050', 'codigo' => '0114', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
         Variedad::create(['nombre' => 'FV08 1379', 'codigo' => '0115', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
-        Variedad::create(['nombre' => 'DIVERSAS', 'codigo' => '0116', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'SP 724928', 'codigo' => '0116', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV08 168', 'codigo' => '0118', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV08 1432', 'codigo' => '0119', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'FV08 1938', 'codigo' => '0120', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
+        Variedad::create(['nombre' => 'MEZCLA', 'codigo' => '0117', 'descripcion' => 'Adaptable a suelos pesados y buena soca.']);
         
         $this->command->info('Variedades creadas.');
 

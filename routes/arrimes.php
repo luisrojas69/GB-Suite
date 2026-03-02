@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Produccion\Arrimes\ArrimeImportController;
+use App\Http\Controllers\Produccion\Arrimes\TabuladorFleteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +16,10 @@ Route::middleware(['auth'])->group(function () {
         
         // Vista Principal (Historial de Boletos)
         Route::get('/historial', [ArrimeImportController::class, 'index'])->name('arrimes.index');
+
+        // tabluladfor de fletes por Sector
+        Route::get('/tabulador/fletes', [TabuladorFleteController::class, 'index'])->name('tabulador.index');
+        Route::put('/tabulador/fletes/{id}', [TabuladorFleteController::class, 'update'])->name('tabulador.update');
 
         // Flujo de Importación
         Route::get('/importar', [ArrimeImportController::class, 'importar'])->name('arrimes.importar'); // Formulario

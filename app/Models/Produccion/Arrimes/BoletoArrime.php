@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Produccion\Areas\Tablon;
 use App\Models\Logistica\Taller\Activo;
 use App\Models\Produccion\Agro\Zafra;
+use App\Models\Produccion\Agro\Contratista;
 
 class BoletoArrime extends Model
 {
@@ -41,5 +42,9 @@ class BoletoArrime extends Model
 
     public function empuje() {
         return $this->belongsTo(Activo::class, 'activo_empuje_id');
+    }
+
+    public function contratista() {
+        return $this->belongsTo(Contratista::class, 'contratista_id');
     }
 }

@@ -2,7 +2,7 @@
 @section('title-page', 'Mapeo de Rol de Molienda')
 
 @section('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <style>
     :root {
         --agro-dark: #1b4332;
@@ -104,7 +104,7 @@
                                 
                                 <td>
                                     <span class="badge badge-light border">{{ $item['sector_csv'] }}</span>
-                                    <i class="fas fa-arrow-right mx-1 text-muted small"></i>
+                                    ➡️
                                     <span class="badge badge-light border">{{ $item['tablon_csv'] }}</span>
                                 </td>
                                 
@@ -144,10 +144,10 @@
                                             </div>
                                         </div>
                                     @else
-                                        <div class="d-flex align-items-center">
+                                        <div class="d-flex">
                                             <i class="fas fa-leaf text-success mr-2"></i>
                                             <span class="text-dark font-weight-bold small">{{ $item['variedad_nombre'] }}</span>
-                                            <<input type="hidden" name="data[{{ $index }}][variedad_id]" value="{{ $item['variedad_id'] }}">
+                                            <input type="hidden" name="data[{{ $index }}][variedad_id]" value="{{ $item['variedad_id'] }}">
                                         </div>
                                     @endif
                                     <input type="hidden" name="data[{{ $index }}][variedad_nombre]" value="{{ $item['variedad_nombre'] }}">
@@ -229,13 +229,15 @@
             timerProgressBar: true
         });
         // Inicializar Select2
-        $('.select2-agro').select2({ theme: 'bootstrap4' });
+        $('.select2-agro').select2({ theme: 'bootstrap-5' });
 
         // Inicializar DataTables
         $('#dataTablePurgatorio').DataTable({
             "language": { "url": "/js/lang/Spanish.json" },
-            "pageLength": 50,
-            "dom": '<"p-3 d-flex justify-content-between"fB>rtip',
+            "paging": false,
+            "scrollY": "1500px",
+            "scrollCollapse": true,
+            "dom": '<"p-3 d-flex justify-content-between"fB>rt',
         });
 
         // Setup AJAX CSRF

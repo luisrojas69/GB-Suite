@@ -9,7 +9,10 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Exports\Produccion\Agro\LaboresCriticasExport;
 use App\Models\Produccion\Labores\LaborTablonDetalle;
 use DB;
+use App\Models\Produccion\Arrimes\BoletoArrime;
 use App\Exports\Produccion\Agro\PlanVsRealExport;
+use App\Models\Produccion\Agro\Contratista;
+use App\Exports\Produccion\Arrimes\Fletes\PreLiquidacionExport;
 
 class ReporteController extends Controller
 {
@@ -18,7 +21,8 @@ class ReporteController extends Controller
      */
     public function index()
     {
-        return view('produccion.agro.reportes.index');
+        $contratistas = Contratista::all();
+        return view('produccion.agro.reportes.index', compact('contratistas'));
     }
 
     /**
@@ -32,27 +36,31 @@ class ReporteController extends Controller
             'sector_id' => $request->input('sector_id'),
             'desde'     => $request->input('fecha_desde'),
             'hasta'     => $request->input('fecha_hasta'),
+            'contratista_id' => $request->input('contratista_id'),
         ];
-        $tipo = $request->input('tipo_exportacion'); // 'pdf' o 'excel'
+        $tipo = $request->input('tipo_exportacion'); // 'pdf' o 'excel' o 'vista'
 
         // 2. Switch o Match para enrutar según el reporte solicitado
         switch ($reporte) {
             case 'labores_criticas':
                 return $this->generarLaboresCriticas($filtros, $tipo);
-                break;
-                case 'molienda_comparativo':
-                    if ($tipo === 'excel') {
-                        return Excel::download(new PlanVsRealExport($filtros), 'Plan_vs_Real_Molienda.xlsx');
-                    }
-                    
-                    $data = $this->obtenerDataComparativa($filtros);
-                    $pdf = PDF::loadView('produccion.agro.reportes.pdf.plan_vs_real', compact('data', 'filtros'))
-                              ->setPaper('a4', 'portrait');
-                    return $pdf->stream('Plan_vs_Real.pdf');
-                break;
-            
-            // Aquí agregarás los demás casos: 'molienda_comparativo', 'horas_maquina', etc.
-            
+            break;
+
+            case 'molienda_comparativo':
+                if ($tipo === 'excel') {
+                    return Excel::download(new PlanVsRealExport($filtros), 'Plan_vs_Real_Molienda.xlsx');
+                }
+                
+                $data = $this->obtenerDataComparativa($filtros);
+                $pdf = PDF::loadView('produccion.agro.reportes.pdf.plan_vs_real', compact('data', 'filtros'))
+                          ->setPaper('a4', 'portrait');
+                return $pdf->stream('Plan_vs_Real.pdf');
+            break;
+
+            case 'preliquidacion_fletes':
+                return $this->generarPreLiquidacion($filtros, $tipo);
+            break;
+
             default:
                 abort(404, 'Reporte no encontrado');
         }
@@ -138,6 +146,66 @@ class ReporteController extends Controller
             ->when($filtros['sector_id'] !== 'todos', function($q) use ($filtros) {
                 return $q->where('s.id', $filtros['sector_id']);
             })
+            ->get();
+    }
+
+    private function generarPreLiquidacion($filtros, $tipo)
+    {
+        $desde = $filtros['desde'];
+        $hasta = $filtros['hasta'];
+        $contratista_id = $filtros['contratista_id'];
+
+       $data = $this->obtenerDataPreLiquidacion($filtros);
+
+        if ($tipo === 'excel') {
+            // Pasamos la DATA, el DESDE y el HASTA al constructor
+            return Excel::download(
+                new PreLiquidacionExport($data, $filtros['desde'], $filtros['hasta']), 
+                'Pre_Liquidacion_Fletes.xlsx'
+            );
+        }
+
+        if ($tipo === 'pdf') {
+            $pdf = PDF::loadView('produccion.agro.reportes.pdf.pre_liquidacion', compact('data', 'filtros'))
+                      ->setPaper('a4')
+                      ->setOption('footer-left', 'Generado el ' . now()->format('d/m/Y H:i'))
+                      ->setOption('footer-right', 'Página [page] de [topage]');
+            
+            return $pdf->stream('Pre_Liquidacion_Fletes.pdf');
+        }
+
+        // Si es 'vista', devolvemos la tabla para previsualizar
+        return view('produccion.agro.reportes.fletes.index_pre_liquidacion', compact('data', 'filtros'));
+    }
+
+    /**
+     * Query para Pre-Liquidación (Reutilizable)
+     */
+    private function obtenerDataPreLiquidacion($filtros)
+    {
+
+        return BoletoArrime::query()
+            ->join('tablones', 'boletos_arrime.tablon_id', '=', 'tablones.id')
+            ->join('lotes', 'tablones.lote_id', '=', 'lotes.id')
+            ->join('sectores', 'lotes.sector_id', '=', 'sectores.id')
+            ->join('contratistas', 'boletos_arrime.contratista_id', '=', 'contratistas.id')
+            ->select(
+                'contratistas.nombre as contratista_nombre',
+                'sectores.nombre as sector_nombre',
+                'sectores.tarifa_flete',
+                DB::raw('COUNT(boletos_arrime.id) as cantidad_viajes'),
+                DB::raw('SUM(boletos_arrime.toneladas_netas) as total_toneladas'),
+                DB::raw('SUM(boletos_arrime.toneladas_netas * sectores.tarifa_flete) as monto_total')
+            )
+            ->whereBetween('boletos_arrime.fecha_arrime', [$filtros['desde'], $filtros['hasta']])
+            ->when($filtros['contratista_id'], function($q) use ($filtros) {
+                $q->where('boletos_arrime.contratista_id', $filtros['contratista_id']);
+            })
+            ->when($filtros['sector_id'] !== 'todos', function($q) use ($filtros) {
+                $q->where('sectores.id', $filtros['sector_id']);
+            })
+            ->groupBy('contratistas.nombre', 'sectores.nombre', 'sectores.tarifa_flete')
+            ->orderBy('contratistas.nombre')
             ->get();
     }
 }

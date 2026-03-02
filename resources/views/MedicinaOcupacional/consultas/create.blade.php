@@ -2,7 +2,7 @@
 @section('title-page', 'Modulo de creación de Consulta - Paciente: '.$paciente->cod_emp)
 
 @section('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <style>
     .info-card {
         transition: all 0.3s ease;
@@ -890,7 +890,7 @@ PLAN DE TRATAMIENTO:
 $(document).ready(function() {
     // Inicializar Select2 mejorado
     $('#diagnostico_cie10').select2({
-        theme: 'default',
+        theme: 'bootstrap-5',
         placeholder: 'Escriba al menos 3 caracteres para buscar diagnóstico...',
         allowClear: true,
         language: {
